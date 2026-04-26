@@ -68,7 +68,7 @@ export function HomeNavbar() {
               }
             }}
           >
-            <EncontrateMark className="size-6 shrink-0" />
+            <EncontrateMark className="size-3 shrink-0" />
             encontrate
           </Link>
 

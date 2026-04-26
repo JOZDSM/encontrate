@@ -9,6 +9,9 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // Prisma ORM v7 moved connection URLs out of `schema.prisma`.
+    // For Supabase: set DIRECT_URL to the non-pooler (5432) connection string for migrations,
+    // and DATABASE_URL to the pooler (6543) string for runtime.
+    url: process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"],
   },
 });

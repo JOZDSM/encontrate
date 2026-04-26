@@ -1,0 +1,109 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { BookingStatus } from "@/generated/prisma/enums";
+import { isPlatformAdmin } from "@/lib/admin";
+import { bookingStatusLabel } from "@/lib/booking-status-label";
+import { formatDateLongES, formatDateUTC } from "@/lib/format";
+import { prisma } from "@/lib/db";
+
+export default async function AdminPage() {
+  const session = await auth();
+  if (!isPlatformAdmin(session)) redirect("/");
+
+  const [listings, bookings] = await Promise.all([
+    prisma.listing.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { host: { select: { email: true, name: true } } },
+    }),
+    prisma.booking.findMany({
+      where: {
+        status: {
+          in: [BookingStatus.PENDING, BookingStatus.CONFIRMED],
+        },
+      },
+      orderBy: { startDate: "asc" },
+      include: {
+        listing: { select: { title: true, city: true } },
+        guest: { select: { email: true } },
+      },
+    }),
+  ]);
+
+  return (
+    <div className="mx-auto max-w-6xl space-y-12 px-4 py-10">
+      <div>
+        <h1 className="text-2xl font-semibold">Vista operador</h1>
+        <p className="text-sm text-muted-foreground">
+          Todos los anuncios y reservas activas (pendiente o confirmada).
+        </p>
+      </div>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-medium">Anuncios</h2>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Título</TableHead>
+              <TableHead>Ciudad</TableHead>
+              <TableHead>Anfitrión</TableHead>
+              <TableHead>Creado</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {listings.map((l) => (
+              <TableRow key={l.id}>
+                <TableCell className="font-medium">{l.title}</TableCell>
+                <TableCell>{l.city}</TableCell>
+                <TableCell className="text-sm">
+                  {l.host.email ?? l.host.name ?? "—"}
+                </TableCell>
+                <TableCell className="text-sm whitespace-nowrap">
+                  {formatDateUTC(l.createdAt)}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-medium">Reservas (pendiente / confirmada)</h2>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Anuncio</TableHead>
+              <TableHead>Huésped</TableHead>
+              <TableHead>Fechas</TableHead>
+              <TableHead>Estado</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {bookings.map((b) => (
+              <TableRow key={b.id}>
+                <TableCell>
+                  <span className="font-medium">{b.listing.title}</span>
+                  <span className="text-muted-foreground"> · {b.listing.city}</span>
+                </TableCell>
+                <TableCell className="text-sm">{b.guest.email ?? "—"}</TableCell>
+                <TableCell className="text-sm whitespace-nowrap">
+                  {formatDateLongES(b.startDate)} — {formatDateLongES(b.endDate)}
+                </TableCell>
+                <TableCell className="text-sm">
+                  {bookingStatusLabel(b.status)}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </section>
+    </div>
+  );
+}

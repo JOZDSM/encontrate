@@ -39,6 +39,9 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  /* Semantic CTA surface; tied to Tailwind `lime-700` in this @theme block. */
+  --brand-background: var(--color-lime-700);
+  --color-brand-background: var(--brand-background);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -49,8 +52,6 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -81,6 +82,8 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
 }
 
 .dark {
@@ -115,6 +118,41 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  /* CTA surface: lighter lime on dark UI (Tailwind `lime-500`). */
+  --brand-background: var(--color-lime-300);
+  --color-brand-background: var(--brand-background);
+}
+
+@layer components {
+  /* SVG polygons: theme vars + plain CSS so fills never fall back to default black. */
+  .barcelona-zone-polygon {
+    fill: var(--muted);
+    stroke: color-mix(in oklab, var(--foreground) 30%, transparent);
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+  }
+  .barcelona-zone-polygon:hover {
+    fill: color-mix(in oklab, var(--muted) 70%, var(--card-foreground) 12%);
+  }
+  .barcelona-zone-polygon[data-selected="true"] {
+    fill: var(--primary);
+    stroke: color-mix(in oklab, var(--primary-foreground) 42%, transparent);
+  }
+  .barcelona-zone-label {
+    pointer-events: none;
+    font-size: 10px;
+    font-weight: 500;
+    fill: var(--foreground);
+    stroke: var(--background);
+    stroke-width: 3.25px;
+    stroke-linejoin: round;
+    paint-order: stroke fill;
+  }
+  .barcelona-zone-label[data-selected="true"] {
+    fill: var(--primary-foreground);
+    stroke: var(--primary);
+    stroke-width: 2.75px;
+  }
 }
 
 @layer base {
@@ -126,5 +164,12 @@
   }
   html {
     @apply font-sans;
+    color-scheme: dark;
   }
+}
+
+/* Subtle scrollbars on dark UI (Safari/Chrome/Firefox). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, white 22%, transparent) transparent;
 }

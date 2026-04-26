@@ -1,0 +1,181 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  DECLINED
+  CANCELLED
+}
+
+enum BedSize {
+  INDIVIDUAL
+  DOBLE
+}
+
+enum WindowType {
+  CALLE
+  CORAZON_DE_MANZANA
+  POZO_DE_AIRE
+  SIN_VENTANA
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  isAdmin       Boolean   @default(false)
+  whatsappNumber String?
+
+  accounts Account[]
+  sessions Session[]
+
+  listings Listing[] @relation("HostListings")
+  bookings Booking[] @relation("GuestBookings")
+  messages Message[]
+}
+
+model SignupProfile {
+  email          String   @id
+  name           String?
+  whatsappNumber String?
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Listing {
+  id              String   @id @default(cuid())
+  hostId          String
+  host            User     @relation("HostListings", fields: [hostId], references: [id], onDelete: Cascade)
+  title           String
+  description     String
+  city            String
+  country         String
+  neighborhood    String
+  /// Full address: visible to host, admin, and guests with a confirmed booking only
+  addressDetail   String?
+  latitude        Float?
+  longitude       Float?
+  timeZone        String   @default("Europe/Madrid")
+  priceNote       String?
+
+  // Características de la habitación (required)
+  bedSize         BedSize  @default(INDIVIDUAL)
+  windowType      WindowType @default(CALLE)
+  roomSizeSqm     Int      @default(10)
+  furnished       Boolean  @default(true)
+
+  // Características del piso (required)
+  apartmentRooms  Int      @default(3)
+  apartmentBaths  Int      @default(1)
+  apartmentSizeSqm Int     @default(80)
+  wifi            Boolean  @default(true)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  photos   ListingPhoto[]
+  blocks   AvailabilityBlock[]
+  bookings Booking[]
+  messages Message[]
+
+  @@index([city, country])
+}
+
+model ListingPhoto {
+  id        String  @id @default(cuid())
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  url       String
+  sortOrder Int     @default(0)
+}
+
+model AvailabilityBlock {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  /// Inclusive first unavailable night (date-only)
+  startDate DateTime @db.Date
+  /// Exclusive end: first night that is available again (half-open interval)
+  endDate   DateTime @db.Date
+  reason    String?
+
+  @@index([listingId])
+}
+
+model Booking {
+  id        String        @id @default(cuid())
+  listingId String
+  listing   Listing       @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  guestId   String
+  guest     User          @relation("GuestBookings", fields: [guestId], references: [id], onDelete: Cascade)
+  /// First night (inclusive), date-only
+  startDate DateTime      @db.Date
+  /// Checkout morning = exclusive end date (half-open [start, end))
+  endDate   DateTime      @db.Date
+  status    BookingStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  messages Message[]
+
+  @@index([listingId, status])
+  @@index([guestId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  bookingId String?
+  booking   Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([listingId, createdAt])
+}

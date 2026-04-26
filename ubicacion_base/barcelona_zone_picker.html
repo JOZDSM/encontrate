@@ -1,0 +1,115 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{padding:16px 0;font-family:var(--font-sans)}
+.map-wrap{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);padding:12px;margin-bottom:16px}
+.zone-path{fill:var(--color-background-primary);stroke:var(--color-border-secondary);stroke-width:1.5;cursor:pointer;transition:fill 0.15s}
+.zone-path:hover{fill:#E6F1FB}
+.zone-path.selected{fill:#378ADD;stroke:#185FA5}
+.zone-label{font-size:9px;fill:var(--color-text-secondary);pointer-events:none;font-family:var(--font-sans);text-anchor:middle}
+.zone-label.selected{fill:#E6F1FB}
+.chips-label{font-size:13px;color:var(--color-text-secondary);margin-bottom:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{padding:6px 14px;border-radius:9999px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);font-size:13px;color:var(--color-text-primary);cursor:pointer;transition:all 0.15s;user-select:none}
+.chip:hover{background:var(--color-background-secondary)}
+.chip.selected{background:#378ADD;border-color:#185FA5;color:#E6F1FB}
+.summary{font-size:13px;color:var(--color-text-secondary);padding-top:12px;border-top:0.5px solid var(--color-border-tertiary)}
+.summary span{color:var(--color-text-primary);font-weight:500}
+</style>
+<div class="wrap">
+  <div class="map-wrap">
+    <svg width="100%" viewBox="0 0 420 320" id="map">
+
+      <polygon id="z-ciutatvella" class="zone-path" points="170,180 185,170 200,168 210,175 205,192 188,198 172,194"/>
+      <polygon id="z-eixample" class="zone-path" points="130,140 210,130 220,170 210,175 200,168 185,170 170,180 172,194 140,190 128,165"/>
+      <polygon id="z-gracia" class="zone-path" points="170,100 220,95 225,130 210,130 130,140 128,120"/>
+      <polygon id="z-sarriasantgervasi" class="zone-path" points="100,60 170,55 175,100 170,100 128,120 105,115 95,90"/>
+      <polygon id="z-lescorts" class="zone-path" points="60,100 105,115 128,120 130,140 128,165 90,170 65,150 55,125"/>
+      <polygon id="z-sants" class="zone-path" points="90,170 128,165 140,190 135,215 100,220 75,205 80,185"/>
+      <polygon id="z-horta" class="zone-path" points="170,55 255,50 260,95 225,100 225,95 220,95 170,100 175,100"/>
+      <polygon id="z-noubarris" class="zone-path" points="255,50 310,55 315,100 270,105 260,95"/>
+      <polygon id="z-santandreu" class="zone-path" points="260,95 315,100 320,150 275,155 265,130 225,130 225,100"/>
+      <polygon id="z-santmarti" class="zone-path" points="210,130 265,130 275,155 280,200 240,210 215,200 210,175"/>
+      <polygon id="z-poblesec" class="zone-path" points="130,190 170,180 188,198 185,220 155,230 128,215 128,200"/>
+      <polygon id="z-montjuic" class="zone-path" points="75,205 100,220 135,215 155,230 145,260 100,265 70,240"/>
+
+      <text class="zone-label" id="l-ciutatvella" x="190" y="184">Ciutat Vella</text>
+      <text class="zone-label" id="l-eixample" x="172" y="158">Eixample</text>
+      <text class="zone-label" id="l-gracia" x="178" y="120">Gràcia</text>
+      <text class="zone-label" id="l-sarriasantgervasi" x="133" y="88">Sarrià-St.G.</text>
+      <text class="zone-label" id="l-lescorts" x="90" y="138">Les Corts</text>
+      <text class="zone-label" id="l-sants" x="107" y="197">Sants</text>
+      <text class="zone-label" id="l-horta" x="213" y="78">Horta</text>
+      <text class="zone-label" id="l-noubarris" x="284" y="80">Nou Barris</text>
+      <text class="zone-label" id="l-santandreu" x="280" y="127">Sant Andreu</text>
+      <text class="zone-label" id="l-santmarti" x="247" y="172">Sant Martí</text>
+      <text class="zone-label" id="l-poblesec" x="156" y="210">Poble Sec</text>
+      <text class="zone-label" id="l-montjuic" x="108" y="238">Montjuïc</text>
+
+      <rect x="310" y="60" width="90" height="200" rx="4" fill="var(--color-background-secondary)" stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+      <text x="355" y="80" font-size="9" fill="var(--color-text-tertiary)" text-anchor="middle" font-family="var(--font-sans)">Mediterranean</text>
+      <text x="355" y="92" font-size="9" fill="var(--color-text-tertiary)" text-anchor="middle" font-family="var(--font-sans)">Sea</text>
+
+      <path d="M60 270 Q120 285 200 280 Q280 275 320 260" stroke="var(--color-border-tertiary)" stroke-width="1" fill="none" stroke-dasharray="4 3"/>
+      <text x="200" y="298" font-size="8" fill="var(--color-text-tertiary)" text-anchor="middle" font-family="var(--font-sans)">Approximate schematic — not to scale</text>
+    </svg>
+  </div>
+
+  <p class="chips-label">Selected districts</p>
+  <div class="chips" id="chips">
+    <div class="chip" data-zone="ciutatvella">Ciutat Vella</div>
+    <div class="chip" data-zone="eixample">Eixample</div>
+    <div class="chip" data-zone="gracia">Gràcia</div>
+    <div class="chip" data-zone="sarriasantgervasi">Sarrià-Sant Gervasi</div>
+    <div class="chip" data-zone="lescorts">Les Corts</div>
+    <div class="chip" data-zone="sants">Sants-Montjuïc</div>
+    <div class="chip" data-zone="horta">Horta-Guinardó</div>
+    <div class="chip" data-zone="noubarris">Nou Barris</div>
+    <div class="chip" data-zone="santandreu">Sant Andreu</div>
+    <div class="chip" data-zone="santmarti">Sant Martí</div>
+    <div class="chip" data-zone="poblesec">Poble Sec</div>
+    <div class="chip" data-zone="montjuic">Montjuïc</div>
+  </div>
+
+  <div class="summary" id="summary">No districts selected — pick zones on the map or using the chips above</div>
+</div>
+
+<script>
+const selected = new Set();
+
+function toggle(zone) {
+  if (selected.has(zone)) selected.delete(zone);
+  else selected.add(zone);
+  render();
+}
+
+function render() {
+  document.querySelectorAll('.zone-path').forEach(p => {
+    const z = p.id.replace('z-','');
+    p.classList.toggle('selected', selected.has(z));
+  });
+  document.querySelectorAll('.zone-label').forEach(t => {
+    const z = t.id.replace('l-','');
+    t.classList.toggle('selected', selected.has(z));
+  });
+  document.querySelectorAll('.chip').forEach(c => {
+    c.classList.toggle('selected', selected.has(c.dataset.zone));
+  });
+  const summary = document.getElementById('summary');
+  if (selected.size === 0) {
+    summary.innerHTML = 'No districts selected — pick zones on the map or using the chips above';
+  } else {
+    const names = [...document.querySelectorAll('.chip')]
+      .filter(c => selected.has(c.dataset.zone))
+      .map(c => c.textContent);
+    summary.innerHTML = '<span>' + selected.size + ' district' + (selected.size>1?'s':'') + ' selected:</span> ' + names.join(', ');
+  }
+}
+
+document.querySelectorAll('.zone-path').forEach(p => {
+  p.addEventListener('click', () => toggle(p.id.replace('z-','')));
+});
+document.querySelectorAll('.chip').forEach(c => {
+  c.addEventListener('click', () => toggle(c.dataset.zone));
+});
+</script>

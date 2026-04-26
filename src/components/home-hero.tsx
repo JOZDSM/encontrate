@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useLayoutEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { EncontrateMark } from "@/components/encontrate-mark";
 
 const HOME_HERO_INTRO_KEY = "encontrate-home-hero-intro-seen";
 
@@ -11,7 +12,7 @@ export function HomeHero() {
   // Important: keep first client render identical to SSR to avoid hydration mismatch.
   const [showCtas, setShowCtas] = useState(false);
 
-  // useLayoutEffect + closure flag (no refs): Strict Mode safe; ~4s headline before crossfade (700ms).
+  // useLayoutEffect + closure flag (no refs): Strict Mode safe; short loading mark before crossfade (700ms).
   useLayoutEffect(() => {
     try {
       if (window.sessionStorage.getItem(HOME_HERO_INTRO_KEY)) {
@@ -35,7 +36,7 @@ export function HomeHero() {
       }
     };
 
-    const id = window.setTimeout(reveal, 4000);
+    const id = window.setTimeout(reveal, 2400);
 
     return () => {
       clearTimeout(id);
@@ -74,17 +75,22 @@ export function HomeHero() {
             </Button>
           </div>
         </div>
-        <h1
+        <div
           className={cn(
-            "col-start-1 row-start-1 z-10 text-center text-5xl font-bold tracking-tight text-primary-foreground dark:text-foreground transition-opacity duration-700 ease-in-out motion-reduce:transition-none",
+            "col-start-1 row-start-1 z-10 flex items-center justify-center transition-opacity duration-700 ease-in-out motion-reduce:transition-none",
             showCtas
               ? "pointer-events-none opacity-0"
               : "opacity-100",
           )}
           aria-hidden={showCtas}
         >
-          Buenas!
-        </h1>
+          <EncontrateMark
+            className={cn(
+              "size-16 text-primary-foreground dark:text-foreground",
+              "animate-[spin_0.8s_linear_infinite] motion-reduce:animate-none",
+            )}
+          />
+        </div>
       </div>
     </div>
   );

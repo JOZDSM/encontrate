@@ -7,6 +7,9 @@ export default {
   pages: { signIn: "/login", verifyRequest: "/login/verify" },
   providers: [
     Resend({
+      // Auth.js docs default to AUTH_RESEND_KEY; this app uses RESEND_API_KEY.
+      // Pass explicitly so the provider always has a key in production.
+      apiKey: process.env.RESEND_API_KEY ?? process.env.AUTH_RESEND_KEY,
       from: process.env.EMAIL_FROM ?? "onboarding@resend.dev",
     }),
   ],

@@ -1,10 +1,10 @@
-# Hospedaje en Barcelona
+# Encontrate
 
 Personal platform for coordinating rooms in Barcelona: listings with filters, booking requests, host confirmation, calendar blocks, per-booking messaging, and an **admin view** (operator-only) of all listings and active bookings. **There are no in-app payments.**
 
 The **site UI is Spanish by default**; this README is in English for day-to-day development.
 
-Stack: **Next.js (App Router)**, **TypeScript**, **Tailwind + shadcn/ui**, **PostgreSQL + Prisma**, **Auth.js** with magic link (**Resend**), deployment aimed at **Vercel** + **Neon**.
+Stack: **Next.js (App Router)**, **TypeScript**, **Tailwind + shadcn/ui**, **PostgreSQL + Prisma**, **Auth.js** with magic link (**Resend**), deployment aimed at **Vercel** + **Supabase**.
 
 ## Requirements
 

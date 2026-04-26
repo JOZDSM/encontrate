@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Hospedaje en Barcelona",
-    template: "%s · Hospedaje en Barcelona",
+    default: "Encontrate",
+    template: "%s · Encontrate",
   },
   description:
     "Coordina estancias en habitaciones en Barcelona: anuncios, solicitudes y mensajes. Sin pagos en la plataforma.",

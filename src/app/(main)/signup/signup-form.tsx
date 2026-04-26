@@ -117,7 +117,7 @@ export function SignupForm() {
               <p className="text-sm text-muted-foreground">
                 Vamos a usar este email para contactarnos contigo e identificarte
                 dentro de nuestro sistema. No tenés porqué incluirlo o compartirlo
-                con nadie más que entre a heb.
+                con nadie más que entre a encontrate.
               </p>
             </div>
 
@@ -140,7 +140,7 @@ export function SignupForm() {
               <p className="text-sm text-muted-foreground">
                 Vamos a usar este número de teléfono para contactarnos contigo.
                 Tampoco tenés porqué incluirlo o compartirlo con nadie más que
-                entre a heb.
+                entre a encontrate.
               </p>
             </div>
 

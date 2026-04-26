@@ -5,7 +5,7 @@ import { useLayoutEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-const HOME_HERO_INTRO_KEY = "heb-home-hero-intro-seen";
+const HOME_HERO_INTRO_KEY = "encontrate-home-hero-intro-seen";
 
 export function HomeHero() {
   // Important: keep first client render identical to SSR to avoid hydration mismatch.

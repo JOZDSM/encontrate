@@ -54,7 +54,7 @@ export function HomeNavbar() {
               }
             }}
           >
-            heb
+            encontrate
           </Link>
 
           <div className="hidden flex-wrap items-center justify-end gap-3 md:flex lg:gap-4">

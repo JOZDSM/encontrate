@@ -3,7 +3,7 @@ export default function AvisoPage() {
     <div className="mx-auto max-w-2xl space-y-6 px-4 py-12 text-sm leading-relaxed">
       <h1 className="text-2xl font-semibold">Aviso legal (plantilla)</h1>
       <p>
-        <strong>Hospedaje en Barcelona</strong> es un servicio de intermediación
+        <strong>Encontrate</strong> es un servicio de intermediación
         informativa. No somos arrendadores ni agentes inmobiliarios. No gestionamos
         pagos, fianzas ni impuestos turísticos en la plataforma.
       </p>

@@ -11,7 +11,7 @@ export function SiteFooter() {
       )}
     >
       <p className="px-4 leading-snug">
-        heb solo conecta personas. No somos parte del contrato de
+        encontrate solo conecta personas. No somos parte del contrato de
         alquiler ni procesamos pagos.
       </p>
       <Link

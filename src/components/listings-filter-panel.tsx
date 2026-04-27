@@ -65,6 +65,11 @@ function formatDateOnlyUTC(value: Date): string {
   return value.toISOString().slice(0, 10);
 }
 
+function toUTCNoonDateOnly(d: Date): Date {
+  // react-day-picker returns local Date objects; normalize to date-only at noon UTC.
+  return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0));
+}
+
 function getMonthLabel(d: Date) {
   return d.toLocaleString("es-ES", { month: "short", timeZone: "UTC" });
 }
@@ -244,9 +249,13 @@ export function ListingsFilterPanel({
   const whenTitle = (() => {
     if (dateMode === "exact") {
       if (exactCheckIn && exactCheckOut && exactCheckIn < exactCheckOut) {
+        const flexLabel =
+          exactFlexDays && exactFlexDays !== "0"
+            ? `± ${exactFlexDays} días`
+            : "fechas exactas";
         return `Cuándo (${formatMonthDay(exactCheckIn)} - ${formatMonthDay(
           exactCheckOut,
-        )}, fechas exactas)`;
+        )}, ${flexLabel})`;
       }
       return "Cuándo";
     }
@@ -637,8 +646,9 @@ export function ListingsFilterPanel({
                           selected={exactCheckIn}
                           onSelect={(d) => {
                             if (!d) return;
-                            setExactCheckIn(d);
-                            if (exactCheckOut && !(d < exactCheckOut)) {
+                            const next = toUTCNoonDateOnly(d);
+                            setExactCheckIn(next);
+                            if (exactCheckOut && !(next < exactCheckOut)) {
                               setExactCheckOut(undefined);
                             }
                           }}
@@ -673,8 +683,9 @@ export function ListingsFilterPanel({
                           selected={exactCheckOut}
                           onSelect={(d) => {
                             if (!d) return;
-                            if (exactCheckIn && !(exactCheckIn < d)) return;
-                            setExactCheckOut(d);
+                            const next = toUTCNoonDateOnly(d);
+                            if (exactCheckIn && !(exactCheckIn < next)) return;
+                            setExactCheckOut(next);
                           }}
                           disabled={exactCheckIn ? { before: exactCheckIn } : undefined}
                           modifiers={rangeModifiers}

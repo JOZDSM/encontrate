@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { upsertSignupProfileAction } from "@/app/actions/signup";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 const inputDesign =
   "h-9 rounded-md border border-border bg-background shadow-[0px_1px_2px_0px_rgba(0,0,0,0.1)] placeholder:text-muted-foreground md:text-sm";
@@ -20,6 +21,21 @@ export function SignupForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const phoneState = useMemo(() => {
+    const trimmed = whatsappNumber.trim();
+    if (!trimmed) return { ok: false, normalized: "", waLink: "" };
+    const digitsOnly = trimmed.replace(/[^\d+]/g, "");
+    const phone = parsePhoneNumberFromString(digitsOnly);
+    const ok = Boolean(phone && phone.isValid());
+    const normalized = phone?.number ?? "";
+    const waLink = normalized ? `https://wa.me/${normalized.replace("+", "")}` : "";
+    return { ok, normalized, waLink };
+  }, [whatsappNumber]);
+
+  const nameOk = name.trim().length > 0;
+  const emailOk = email.trim().length > 0;
+  const formOk = nameOk && emailOk && phoneState.ok;
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -29,11 +45,13 @@ export function SignupForm() {
       await upsertSignupProfileAction({
         email,
         name,
-        whatsappNumber,
+        whatsappNumber: phoneState.normalized || whatsappNumber,
       });
     } catch {
       setLoading(false);
-      setError("No se pudo guardar tu info. Probá de nuevo.");
+      setError(
+        "Revisá los campos: nombre, email y número de WhatsApp (formato internacional, ej: +34600111222).",
+      );
       return;
     }
 
@@ -80,11 +98,12 @@ export function SignupForm() {
                 htmlFor="signup-name"
                 className="text-sm font-medium text-card-foreground"
               >
-                Nombre de usuario
+                Nombre de usuario *
               </Label>
               <Input
                 id="signup-name"
                 type="text"
+                required
                 autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -102,7 +121,7 @@ export function SignupForm() {
                 htmlFor="signup-email"
                 className="text-sm font-medium text-card-foreground"
               >
-                Email
+                Email *
               </Label>
               <Input
                 id="signup-email"
@@ -126,21 +145,47 @@ export function SignupForm() {
                 htmlFor="signup-whatsapp"
                 className="text-sm font-medium text-card-foreground"
               >
-                Número asociado a WhatsApp
+                Número asociado a WhatsApp *
               </Label>
               <Input
                 id="signup-whatsapp"
                 type="tel"
+                required
                 autoComplete="tel"
                 value={whatsappNumber}
                 onChange={(e) => setWhatsappNumber(e.target.value)}
-                placeholder="+34 674 234"
+                placeholder="+34600111222"
                 className={cn(inputDesign, "text-base")}
               />
               <p className="text-sm text-muted-foreground">
-                Vamos a usar este número de teléfono para contactarnos contigo.
-                Tampoco tenés porqué incluirlo o compartirlo con nadie más que
-                entre a encontrate.
+                Usá formato internacional (E.164), por ejemplo: +34600111222.
+                {whatsappNumber.trim() ? (
+                  phoneState.ok ? (
+                    <>
+                      {" "}
+                      <span className="text-card-foreground">
+                        Formato OK.
+                      </span>{" "}
+                      {phoneState.waLink ? (
+                        <a
+                          href={phoneState.waLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline underline-offset-2"
+                        >
+                          Abrir en WhatsApp
+                        </a>
+                      ) : null}
+                    </>
+                  ) : (
+                    <>
+                      {" "}
+                      <span className="text-destructive">
+                        Número inválido.
+                      </span>
+                    </>
+                  )
+                ) : null}
               </p>
             </div>
 
@@ -154,7 +199,7 @@ export function SignupForm() {
               type="submit"
               size="sm"
               className="w-full rounded-full font-medium shadow-xs disabled:opacity-100 disabled:bg-muted disabled:text-muted-foreground"
-              disabled={loading}
+              disabled={loading || !formOk}
             >
               {loading ? "Creando…" : "Crear cuenta"}
             </Button>

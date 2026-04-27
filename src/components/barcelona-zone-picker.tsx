@@ -204,8 +204,10 @@ export function BarcelonaZonePicker({
   }, [value, formId, autoSubmit]);
 
   useEffect(() => {
+    // Uncontrolled mode: notify parent when internal selection changes.
+    if (zones) return;
     onChangeZones?.([...selected].sort());
-  }, [onChangeZones, selected]);
+  }, [onChangeZones, selected, zones]);
 
   const toggle = (zone: string) => {
     if (zones) {

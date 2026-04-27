@@ -36,7 +36,7 @@ export function HomeHero() {
       }
     };
 
-    const id = window.setTimeout(reveal, 2700);
+    const id = window.setTimeout(reveal, 3000);
 
     return () => {
       clearTimeout(id);

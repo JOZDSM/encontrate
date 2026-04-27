@@ -179,26 +179,16 @@
     transform-origin: center;
     will-change: transform;
     transform: translateZ(0);
-    animation: encontrate-coin-halfspin 900ms cubic-bezier(0.22, 0.98, 0.32, 1)
-      both;
+    animation: encontrate-mark-spin 1000ms ease both;
   }
 }
 
-@keyframes encontrate-coin-halfspin {
+@keyframes encontrate-mark-spin {
   0% {
-    transform: translateZ(0) rotate(-8deg) scale(0.985);
-  }
-  12% {
-    transform: translateZ(0) rotate(0deg) scale(1);
-  }
-  55% {
-    transform: translateZ(0) rotate(176deg) scale(1);
-  }
-  88% {
-    transform: translateZ(0) rotate(188deg) scale(1.015);
+    transform: translateZ(0) rotate(0deg);
   }
   100% {
-    transform: translateZ(0) rotate(180deg) scale(1);
+    transform: translateZ(0) rotate(360deg);
   }
 }
 

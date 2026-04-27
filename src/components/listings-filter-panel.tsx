@@ -39,7 +39,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { parseDateOnly } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import type { PublicListingSort } from "@/lib/listing-queries";
-import { addMonths, startOfMonth } from "date-fns";
+import { addMonths } from "date-fns";
 
 type PanelProps = {
   defaultCity: string;
@@ -70,6 +70,10 @@ function toUTCNoonDateOnly(d: Date): Date {
   return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0));
 }
 
+function startOfUTCMonth(d: Date): Date {
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1, 12, 0, 0));
+}
+
 function getMonthLabel(d: Date) {
   return d.toLocaleString("es-ES", { month: "short", timeZone: "UTC" });
 }
@@ -79,7 +83,7 @@ function getYearLabel(d: Date) {
 }
 
 function setUTCMonthYear(base: Date, monthIndex: number, year: number) {
-  return startOfMonth(new Date(Date.UTC(year, monthIndex, 1, 12, 0, 0)));
+  return new Date(Date.UTC(year, monthIndex, 1, 12, 0, 0));
 }
 
 function CalendarHeader({
@@ -201,7 +205,7 @@ export function ListingsFilterPanel({
 
   const [checkInMonth, setCheckInMonth] = useState<Date>(() => {
     const base = defaultCheckIn ? parseDateOnly(defaultCheckIn) : new Date();
-    return startOfMonth(base);
+    return startOfUTCMonth(base);
   });
   const [checkOutMonth, setCheckOutMonth] = useState<Date>(() => {
     const base = defaultCheckOut
@@ -209,7 +213,7 @@ export function ListingsFilterPanel({
       : defaultCheckIn
         ? addMonths(parseDateOnly(defaultCheckIn), 1)
         : addMonths(new Date(), 1);
-    return startOfMonth(base);
+    return startOfUTCMonth(base);
   });
 
   const [flexStays, setFlexStays] = useState<FlexStay[]>(["weekend"]);
@@ -597,17 +601,17 @@ export function ListingsFilterPanel({
                           month={checkInMonth}
                           onPrev={() => {
                             const prev = addMonths(checkInMonth, -1);
-                            setCheckInMonth(startOfMonth(prev));
+                            setCheckInMonth(startOfUTCMonth(prev));
                           }}
                           onNext={() => {
                             const next = addMonths(checkInMonth, 1);
-                            setCheckInMonth(startOfMonth(next));
+                            setCheckInMonth(startOfUTCMonth(next));
                             setCheckOutMonth((prev) => {
                               const n =
                                 prev.getTime() <= next.getTime()
                                   ? addMonths(next, 1)
                                   : prev;
-                              return startOfMonth(n);
+                              return startOfUTCMonth(n);
                             });
                           }}
                           onMonthSelect={(mIdx) => {
@@ -618,7 +622,7 @@ export function ListingsFilterPanel({
                                 prev.getTime() <= next.getTime()
                                   ? addMonths(next, 1)
                                   : prev;
-                              return startOfMonth(n);
+                              return startOfUTCMonth(n);
                             });
                           }}
                           onYearSelect={(y) => {
@@ -629,7 +633,7 @@ export function ListingsFilterPanel({
                                 prev.getTime() <= next.getTime()
                                   ? addMonths(next, 1)
                                   : prev;
-                              return startOfMonth(n);
+                              return startOfUTCMonth(n);
                             });
                           }}
                         />
@@ -637,10 +641,10 @@ export function ListingsFilterPanel({
                           mode="single"
                           month={checkInMonth}
                           onMonthChange={(m) => {
-                            setCheckInMonth(startOfMonth(m));
+                            setCheckInMonth(startOfUTCMonth(m));
                             setCheckOutMonth((prev) => {
                               const next = prev.getTime() <= m.getTime() ? addMonths(m, 1) : prev;
-                              return startOfMonth(next);
+                              return startOfUTCMonth(next);
                             });
                           }}
                           selected={exactCheckIn}
@@ -663,8 +667,8 @@ export function ListingsFilterPanel({
                       <div className="bg-background rounded-lg border border-border shadow-sm">
                         <CalendarHeader
                           month={checkOutMonth}
-                          onPrev={() => setCheckOutMonth(startOfMonth(addMonths(checkOutMonth, -1)))}
-                          onNext={() => setCheckOutMonth(startOfMonth(addMonths(checkOutMonth, 1)))}
+                          onPrev={() => setCheckOutMonth(startOfUTCMonth(addMonths(checkOutMonth, -1)))}
+                          onNext={() => setCheckOutMonth(startOfUTCMonth(addMonths(checkOutMonth, 1)))}
                           onMonthSelect={(mIdx) =>
                             setCheckOutMonth(
                               setUTCMonthYear(checkOutMonth, mIdx, checkOutMonth.getUTCFullYear()),
@@ -679,7 +683,7 @@ export function ListingsFilterPanel({
                         <Calendar
                           mode="single"
                           month={checkOutMonth}
-                          onMonthChange={(m) => setCheckOutMonth(startOfMonth(m))}
+                          onMonthChange={(m) => setCheckOutMonth(startOfUTCMonth(m))}
                           selected={exactCheckOut}
                           onSelect={(d) => {
                             if (!d) return;

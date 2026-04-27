@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { BARCELONA_ZONE_LABELS, BARCELONA_ZONE_ORDER } from "@/lib/barcelona-zones";
 
 type Defaults = {
   title: string;
@@ -180,13 +181,22 @@ export function HostListingForm({
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="neighborhood">Barrio (público)</Label>
-        <Input
-          id="neighborhood"
+        <Label>Barrio / zona (público)</Label>
+        <Select
           value={neighborhood}
-          onChange={(e) => setNeighborhood(e.target.value)}
-          required
-        />
+          onValueChange={(v) => setNeighborhood(v ?? "")}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Elegí una zona" />
+          </SelectTrigger>
+          <SelectContent>
+            {BARCELONA_ZONE_ORDER.map((slug) => (
+              <SelectItem key={slug} value={BARCELONA_ZONE_LABELS[slug]}>
+                {BARCELONA_ZONE_LABELS[slug]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="space-y-2">
         <Label htmlFor="addressDetail">Dirección completa (solo tras confirmar)</Label>

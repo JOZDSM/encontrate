@@ -7,14 +7,25 @@ import {
   designPreviewAllowsEditAnyListing,
   designPreviewWriteBlockedMessage,
 } from "@/lib/design-preview";
+import { BARCELONA_ZONE_LABELS } from "@/lib/barcelona-zones";
 import { prisma } from "@/lib/db";
+
+const allowedNeighborhoodLabels = new Set(
+  Object.values(BARCELONA_ZONE_LABELS).map((s) => s.trim()),
+);
 
 const listingSchema = z.object({
   title: z.string().min(3).max(120),
   description: z.string().min(10).max(8000),
   city: z.string().min(2).max(80),
   country: z.string().min(2).max(80),
-  neighborhood: z.string().min(2).max(120),
+  neighborhood: z
+    .string()
+    .min(2)
+    .max(120)
+    .refine((v) => allowedNeighborhoodLabels.has(v.trim()), {
+      message: "Barrio inválido.",
+    }),
   addressDetail: z.string().max(500).optional().nullable(),
   priceNote: z.string().max(200).optional().nullable(),
   timeZone: z.string().min(3).max(80).default("Europe/Madrid"),

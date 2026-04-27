@@ -87,7 +87,7 @@ export function HomeHero() {
           <EncontrateMark
             className={cn(
               "size-16 text-primary-foreground dark:text-foreground",
-              "animate-[spin_0.8s_linear_infinite] motion-reduce:animate-none",
+              "animate-encontrate-coin",
             )}
           />
         </div>

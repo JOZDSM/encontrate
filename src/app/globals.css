@@ -173,3 +173,42 @@
   scrollbar-width: thin;
   scrollbar-color: color-mix(in oklab, white 22%, transparent) transparent;
 }
+
+@layer components {
+  .animate-encontrate-coin {
+    transform-origin: center;
+    animation: encontrate-coin-spin 2400ms both;
+  }
+}
+
+@keyframes encontrate-coin-spin {
+  0% {
+    transform: rotate(0deg) scale(0.96);
+    opacity: 0.95;
+  }
+  12% {
+    transform: rotate(70deg) scale(1);
+    opacity: 1;
+  }
+  30% {
+    transform: rotate(420deg) scale(1);
+  }
+  55% {
+    transform: rotate(900deg) scale(1);
+  }
+  74% {
+    transform: rotate(1080deg) scale(1);
+  }
+  86% {
+    transform: rotate(1130deg) translateY(-2px) scale(1.04);
+  }
+  100% {
+    transform: rotate(1080deg) translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-encontrate-coin {
+    animation: none;
+  }
+}

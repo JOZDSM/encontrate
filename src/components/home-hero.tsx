@@ -36,7 +36,7 @@ export function HomeHero() {
       }
     };
 
-    const id = window.setTimeout(reveal, 2400);
+    const id = window.setTimeout(reveal, 2700);
 
     return () => {
       clearTimeout(id);
@@ -89,6 +89,7 @@ export function HomeHero() {
               "size-16 text-primary-foreground dark:text-foreground",
               "animate-encontrate-coin",
             )}
+            style={{ animationIterationCount: 3 }}
           />
         </div>
       </div>

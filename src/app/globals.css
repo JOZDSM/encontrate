@@ -177,28 +177,28 @@
 @layer components {
   .animate-encontrate-coin {
     transform-origin: center;
-    animation: encontrate-coin-spin 900ms infinite;
+    will-change: transform;
+    transform: translateZ(0);
+    animation: encontrate-coin-halfspin 900ms cubic-bezier(0.22, 0.98, 0.32, 1)
+      both;
   }
 }
 
-@keyframes encontrate-coin-spin {
+@keyframes encontrate-coin-halfspin {
   0% {
-    transform: rotate(0deg) scale(0.98);
+    transform: translateZ(0) rotate(-8deg) scale(0.985);
   }
-  18% {
-    transform: rotate(110deg) scale(1);
+  12% {
+    transform: translateZ(0) rotate(0deg) scale(1);
   }
-  45% {
-    transform: rotate(260deg) scale(1);
-  }
-  72% {
-    transform: rotate(360deg) scale(1);
+  55% {
+    transform: translateZ(0) rotate(176deg) scale(1);
   }
   88% {
-    transform: rotate(392deg) translateY(-1px) scale(1.03);
+    transform: translateZ(0) rotate(188deg) scale(1.015);
   }
   100% {
-    transform: rotate(360deg) translateY(0) scale(1);
+    transform: translateZ(0) rotate(180deg) scale(1);
   }
 }
 

@@ -5,6 +5,7 @@ declare module "next-auth" {
     user: DefaultSession["user"] & {
       id: string;
       isAdmin?: boolean;
+      isApproved?: boolean;
       /** Set when SESSION comes from DESIGN_PREVIEW (local dev only). */
       designPreview?: boolean;
     };
@@ -14,5 +15,6 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     isAdmin?: boolean;
+    isApproved?: boolean;
   }
 }

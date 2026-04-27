@@ -6,6 +6,7 @@ import { designPreviewAllowsEditAnyListing } from "@/lib/design-preview";
 import { DeleteBlockButton } from "@/components/delete-block-button";
 import { HostListingForm } from "@/components/host-listing-form";
 import { Card, CardContent } from "@/components/ui/card";
+import { isUserApproved } from "@/lib/approval";
 import { formatDateUTC } from "@/lib/format";
 import { prisma } from "@/lib/db";
 
@@ -17,6 +18,7 @@ export default async function EditListingPage({
   const { id } = await params;
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+  if (!isUserApproved(session)) redirect("/pending");
 
   const listing = await prisma.listing.findUnique({
     where: { id },

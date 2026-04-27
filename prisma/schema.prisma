@@ -33,6 +33,7 @@ model User {
   emailVerified DateTime?
   image         String?
   isAdmin       Boolean   @default(false)
+  isApproved    Boolean   @default(false)
   whatsappNumber String?
 
   accounts Account[]

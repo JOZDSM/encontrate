@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingStatus } from "@/generated/prisma/enums";
 import { bookingStatusLabel } from "@/lib/booking-status-label";
+import { isUserApproved } from "@/lib/approval";
 import { formatDateLongES } from "@/lib/format";
 import { canSeeFullAddress } from "@/lib/listing-visibility";
 import { prisma } from "@/lib/db";
@@ -19,6 +20,7 @@ export default async function BookingDetailPage({
   const { id } = await params;
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+  if (!isUserApproved(session)) redirect("/pending");
 
   const booking = await prisma.booking.findUnique({
     where: { id },

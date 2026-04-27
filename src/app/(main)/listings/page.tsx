@@ -1,9 +1,12 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { ListingsFilterPanel } from "@/components/listings-filter-panel";
 import { ListingsResultsPanel } from "@/components/listings-results-panel";
 import { parseBarcelonaZonesParam } from "@/lib/barcelona-zones";
 import { parseDateOnly } from "@/lib/dates";
 import { parseListingSort } from "@/lib/listing-sort";
 import { getPublicListings, type AvailabilityRange } from "@/lib/listing-queries";
+import { isUserApproved } from "@/lib/approval";
 import { cn } from "@/lib/utils";
 import { addDays } from "date-fns";
 
@@ -33,6 +36,10 @@ export default async function ListingsPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/login");
+  if (!isUserApproved(session)) redirect("/pending");
+
   const sp = await searchParams;
   const city = sp.city ?? "Barcelona";
   const country = sp.country ?? "España";

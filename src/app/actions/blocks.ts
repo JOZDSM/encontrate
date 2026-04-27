@@ -7,6 +7,7 @@ import {
   designPreviewAllowsEditAnyListing,
   designPreviewWriteBlockedMessage,
 } from "@/lib/design-preview";
+import { isUserApproved } from "@/lib/approval";
 import { prisma } from "@/lib/db";
 import { parseDateOnly } from "@/lib/dates";
 
@@ -22,6 +23,9 @@ export async function createAvailabilityBlock(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const session = await auth();
   if (!session?.user?.id) return { ok: false, error: "Inicia sesión." };
+  if (!isUserApproved(session)) {
+    return { ok: false, error: "Tu cuenta está pendiente de aprobación." };
+  }
   const previewBlock = designPreviewWriteBlockedMessage(session);
   if (previewBlock) return { ok: false, error: previewBlock };
 
@@ -67,6 +71,9 @@ export async function deleteAvailabilityBlock(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const session = await auth();
   if (!session?.user?.id) return { ok: false, error: "Inicia sesión." };
+  if (!isUserApproved(session)) {
+    return { ok: false, error: "Tu cuenta está pendiente de aprobación." };
+  }
   const previewBlock = designPreviewWriteBlockedMessage(session);
   if (previewBlock) return { ok: false, error: previewBlock };
 

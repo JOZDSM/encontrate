@@ -17,8 +17,9 @@ export default {
     jwt({ token, user }) {
       if (user) {
         token.sub = user.id;
-        const u = user as { isAdmin?: boolean };
+        const u = user as { isAdmin?: boolean; isApproved?: boolean };
         token.isAdmin = u.isAdmin ?? false;
+        token.isApproved = u.isApproved ?? false;
       }
       return token;
     },
@@ -26,6 +27,7 @@ export default {
       if (session.user && token.sub) {
         session.user.id = token.sub;
         session.user.isAdmin = Boolean(token.isAdmin);
+        session.user.isApproved = Boolean(token.isApproved);
       }
       return session;
     },

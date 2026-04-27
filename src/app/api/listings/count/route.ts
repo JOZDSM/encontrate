@@ -1,11 +1,21 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { parseBarcelonaZonesParam } from "@/lib/barcelona-zones";
 import { parseDateOnly } from "@/lib/dates";
 import { parseListingSort } from "@/lib/listing-sort";
 import { getPublicListings, type AvailabilityRange } from "@/lib/listing-queries";
+import { isUserApproved } from "@/lib/approval";
 import { addDays } from "date-fns";
 
 export async function GET(req: Request) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ count: 0 }, { status: 401 });
+  }
+  if (!isUserApproved(session)) {
+    return NextResponse.json({ count: 0 }, { status: 403 });
+  }
+
   const url = new URL(req.url);
   const sp = url.searchParams;
 

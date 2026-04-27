@@ -3,10 +3,13 @@ import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { prisma } from "@/lib/db";
+import { redirect } from "next/navigation";
+import { isUserApproved } from "@/lib/approval";
 
 export default async function HostListingsPage() {
   const session = await auth();
   if (!session?.user?.id) return null;
+  if (!isUserApproved(session)) redirect("/pending");
 
   const listings = await prisma.listing.findMany({
     where: { hostId: session.user.id },

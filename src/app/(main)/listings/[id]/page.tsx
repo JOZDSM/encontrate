@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { BookingRequestForm } from "@/components/booking-request-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { prisma } from "@/lib/db";
+import { isUserApproved } from "@/lib/approval";
 import { canSeeFullAddress } from "@/lib/listing-visibility";
 
 export default async function ListingDetailPage({
@@ -15,6 +16,7 @@ export default async function ListingDetailPage({
 }) {
   const { id } = await params;
   const session = await auth();
+  if (!session?.user?.id) redirect("/login");
 
   const listing = await prisma.listing.findUnique({
     where: { id },
@@ -24,6 +26,9 @@ export default async function ListingDetailPage({
     },
   });
   if (!listing) notFound();
+
+  // Unapproved users can't browse/search listings yet.
+  if (!isUserApproved(session)) redirect("/pending");
 
   const showAddress = await canSeeFullAddress(session, listing);
   const isHost = session?.user?.id === listing.hostId;

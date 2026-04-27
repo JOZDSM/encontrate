@@ -14,12 +14,14 @@ import {
 } from "@/components/ui/table";
 import { BookingStatus } from "@/generated/prisma/enums";
 import { bookingStatusLabel } from "@/lib/booking-status-label";
+import { isUserApproved } from "@/lib/approval";
 import { formatDateLongES } from "@/lib/format";
 import { prisma } from "@/lib/db";
 
 export default async function HostBookingsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+  if (!isUserApproved(session)) redirect("/pending");
 
   const bookings = await prisma.booking.findMany({
     where: { listing: { hostId: session.user.id } },

@@ -7,6 +7,7 @@ import { BookingStatus } from "@/generated/prisma/enums";
 import { designPreviewWriteBlockedMessage } from "@/lib/design-preview";
 import { prisma } from "@/lib/db";
 import { sendEmail } from "@/lib/email";
+import { isUserApproved } from "@/lib/approval";
 
 const messageSchema = z.object({
   listingId: z.string().min(1),
@@ -19,6 +20,9 @@ export async function sendListingMessage(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const session = await auth();
   if (!session?.user?.id) return { ok: false, error: "Inicia sesión." };
+  if (!isUserApproved(session)) {
+    return { ok: false, error: "Tu cuenta está pendiente de aprobación." };
+  }
   const previewBlock = designPreviewWriteBlockedMessage(session);
   if (previewBlock) return { ok: false, error: previewBlock };
 

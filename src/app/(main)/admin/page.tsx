@@ -14,12 +14,19 @@ import { isPlatformAdmin } from "@/lib/admin";
 import { bookingStatusLabel } from "@/lib/booking-status-label";
 import { formatDateLongES, formatDateUTC } from "@/lib/format";
 import { prisma } from "@/lib/db";
+import { approveUserAction } from "@/app/actions/admin-users";
+import { Button } from "@/components/ui/button";
 
 export default async function AdminPage() {
   const session = await auth();
   if (!isPlatformAdmin(session)) redirect("/");
 
-  const [listings, bookings] = await Promise.all([
+  const [pendingUsers, listings, bookings] = await Promise.all([
+    prisma.user.findMany({
+      where: { isApproved: false },
+      orderBy: { email: "asc" },
+      select: { id: true, email: true, name: true },
+    }),
     prisma.listing.findMany({
       orderBy: { createdAt: "desc" },
       include: { host: { select: { email: true, name: true } } },
@@ -48,6 +55,47 @@ export default async function AdminPage() {
               Todos los anuncios y reservas activas (pendiente o confirmada).
             </p>
           </div>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-medium">Usuarios pendientes</h2>
+            {pendingUsers.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No hay usuarios pendientes de aprobación.
+              </p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead className="text-right">Acción</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pendingUsers.map((u) => (
+                    <TableRow key={u.id}>
+                      <TableCell className="font-medium">
+                        {u.email ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-sm">{u.name ?? "—"}</TableCell>
+                      <TableCell className="text-right">
+                        <form
+                          action={async () => {
+                            "use server";
+                            await approveUserAction(u.id);
+                          }}
+                        >
+                          <Button type="submit" size="sm">
+                            Aprobar
+                          </Button>
+                        </form>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </section>
 
           <section className="space-y-3">
             <h2 className="text-lg font-medium">Anuncios</h2>

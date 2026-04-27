@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createListing, updateListing } from "@/app/actions/listings";
 import { Button } from "@/components/ui/button";
@@ -92,12 +92,20 @@ export function HostListingForm({
   const [apartmentSizeSqm, setApartmentSizeSqm] = useState(d.apartmentSizeSqm);
   const [wifi, setWifi] = useState(d.wifi);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!success) return;
+    const id = window.setTimeout(() => setSuccess(null), 2500);
+    return () => window.clearTimeout(id);
+  }, [success]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
     const photoUrls = photoUrlsText
       .split("\n")
       .map((l) => l.trim())
@@ -132,6 +140,7 @@ export function HostListingForm({
     }
     if (listingId) {
       router.refresh();
+      setSuccess("Cambios guardados.");
     } else if ("id" in res) {
       router.push(`/host/listings/${res.id}/edit`);
     }
@@ -377,6 +386,9 @@ export function HostListingForm({
       </div>
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {success ? (
+        <p className="text-sm font-medium text-foreground">{success}</p>
+      ) : null}
       <Button type="submit" disabled={loading}>
         {loading ? "Guardando…" : listingId ? "Guardar cambios" : "Publicar"}
       </Button>

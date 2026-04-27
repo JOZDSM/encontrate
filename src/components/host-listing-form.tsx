@@ -190,13 +190,13 @@ export function HostListingForm({
         </div>
       </div>
       <div className="space-y-2">
-        <Label>Barrio / zona (público)</Label>
+        <Label>Barrio (público)</Label>
         <Select
           value={neighborhood}
           onValueChange={(v) => setNeighborhood(v ?? "")}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Elegí una zona" />
+            <SelectValue placeholder="Elegí un barrio" />
           </SelectTrigger>
           <SelectContent>
             {BARCELONA_ZONE_ORDER.map((slug) => (

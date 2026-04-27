@@ -75,7 +75,7 @@ function ZoneSvg({
       aria-labelledby={`${mapId}-title`}
     >
       <title id={`${mapId}-title`}>
-        Mapa esquemático de distritos de Barcelona
+        Mapa esquemático de barrios de Barcelona
       </title>
       {poly(
         "ciutatvella",
@@ -228,12 +228,12 @@ export function BarcelonaZonePicker({
   const summary =
     selected.size === 0 ? (
       <span className="text-muted-foreground">
-        Ningún distrito seleccionado — elegí en el mapa o en las etiquetas.
+        Ningún barrio seleccionado — elegí en el mapa o en las etiquetas.
       </span>
     ) : (
       <>
         <span className="text-foreground font-medium">
-          {selected.size} {selected.size === 1 ? "distrito" : "distritos"}:
+          {selected.size} {selected.size === 1 ? "barrio" : "barrios"}:
         </span>{" "}
         <span className="text-muted-foreground">
           {[...selected]
@@ -255,7 +255,7 @@ export function BarcelonaZonePicker({
           ¿Dónde estás buscando?
         </p>
         <p className="text-sm leading-5 text-muted-foreground">
-          Elegí tus zonas de interés
+          Elegí tus barrios de interés
         </p>
       </div>
 
@@ -264,14 +264,14 @@ export function BarcelonaZonePicker({
       <div
         className="-mx-4 w-[calc(100%+2rem)] max-w-none rounded-md bg-muted/35 px-1 py-1 [&_svg]:max-h-none"
         role="group"
-        aria-label="Mapa esquemático de distritos"
+        aria-label="Mapa esquemático de barrios"
       >
         <ZoneSvg selected={selected} toggle={toggle} />
       </div>
 
       <div className="flex flex-col gap-2">
         <p className="text-muted-foreground text-xs font-medium">
-          Distritos seleccionados
+          Barrios seleccionados
         </p>
         <div className="flex flex-wrap gap-1">
           {BARCELONA_ZONE_ORDER.map((zone) => {

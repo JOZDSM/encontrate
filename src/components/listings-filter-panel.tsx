@@ -247,7 +247,7 @@ export function ListingsFilterPanel({
 
   const whereTitle =
     zones.length > 0
-      ? `Dónde (${zones.length} ${zones.length === 1 ? "zona" : "zonas"})`
+      ? `Dónde (${zones.length} ${zones.length === 1 ? "barrio" : "barrios"})`
       : "Dónde";
 
   const whenTitle = (() => {

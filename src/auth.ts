@@ -3,7 +3,9 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { Session } from "next-auth";
 import authConfig from "@/auth.config";
 import { getDesignPreviewSession, isDesignPreviewActive } from "@/lib/design-preview";
+import { parseAdminEmails } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { sendEmail } from "@/lib/email";
 
 const nextAuth = NextAuth({
   ...authConfig,
@@ -34,6 +36,27 @@ const nextAuth = NextAuth({
           ...(nextWhatsapp ? { whatsappNumber: nextWhatsapp } : {}),
         },
       });
+
+      // Notify admins that a new account was created (and is pending approval).
+      const adminEmails = parseAdminEmails();
+      if (adminEmails.length > 0) {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.encontrate.es";
+        const subject = "Nuevo usuario registrado (pendiente de aprobación)";
+        const html = `
+          <p>Se registró un nuevo usuario en <strong>encontrate</strong> y está pendiente de aprobación.</p>
+          <ul>
+            <li><strong>Nombre</strong>: ${nextName ?? "—"}</li>
+            <li><strong>Email</strong>: ${email}</li>
+            <li><strong>WhatsApp</strong>: ${nextWhatsapp ?? "—"}</li>
+          </ul>
+          <p><a href="${appUrl}/admin">Abrir panel de admin</a></p>
+        `;
+        await Promise.all(
+          adminEmails.map((to) =>
+            sendEmail({ to, subject, html }).catch(() => {}),
+          ),
+        );
+      }
 
       await prisma.signupProfile.delete({ where: { email } }).catch(() => {});
     },

@@ -50,13 +50,18 @@ export async function auth(): Promise<Session | null> {
   const session = await nextAuth.auth();
   if (!session?.user?.id) return session;
 
-  const fresh = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { isAdmin: true, isApproved: true },
-  });
-  if (fresh) {
-    session.user.isAdmin = session.user.isAdmin || fresh.isAdmin;
-    session.user.isApproved = fresh.isApproved;
+  try {
+    const fresh = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { isAdmin: true, isApproved: true },
+    });
+    if (fresh) {
+      session.user.isAdmin = session.user.isAdmin || fresh.isAdmin;
+      session.user.isApproved = fresh.isApproved;
+    }
+  } catch {
+    // If the DB is temporarily unavailable/misconfigured, don't crash every page render.
+    // Pages/actions that truly require DB access will fail in a more specific place.
   }
   return session;
 }

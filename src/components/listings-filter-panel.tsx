@@ -65,6 +65,16 @@ function formatDateOnlyUTC(value: Date): string {
   return value.toISOString().slice(0, 10);
 }
 
+function filterTriggerTitle(base: string, meta?: string): React.ReactNode {
+  if (!meta) return base;
+  return (
+    <span className="inline-flex flex-wrap items-baseline gap-x-2">
+      <span>{base}</span>
+      <span className="text-muted-foreground font-normal">{meta}</span>
+    </span>
+  );
+}
+
 function toUTCNoonDateOnly(d: Date): Date {
   // react-day-picker returns local Date objects; normalize to date-only at noon UTC.
   return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0));
@@ -245,21 +255,24 @@ export function ListingsFilterPanel({
     return `${capMonth} ${d.getUTCDate()}`;
   }
 
-  const whereTitle =
+  const whereTitle = filterTriggerTitle(
+    "Dónde",
     zones.length > 0
-      ? `Dónde (${zones.length} ${zones.length === 1 ? "barrio" : "barrios"})`
-      : "Dónde";
+      ? `(${zones.length} ${zones.length === 1 ? "barrio" : "barrios"})`
+      : undefined,
+  );
 
-  const whenTitle = (() => {
+  const whenTitle: React.ReactNode = (() => {
     if (dateMode === "exact") {
       if (exactCheckIn && exactCheckOut && exactCheckIn < exactCheckOut) {
         const flexLabel =
           exactFlexDays && exactFlexDays !== "0"
             ? `± ${exactFlexDays} días`
             : "fechas exactas";
-        return `Cuándo (${formatMonthDay(exactCheckIn)} - ${formatMonthDay(
-          exactCheckOut,
-        )}, ${flexLabel})`;
+        return filterTriggerTitle(
+          "Cuándo",
+          `(${formatMonthDay(exactCheckIn)} - ${formatMonthDay(exactCheckOut)}, ${flexLabel})`,
+        );
       }
       return "Cuándo";
     }
@@ -275,7 +288,9 @@ export function ListingsFilterPanel({
     if (flexMonths.length) {
       parts.push(`${flexMonths.length} ${flexMonths.length === 1 ? "mes" : "meses"}`);
     }
-    return parts.length ? `Cuándo (${parts.join(", ")}, flexible)` : "Cuándo";
+    return parts.length
+      ? filterTriggerTitle("Cuándo", `(${parts.join(", ")}, flexible)`)
+      : "Cuándo";
   })();
 
   const characteristicsSelectedCount =
@@ -287,10 +302,12 @@ export function ListingsFilterPanel({
     (apartmentBaths ? 1 : 0) +
     (apartmentSizeSqm ? 1 : 0) +
     (wifi ? 1 : 0);
-  const characteristicsTitle =
+  const characteristicsTitle = filterTriggerTitle(
+    "Características",
     characteristicsSelectedCount > 0
-      ? `Características (${characteristicsSelectedCount} seleccionadas)`
-      : "Características";
+      ? `(${characteristicsSelectedCount} seleccionadas)`
+      : undefined,
+  );
 
   const rangeModifiers = useMemo(() => {
     const start = exactCheckIn;

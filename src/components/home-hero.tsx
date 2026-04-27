@@ -5,6 +5,7 @@ import { useLayoutEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { EncontrateMark } from "@/components/encontrate-mark";
+import { ANIMATIONS } from "@/lib/animations";
 
 const HOME_HERO_INTRO_KEY = "encontrate-home-hero-intro-seen";
 
@@ -87,7 +88,7 @@ export function HomeHero() {
           <EncontrateMark
             className={cn(
               "size-16 text-primary-foreground dark:text-foreground",
-              "animate-encontrate-coin",
+              ANIMATIONS.MARK_SPIN_360_EASE_1S,
             )}
             style={{ animationIterationCount: 3 }}
           />

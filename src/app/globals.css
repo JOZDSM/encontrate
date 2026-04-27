@@ -175,6 +175,8 @@
 }
 
 @layer components {
+  /* Animation: "MARK_SPIN_360_EASE_1S" (see `src/lib/animations.ts`). */
+  .animate-encontrate-mark-spin-360-ease-1s,
   .animate-encontrate-coin {
     transform-origin: center;
     will-change: transform;
@@ -193,6 +195,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .animate-encontrate-mark-spin-360-ease-1s,
   .animate-encontrate-coin {
     animation: none;
   }

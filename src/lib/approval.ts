@@ -1,8 +1,9 @@
 import type { Session } from "next-auth";
+import { isPlatformAdmin } from "@/lib/admin";
 
 export function isUserApproved(session: Session | null): boolean {
-  // Admins always bypass approval.
-  if (session?.user?.isAdmin) return true;
+  // Platform admins always bypass approval (either DB flag or ADMIN_EMAILS).
+  if (isPlatformAdmin(session)) return true;
   return Boolean(session?.user?.isApproved);
 }
 

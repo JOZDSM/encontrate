@@ -12,9 +12,13 @@ import {
 type Props = {
   name?: string;
   defaultZones?: string[];
+  /** Controlled zones (preferred). */
+  zones?: string[];
   /** Parent `<form id>` so "Confirmar" can submit the listings filter form. */
   formId: string;
   onChangeZones?: (zones: string[]) => void;
+  /** If true, selection changes auto-submit the parent form. */
+  autoSubmit?: boolean;
 };
 
 const ZONE_PATH_CLASS =
@@ -164,18 +168,26 @@ function ZoneSvg({
 export function BarcelonaZonePicker({
   name = "zones",
   defaultZones = [],
+  zones,
   formId,
   onChangeZones,
+  autoSubmit = true,
 }: Props) {
-  const [selected, setSelected] = useState<Set<string>>(
+  const [uncontrolledSelected, setUncontrolledSelected] = useState<Set<string>>(
     () => new Set(defaultZones.filter((z) => z in BARCELONA_ZONE_LABELS)),
   );
+
+  const selected = useMemo(() => {
+    if (zones) return new Set(zones.filter((z) => z in BARCELONA_ZONE_LABELS));
+    return uncontrolledSelected;
+  }, [zones, uncontrolledSelected]);
 
   const value = useMemo(() => [...selected].sort().join(","), [selected]);
   const didMount = useRef(false);
   const submitTimer = useRef<number | null>(null);
 
   useEffect(() => {
+    if (!autoSubmit) return;
     if (!didMount.current) {
       didMount.current = true;
       return;
@@ -189,14 +201,21 @@ export function BarcelonaZonePicker({
       if (typeof form.requestSubmit === "function") form.requestSubmit();
       else form.submit();
     }, 250);
-  }, [value, formId]);
+  }, [value, formId, autoSubmit]);
 
   useEffect(() => {
     onChangeZones?.([...selected].sort());
   }, [onChangeZones, selected]);
 
   const toggle = (zone: string) => {
-    setSelected((prev) => {
+    if (zones) {
+      const next = new Set(selected);
+      if (next.has(zone)) next.delete(zone);
+      else next.add(zone);
+      onChangeZones?.([...next].sort());
+      return;
+    }
+    setUncontrolledSelected((prev) => {
       const next = new Set(prev);
       if (next.has(zone)) next.delete(zone);
       else next.add(zone);

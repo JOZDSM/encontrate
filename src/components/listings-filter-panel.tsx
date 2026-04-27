@@ -330,40 +330,52 @@ export function ListingsFilterPanel({
   }
 
   const didMount = useRef(false);
-  const submitTimer = useRef<number | null>(null);
+  const previewTimer = useRef<number | null>(null);
   const flexStaysKey = useMemo(() => flexStays.join(","), [flexStays]);
   const flexMonthsKey = useMemo(() => flexMonths.join(","), [flexMonths]);
 
-  useEffect(() => {
-    if (!didMount.current) {
-      didMount.current = true;
-      return;
+  const [previewCount, setPreviewCount] = useState<number | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+
+  const zonesKey = useMemo(() => zones.join(","), [zones]);
+
+  const previewQueryString = useMemo(() => {
+    const sp = new URLSearchParams();
+    sp.set("sort", sort);
+    sp.set("city", defaultCity);
+    sp.set("country", defaultCountry);
+    sp.set("dateMode", dateMode);
+
+    if (zonesKey) sp.set("zones", zonesKey);
+
+    if (dateMode === "exact") {
+      if (exactCheckIn) sp.set("checkIn", formatDateOnlyUTC(exactCheckIn));
+      if (exactCheckOut) sp.set("checkOut", formatDateOnlyUTC(exactCheckOut));
+      if (exactFlexDays && exactFlexDays !== "0") sp.set("flexDays", exactFlexDays);
+    } else {
+      if (flexStays.length) sp.set("flexStay", flexStays.join(","));
+      if (flexMonths.length) sp.set("flexMonths", flexMonths.join(","));
     }
 
-    // Avoid spamming navigations while user is still picking a range.
-    if (
-      dateMode === "exact" &&
-      ((exactCheckIn && !exactCheckOut) || (!exactCheckIn && exactCheckOut))
-    ) {
-      return;
-    }
+    if (bedSize) sp.set("bedSize", bedSize);
+    if (windowType) sp.set("windowType", windowType);
+    if (roomSizeSqm) sp.set("roomSizeSqm", roomSizeSqm);
+    if (furnished) sp.set("furnished", furnished);
+    if (apartmentRooms) sp.set("apartmentRooms", apartmentRooms);
+    if (apartmentBaths) sp.set("apartmentBaths", apartmentBaths);
+    if (apartmentSizeSqm) sp.set("apartmentSizeSqm", apartmentSizeSqm);
+    if (wifi) sp.set("wifi", wifi);
 
-    if (submitTimer.current != null) window.clearTimeout(submitTimer.current);
-    submitTimer.current = window.setTimeout(() => {
-      const form = document.getElementById("listings-filter-form") as
-        | HTMLFormElement
-        | null;
-      if (!form) return;
-      if (typeof form.requestSubmit === "function") form.requestSubmit();
-      else form.submit();
-    }, 300);
+    return sp.toString();
   }, [
+    sort,
+    defaultCity,
+    defaultCountry,
     dateMode,
+    zonesKey,
     exactCheckIn,
     exactCheckOut,
     exactFlexDays,
-    flexStaysKey,
-    flexMonthsKey,
     bedSize,
     windowType,
     roomSizeSqm,
@@ -372,6 +384,84 @@ export function ListingsFilterPanel({
     apartmentBaths,
     apartmentSizeSqm,
     wifi,
+    flexStays,
+    flexMonths,
+  ]);
+
+  const resetAllFilters = () => {
+    setZones([]);
+    setDateMode("exact");
+    setExactCheckIn(undefined);
+    setExactCheckOut(undefined);
+    setExactFlexDays("0");
+    setFlexStays(["weekend"]);
+    setFlexMonthLimit(4);
+    setFlexMonths([]);
+    setBedSize("");
+    setWindowType("");
+    setRoomSizeSqm("");
+    setFurnished("");
+    setApartmentRooms("");
+    setApartmentBaths("");
+    setApartmentSizeSqm("");
+    setWifi("");
+  };
+
+  const applyFilters = () => {
+    const form = document.getElementById("listings-filter-form") as
+      | HTMLFormElement
+      | null;
+    if (!form) return;
+    if (typeof form.requestSubmit === "function") form.requestSubmit();
+    else form.submit();
+  };
+
+  useEffect(() => {
+    // First render: run a preview fetch too.
+    if (!didMount.current) didMount.current = true;
+
+    // Avoid preview fetch while user is still picking a range (exact mode).
+    if (
+      dateMode === "exact" &&
+      ((exactCheckIn && !exactCheckOut) || (!exactCheckIn && exactCheckOut))
+    ) {
+      return;
+    }
+
+    if (previewTimer.current != null) window.clearTimeout(previewTimer.current);
+    previewTimer.current = window.setTimeout(async () => {
+      setPreviewLoading(true);
+      try {
+        const res = await fetch(`/api/listings/count?${previewQueryString}`, {
+          method: "GET",
+          headers: { "accept": "application/json" },
+        });
+        if (!res.ok) throw new Error("count fetch failed");
+        const json = (await res.json()) as { count?: number };
+        setPreviewCount(typeof json.count === "number" ? json.count : null);
+      } catch {
+        setPreviewCount(null);
+      } finally {
+        setPreviewLoading(false);
+      }
+    }, 250);
+  }, [
+    dateMode,
+    exactCheckIn,
+    exactCheckOut,
+    exactFlexDays,
+    flexStaysKey,
+    flexMonthsKey,
+    zonesKey,
+    bedSize,
+    windowType,
+    roomSizeSqm,
+    furnished,
+    apartmentRooms,
+    apartmentBaths,
+    apartmentSizeSqm,
+    wifi,
+    previewQueryString,
   ]);
 
   return (
@@ -448,13 +538,15 @@ export function ListingsFilterPanel({
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 pb-4">
-          <div className="flex flex-col gap-2">
+        <CardContent className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 pb-0">
+          <div className="flex flex-col gap-2 pb-4">
             <FilterSection title={whereTitle}>
               <BarcelonaZonePicker
                 formId="listings-filter-form"
                 defaultZones={defaultZones}
+                zones={zones}
                 onChangeZones={setZones}
+                autoSubmit={false}
               />
             </FilterSection>
 
@@ -880,6 +972,30 @@ export function ListingsFilterPanel({
                 </div>
               </div>
             </FilterSection>
+          </div>
+
+          <div className="sticky bottom-0 z-10 -mx-6 mt-auto border-t border-border bg-card px-6 py-4">
+            <div className="flex items-center justify-between gap-3">
+              <Button
+                type="button"
+                variant="ghost"
+                className="px-0"
+                onClick={resetAllFilters}
+              >
+                Borrar filtros
+              </Button>
+
+              <Button
+                type="button"
+                onClick={applyFilters}
+                disabled={previewLoading}
+                className="rounded-full"
+              >
+                {previewLoading
+                  ? "Calculando…"
+                  : `Mostrar ${previewCount ?? "—"} habitaciones`}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </form>

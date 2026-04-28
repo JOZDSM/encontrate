@@ -1,6 +1,5 @@
 import type { PrismaClient } from "@/generated/prisma/client";
 import { BookingStatus } from "@/generated/prisma/enums";
-import { rangesOverlap } from "@/lib/dates";
 
 export async function listingHasConflict(
   prisma: PrismaClient,

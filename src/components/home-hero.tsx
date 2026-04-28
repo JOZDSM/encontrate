@@ -19,8 +19,8 @@ export function HomeHero() {
     // Only show the intro the first time per *browser session*.
     try {
       if (window.sessionStorage.getItem(HOME_INTRO_SEEN_KEY)) {
-        setIntroVisible(false);
-        return;
+        const id = window.setTimeout(() => setIntroVisible(false), 0);
+        return () => window.clearTimeout(id);
       }
     } catch {
       // Storage blocked/private mode — treat as "not seen" and run the intro.

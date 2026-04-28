@@ -2,11 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { addDays } from "date-fns";
+import type { DateRange } from "react-day-picker";
 import { BookingStatus } from "@/generated/prisma/enums";
 import { createAvailabilityBlock } from "@/app/actions/blocks";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar, type CalendarProps } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { formatDateUTC } from "@/lib/format";
 
 type Block = {
@@ -43,7 +43,7 @@ export function ListingAvailabilityCalendar({
   blocks: Block[];
   bookings: Booking[];
 }) {
-  const [range, setRange] = useState<{ from?: Date; to?: Date }>({});
+  const [range, setRange] = useState<DateRange | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -56,16 +56,16 @@ export function ListingAvailabilityCalendar({
     [bookings],
   );
 
-  const modifiers = useMemo(() => {
+  const modifiers: CalendarProps["modifiers"] = useMemo(() => {
     return {
-      blocked: (d: Date) => blocks.some((b) => dayInRange(d, b.startDate, b.endDate)),
+      blocked: (d) => blocks.some((b) => dayInRange(d, b.startDate, b.endDate)),
       confirmed: (d: Date) =>
         confirmed.some((b) => dayInRange(d, b.startDate, b.endDate)),
-      pending: (d: Date) => pending.some((b) => dayInRange(d, b.startDate, b.endDate)),
+      pending: (d) => pending.some((b) => dayInRange(d, b.startDate, b.endDate)),
     };
   }, [blocks, confirmed, pending]);
 
-  const modifiersClassNames = useMemo(() => {
+  const modifiersClassNames: CalendarProps["modifiersClassNames"] = useMemo(() => {
     return {
       blocked: "bg-muted/70 text-foreground",
       confirmed: "bg-primary text-primary-foreground",
@@ -74,10 +74,10 @@ export function ListingAvailabilityCalendar({
     };
   }, []);
 
-  const canBlock = Boolean(range.from);
+  const canBlock = Boolean(range?.from);
 
   async function blockSelected() {
-    if (!range.from) return;
+    if (!range?.from) return;
     setLoading(true);
     setErr(null);
     const from = toUTCNoonDateOnly(range.from);
@@ -97,7 +97,7 @@ export function ListingAvailabilityCalendar({
     }
     // We rely on the parent server component refresh after router.refresh() in the old form,
     // but here we keep it minimal—user can refresh or we can wire router.refresh later.
-    setRange({});
+    setRange(undefined);
     setErr(null);
   }
 
@@ -125,10 +125,10 @@ export function ListingAvailabilityCalendar({
         <Calendar
           mode="range"
           numberOfMonths={2}
-          selected={range as any}
-          onSelect={(next) => setRange((next as any) ?? {})}
-          modifiers={modifiers as any}
-          modifiersClassNames={modifiersClassNames as any}
+          selected={range}
+          onSelect={setRange}
+          modifiers={modifiers}
+          modifiersClassNames={modifiersClassNames}
         />
       </div>
 

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { addDays } from "date-fns";
+import Link from "next/link";
 import { auth } from "@/auth";
 import { Card, CardContent } from "@/components/ui/card";
 import { isPlatformAdmin } from "@/lib/admin";
@@ -29,7 +30,7 @@ export default async function AdminCalendarPage() {
   if (!isPlatformAdmin(session)) redirect("/");
 
   const start = toUTCNoonDateOnly(new Date());
-  const days = 35; // 5 weeks
+  const days = 183; // ~6 months
   const end = addDays(start, days);
 
   const listings = await prisma.listing.findMany({
@@ -132,7 +133,12 @@ export default async function AdminCalendarPage() {
                   <tr key={l.id} className="border-b border-border/60 last:border-b-0">
                     <td className="sticky left-0 z-10 border-r border-border bg-card px-3 py-2 align-middle">
                       <div className="space-y-0.5">
-                        <div className="font-medium">{l.title}</div>
+                        <Link
+                          href={`/listings/${l.id}`}
+                          className="font-medium underline underline-offset-2 hover:opacity-90"
+                        >
+                          {l.title}
+                        </Link>
                         <div className="text-muted-foreground">
                           {l.neighborhood} · {l.host.email ?? l.host.name ?? "—"}
                         </div>

@@ -16,6 +16,14 @@ function dayInRange(day: Date, start: Date, end: Date): boolean {
   return start.getTime() <= x.getTime() && x.getTime() < end.getTime();
 }
 
+function formatMonthLabelES(d: Date): string {
+  return new Intl.DateTimeFormat("es-ES", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(d);
+}
+
 export default async function AdminCalendarPage() {
   const session = await auth();
   if (!isPlatformAdmin(session)) redirect("/");
@@ -49,6 +57,19 @@ export default async function AdminCalendarPage() {
   });
 
   const dayColumns = Array.from({ length: days }, (_, i) => addDays(start, i));
+  const monthGroups = (() => {
+    const groups: Array<{ key: string; label: string; span: number }> = [];
+    for (const d of dayColumns) {
+      const key = `${d.getUTCFullYear()}-${d.getUTCMonth()}`;
+      const last = groups[groups.length - 1];
+      if (last && last.key === key) {
+        last.span += 1;
+      } else {
+        groups.push({ key, label: formatMonthLabelES(d), span: 1 });
+      }
+    }
+    return groups;
+  })();
 
   return (
     <div className="mx-auto w-full max-w-[1440px] px-4 py-10">
@@ -79,6 +100,18 @@ export default async function AdminCalendarPage() {
           <div className="overflow-auto rounded-lg border border-border">
             <table className="w-full border-collapse text-xs">
               <thead className="bg-muted/30">
+                <tr>
+                  <th className="sticky left-0 z-10 w-[18rem] min-w-[18rem] border-b border-border bg-muted/30 px-3 py-2 text-left" />
+                  {monthGroups.map((g) => (
+                    <th
+                      key={g.key}
+                      colSpan={g.span}
+                      className="border-b border-border px-2 py-2 text-left text-xs font-medium capitalize text-muted-foreground"
+                    >
+                      {g.label}
+                    </th>
+                  ))}
+                </tr>
                 <tr>
                   <th className="sticky left-0 z-10 w-[18rem] min-w-[18rem] border-b border-border bg-muted/30 px-3 py-2 text-left">
                     Anuncio

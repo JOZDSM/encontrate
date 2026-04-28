@@ -69,7 +69,7 @@ export default async function AdminCalendarPage() {
               <span className="h-3 w-3 rounded-sm bg-amber-500/25 ring-1 ring-amber-500/30" /> Pendiente
             </span>
             <span className="inline-flex items-center gap-2">
-              <span className="h-3 w-3 rounded-sm bg-muted/70 ring-1 ring-border" /> Cierre
+              <span className="h-3 w-3 rounded-sm bg-brand-background ring-1 ring-border" /> Cierre
             </span>
             <span className="inline-flex items-center gap-2">
               <span className="h-3 w-3 rounded-sm bg-transparent ring-1 ring-border/50" /> Libre
@@ -117,7 +117,7 @@ export default async function AdminCalendarPage() {
                       const cls = confirmed
                         ? "bg-primary"
                         : isBlocked
-                          ? "bg-muted/70"
+                          ? "bg-brand-background"
                           : pending
                             ? "bg-amber-500/25"
                             : "bg-transparent";
@@ -125,9 +125,9 @@ export default async function AdminCalendarPage() {
                       return (
                         <td
                           key={d.toISOString()}
-                          className="border-r border-border/50 p-0 last:border-r-0"
+                          className="h-10 border-r border-border/50 p-0 last:border-r-0"
                         >
-                          <div className={cls + " h-10 w-full"} />
+                          <div className={cls + " h-full w-full"} />
                         </td>
                       );
                     })}

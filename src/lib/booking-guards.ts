@@ -7,7 +7,7 @@ export async function listingHasConflict(
   listingId: string,
   start: Date,
   end: Date,
-  opts?: { excludeBookingId?: string },
+  opts?: { excludeBookingId?: string; includePending?: boolean },
 ): Promise<{ reason: string } | null> {
   const blocks = await prisma.availabilityBlock.findMany({
     where: { listingId },
@@ -28,15 +28,17 @@ export async function listingHasConflict(
     }
   }
 
-  const pending = await prisma.booking.findMany({
-    where: { listingId, status: BookingStatus.PENDING },
-  });
-  for (const b of pending) {
-    if (opts?.excludeBookingId === b.id) continue;
-    if (rangesOverlap(start, end, b.startDate, b.endDate)) {
-      return {
-        reason: "Ya hay una solicitud pendiente que cruza esas fechas.",
-      };
+  if (opts?.includePending) {
+    const pending = await prisma.booking.findMany({
+      where: { listingId, status: BookingStatus.PENDING },
+    });
+    for (const b of pending) {
+      if (opts?.excludeBookingId === b.id) continue;
+      if (rangesOverlap(start, end, b.startDate, b.endDate)) {
+        return {
+          reason: "Ya hay una solicitud pendiente que cruza esas fechas.",
+        };
+      }
     }
   }
 

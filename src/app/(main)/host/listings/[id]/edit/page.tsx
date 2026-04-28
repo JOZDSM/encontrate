@@ -5,6 +5,7 @@ import { AvailabilityBlockForm } from "@/components/availability-block-form";
 import { designPreviewAllowsEditAnyListing } from "@/lib/design-preview";
 import { DeleteBlockButton } from "@/components/delete-block-button";
 import { HostListingForm } from "@/components/host-listing-form";
+import { ListingAvailabilityCalendar } from "@/components/listing-availability-calendar";
 import { Card, CardContent } from "@/components/ui/card";
 import { isUserApproved } from "@/lib/approval";
 import { formatDateUTC } from "@/lib/format";
@@ -25,6 +26,11 @@ export default async function EditListingPage({
     include: {
       photos: { orderBy: { sortOrder: "asc" } },
       blocks: { orderBy: { startDate: "asc" } },
+      bookings: {
+        orderBy: { startDate: "asc" },
+        where: { status: { in: ["PENDING", "CONFIRMED"] } },
+        select: { id: true, startDate: true, endDate: true, status: true },
+      },
     },
   });
   const allowAnyPreview =
@@ -80,6 +86,13 @@ export default async function EditListingPage({
               Intervalo en fechas tipo hotel: desde la primera noche bloqueada hasta
               el día de salida (exclusivo).
             </p>
+
+            <ListingAvailabilityCalendar
+              listingId={listing.id}
+              blocks={listing.blocks}
+              bookings={listing.bookings}
+            />
+
             <AvailabilityBlockForm listingId={listing.id} />
             <ul className="space-y-2 text-sm">
               {listing.blocks.map((b) => (

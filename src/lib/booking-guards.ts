@@ -9,36 +9,41 @@ export async function listingHasConflict(
   end: Date,
   opts?: { excludeBookingId?: string; includePending?: boolean },
 ): Promise<{ reason: string } | null> {
-  const blocks = await prisma.availabilityBlock.findMany({
-    where: { listingId },
+  const block = await prisma.availabilityBlock.findFirst({
+    where: {
+      listingId,
+      startDate: { lt: end },
+      endDate: { gt: start },
+    },
+    select: { id: true },
   });
-  for (const b of blocks) {
-    if (rangesOverlap(start, end, b.startDate, b.endDate)) {
-      return { reason: "Las fechas coinciden con un cierre del anfitrión." };
-    }
-  }
+  if (block) return { reason: "Las fechas coinciden con un cierre del anfitrión." };
 
-  const confirmed = await prisma.booking.findMany({
-    where: { listingId, status: BookingStatus.CONFIRMED },
+  const confirmed = await prisma.booking.findFirst({
+    where: {
+      listingId,
+      status: BookingStatus.CONFIRMED,
+      id: opts?.excludeBookingId ? { not: opts.excludeBookingId } : undefined,
+      startDate: { lt: end },
+      endDate: { gt: start },
+    },
+    select: { id: true },
   });
-  for (const b of confirmed) {
-    if (opts?.excludeBookingId === b.id) continue;
-    if (rangesOverlap(start, end, b.startDate, b.endDate)) {
-      return { reason: "Ya hay una reserva confirmada en esas fechas." };
-    }
-  }
+  if (confirmed) return { reason: "Ya hay una reserva confirmada en esas fechas." };
 
   if (opts?.includePending) {
-    const pending = await prisma.booking.findMany({
-      where: { listingId, status: BookingStatus.PENDING },
+    const pending = await prisma.booking.findFirst({
+      where: {
+        listingId,
+        status: BookingStatus.PENDING,
+        id: opts?.excludeBookingId ? { not: opts.excludeBookingId } : undefined,
+        startDate: { lt: end },
+        endDate: { gt: start },
+      },
+      select: { id: true },
     });
-    for (const b of pending) {
-      if (opts?.excludeBookingId === b.id) continue;
-      if (rangesOverlap(start, end, b.startDate, b.endDate)) {
-        return {
-          reason: "Ya hay una solicitud pendiente que cruza esas fechas.",
-        };
-      }
+    if (pending) {
+      return { reason: "Ya hay una solicitud pendiente que cruza esas fechas." };
     }
   }
 

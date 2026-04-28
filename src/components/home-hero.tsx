@@ -25,10 +25,13 @@ export function HomeHero() {
   }, []);
 
   return (
-    <div className="relative flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-x-hidden px-4 py-6 -mt-20 md:-mt-28">
-      <h1 className="text-center text-2xl font-semibold tracking-tight text-primary-foreground dark:text-foreground sm:text-3xl">
-        Bienvenidos a encontrate
-      </h1>
+    <div className="relative flex min-h-0 w-full flex-1 overflow-x-hidden">
+      {/* Centered in the actual viewport (not "content area minus footer"). */}
+      <div className="pointer-events-none fixed inset-0 z-[10] flex items-center justify-center px-4">
+        <h1 className="text-center text-2xl font-semibold tracking-tight text-primary-foreground dark:text-foreground sm:text-3xl">
+          Bienvenidos a encontrate
+        </h1>
+      </div>
 
       {introVisible ? (
         <div

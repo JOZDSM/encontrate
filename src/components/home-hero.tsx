@@ -1,99 +1,75 @@
 "use client";
 
-import Link from "next/link";
 import { useLayoutEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { EncontrateMark } from "@/components/encontrate-mark";
 import { ANIMATIONS } from "@/lib/animations";
 
-const HOME_HERO_INTRO_KEY = "encontrate-home-hero-intro-seen";
+const INTRO_MS = 3000;
+const FADE_MS = 700;
+const FADE_START_MS = INTRO_MS - FADE_MS;
+const HOME_INTRO_SEEN_KEY = "encontrate-home-hero-intro-seen";
 
 export function HomeHero() {
-  // Important: keep first client render identical to SSR to avoid hydration mismatch.
-  const [showCtas, setShowCtas] = useState(false);
+  // Keep first client render identical to SSR to avoid hydration mismatch.
+  const [introVisible, setIntroVisible] = useState(true);
+  const [introFading, setIntroFading] = useState(false);
 
-  // useLayoutEffect + closure flag (no refs): Strict Mode safe; short loading mark before crossfade (700ms).
   useLayoutEffect(() => {
+    // Only show the intro the first time per *browser session*.
     try {
-      if (window.sessionStorage.getItem(HOME_HERO_INTRO_KEY)) {
-        // Defer state update to avoid sync setState-in-effect lint + keep hydration stable.
-        const id = window.setTimeout(() => setShowCtas(true), 0);
-        return () => clearTimeout(id);
+      if (window.sessionStorage.getItem(HOME_INTRO_SEEN_KEY)) {
+        setIntroVisible(false);
+        return;
       }
     } catch {
-      // private mode / storage blocked — fall through to timed intro
+      // Storage blocked/private mode — treat as "not seen" and run the intro.
     }
 
-    let done = false;
-    const reveal = () => {
-      if (done) return;
-      done = true;
-      setShowCtas(true);
+    const fadeId = window.setTimeout(() => setIntroFading(true), FADE_START_MS);
+    const doneId = window.setTimeout(() => {
+      setIntroVisible(false);
       try {
-        window.sessionStorage.setItem(HOME_HERO_INTRO_KEY, "1");
+        window.sessionStorage.setItem(HOME_INTRO_SEEN_KEY, "1");
       } catch {
         /* ignore */
       }
-    };
-
-    const id = window.setTimeout(reveal, 3000);
+    }, INTRO_MS);
 
     return () => {
-      clearTimeout(id);
+      window.clearTimeout(fadeId);
+      window.clearTimeout(doneId);
     };
   }, []);
 
   return (
-    <div className="relative flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-x-hidden px-4 py-6">
-      <div className="relative isolate grid min-h-[4.5rem] w-full max-w-2xl grid-cols-1 grid-rows-1 place-items-center">
+    <div className="relative flex min-h-0 w-full flex-1 overflow-x-hidden">
+      {/* Centered in the actual viewport (not "content area minus footer"). */}
+      <div className="pointer-events-none fixed inset-0 z-[10] flex items-center justify-center px-4">
+        <h1 className="max-w-[22rem] text-balance text-center text-2xl font-semibold tracking-tight text-primary-foreground dark:text-foreground sm:max-w-none sm:text-3xl">
+          <span className="block">Hola!</span>{" "}
+          <span className="block sm:inline">Estás en el lugar correcto</span>{" "}
+          <span role="img" aria-label="relieved face">
+            😌
+          </span>
+        </h1>
+      </div>
+
+      {introVisible ? (
         <div
           className={cn(
-            "col-start-1 row-start-1 z-0 flex flex-col items-center transition-opacity duration-700 ease-in-out motion-reduce:transition-none",
-            showCtas
-              ? "opacity-100"
-              : "pointer-events-none opacity-0",
+            "fixed inset-0 z-[60] flex items-center justify-center bg-background transition-opacity ease-out motion-reduce:transition-none",
+            introFading ? "opacity-0" : "opacity-100",
           )}
-          aria-hidden={!showCtas}
-          inert={!showCtas ? true : undefined}
-        >
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:flex-wrap">
-            <Button
-              asChild
-              variant="secondary"
-              size="sm"
-              className="rounded-full font-medium shadow-xs"
-            >
-              <Link href="/listings">Buscar habitación</Link>
-            </Button>
-            <Button
-              asChild
-              variant="secondary"
-              size="sm"
-              className="rounded-full font-medium shadow-xs"
-            >
-              <Link href="/host/listings/new">Cargar habitación</Link>
-            </Button>
-          </div>
-        </div>
-        <div
-          className={cn(
-            "col-start-1 row-start-1 z-10 flex items-center justify-center transition-opacity duration-700 ease-in-out motion-reduce:transition-none",
-            showCtas
-              ? "pointer-events-none opacity-0"
-              : "opacity-100",
-          )}
-          aria-hidden={showCtas}
+          style={{ transitionDuration: `${FADE_MS}ms` }}
+          aria-hidden={introFading}
         >
           <EncontrateMark
-            className={cn(
-              "size-16 text-primary-foreground dark:text-foreground",
-              ANIMATIONS.MARK_SPIN_360_EASE_1S,
-            )}
+            className={cn("size-16 text-foreground", ANIMATIONS.MARK_SPIN_360_EASE_1S)}
             style={{ animationIterationCount: 3 }}
           />
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }

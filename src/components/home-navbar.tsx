@@ -132,7 +132,8 @@ export function HomeNavbar() {
               <Button
                 asChild
                 size="default"
-                className="rounded-full border-0 bg-brand-background text-primary-foreground shadow-xs hover:bg-brand-background/90"
+                variant="secondary"
+                className="rounded-full bg-brand-background text-primary-foreground shadow-xs hover:bg-brand-background/90"
               >
                 <Link href="/aviso">Contacto</Link>
               </Button>

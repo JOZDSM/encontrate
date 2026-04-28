@@ -64,6 +64,7 @@ export default async function EditListingPage({
               neighborhood: listing.neighborhood,
               addressDetail: listing.addressDetail ?? "",
               priceNote: listing.priceNote ?? "",
+              priceMonthlyEur: listing.priceMonthlyEur ?? null,
               timeZone: listing.timeZone,
               photoUrlsText,
 

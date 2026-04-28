@@ -14,15 +14,17 @@ import {
 import type { PublicListingSort } from "@/lib/listing-queries";
 
 const OPTIONS = [
-  { value: "recent" as const, label: "Fecha de publicación (más recientes)" },
-  { value: "neighborhood" as const, label: "Barrio (A-Z)" },
-  { value: "title" as const, label: "Título (A-Z)" },
+  { value: "recent" as const, label: "Publicación (más recientes)" },
+  { value: "price_asc" as const, label: "Precio (menor a mayor)" },
+  { value: "price_desc" as const, label: "Precio (mayor a menor)" },
+  { value: "neighborhood" as const, label: "Barrio" },
 ];
 
 const LABELS: Record<PublicListingSort, string> = {
-  recent: "Fecha de publicación (más recientes)",
-  neighborhood: "Barrio (A-Z)",
-  title: "Título (A-Z)",
+  recent: "Publicación (más recientes)",
+  price_asc: "Precio (menor a mayor)",
+  price_desc: "Precio (mayor a menor)",
+  neighborhood: "Barrio",
 };
 
 export function ListingsSortSelect({

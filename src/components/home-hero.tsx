@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { EncontrateMark } from "@/components/encontrate-mark";
 import { ANIMATIONS } from "@/lib/animations";
@@ -8,16 +8,34 @@ import { ANIMATIONS } from "@/lib/animations";
 const INTRO_MS = 3000;
 const FADE_MS = 700;
 const FADE_START_MS = INTRO_MS - FADE_MS;
+const HOME_INTRO_SEEN_KEY = "encontrate-home-hero-intro-seen";
 
 export function HomeHero() {
-  // Always show intro on landing. (No sessionStorage gate.)
   // Keep first client render identical to SSR to avoid hydration mismatch.
   const [introVisible, setIntroVisible] = useState(true);
   const [introFading, setIntroFading] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    // Only show the intro the first time per *browser session*.
+    try {
+      if (window.sessionStorage.getItem(HOME_INTRO_SEEN_KEY)) {
+        setIntroVisible(false);
+        return;
+      }
+    } catch {
+      // Storage blocked/private mode — treat as "not seen" and run the intro.
+    }
+
     const fadeId = window.setTimeout(() => setIntroFading(true), FADE_START_MS);
-    const doneId = window.setTimeout(() => setIntroVisible(false), INTRO_MS);
+    const doneId = window.setTimeout(() => {
+      setIntroVisible(false);
+      try {
+        window.sessionStorage.setItem(HOME_INTRO_SEEN_KEY, "1");
+      } catch {
+        /* ignore */
+      }
+    }, INTRO_MS);
+
     return () => {
       window.clearTimeout(fadeId);
       window.clearTimeout(doneId);

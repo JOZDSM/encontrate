@@ -1010,7 +1010,7 @@ export function ListingsFilterPanel({
           </div>
         </CardContent>
 
-        <CardFooter className="mt-auto border-t border-foreground/10 px-6 pt-4">
+        <CardFooter className="mt-auto border-t border-foreground/10 px-6 py-4">
           <div className="flex w-full items-center justify-between gap-3">
             <Button
               type="button"

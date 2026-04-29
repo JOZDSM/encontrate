@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useLayoutEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { EncontrateMark } from "@/components/encontrate-mark";
 import { ANIMATIONS } from "@/lib/animations";
+import { Button } from "@/components/ui/button";
 
 const INTRO_MS = 3000;
 const FADE_MS = 700;
@@ -46,13 +48,26 @@ export function HomeHero() {
     <div className="relative flex min-h-0 w-full flex-1 overflow-x-hidden">
       {/* Centered in the actual viewport (not "content area minus footer"). */}
       <div className="pointer-events-none fixed inset-0 z-[10] flex items-center justify-center px-4">
-        <h1 className="max-w-[22rem] text-balance text-center text-2xl font-semibold tracking-tight text-primary-foreground dark:text-foreground sm:max-w-none sm:text-3xl">
-          <span className="block">Hola!</span>{" "}
-          <span className="block sm:inline">Estás en el lugar correcto</span>{" "}
-          <span role="img" aria-label="relieved face">
-            😌
-          </span>
-        </h1>
+        <div className="flex flex-col items-center">
+          <h1 className="max-w-[22rem] text-balance text-center text-2xl font-semibold tracking-tight text-primary-foreground dark:text-foreground sm:max-w-none sm:text-3xl">
+            <span className="block">Hola!</span>{" "}
+            <span className="block sm:inline">Estás en el lugar correcto</span>{" "}
+            <span role="img" aria-label="relieved face">
+              😌
+            </span>
+          </h1>
+
+          <div className="pointer-events-auto w-full pt-4 sm:hidden">
+            <Button
+              asChild
+              size="default"
+              variant="secondary"
+              className="w-full rounded-full font-medium shadow-xs"
+            >
+              <Link href="/login">Iniciá sesión</Link>
+            </Button>
+          </div>
+        </div>
       </div>
 
       {introVisible ? (

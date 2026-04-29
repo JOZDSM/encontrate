@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useLayoutEffect, useState } from "react";
+import { signOut, useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { EncontrateMark } from "@/components/encontrate-mark";
 import { ANIMATIONS } from "@/lib/animations";
@@ -13,6 +14,9 @@ const FADE_START_MS = INTRO_MS - FADE_MS;
 const HOME_INTRO_SEEN_KEY = "encontrate-home-hero-intro-seen";
 
 export function HomeHero() {
+  const { data: session, status } = useSession();
+  const authed = status === "authenticated" && Boolean(session?.user);
+
   // Keep first client render identical to SSR to avoid hydration mismatch.
   const [introVisible, setIntroVisible] = useState(true);
   const [introFading, setIntroFading] = useState(false);
@@ -58,14 +62,26 @@ export function HomeHero() {
           </h1>
 
           <div className="pointer-events-auto w-full pt-4 sm:hidden">
-            <Button
-              asChild
-              size="default"
-              variant="secondary"
-              className="w-full rounded-full font-medium shadow-xs"
-            >
-              <Link href="/login">Iniciá sesión</Link>
-            </Button>
+            {authed ? (
+              <Button
+                type="button"
+                size="default"
+                variant="secondary"
+                className="w-full rounded-full font-medium shadow-xs"
+                onClick={() => signOut({ callbackUrl: "/" })}
+              >
+                Cerrar sesión
+              </Button>
+            ) : (
+              <Button
+                asChild
+                size="default"
+                variant="secondary"
+                className="w-full rounded-full font-medium shadow-xs"
+              >
+                <Link href="/login">Iniciá sesión</Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>

@@ -249,7 +249,7 @@ export function HomeNavbar() {
               ) : (
                 <form action={signOutAction} className="pt-1">
                   <Button type="submit" variant="outline" className="w-full">
-                    Salir
+                    Cerrar sesión
                   </Button>
                 </form>
               )

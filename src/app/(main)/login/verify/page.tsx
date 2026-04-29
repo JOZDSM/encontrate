@@ -6,15 +6,14 @@ export default function VerifyRequestPage() {
     <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-center px-4 py-8 md:py-10">
       <Card className="w-full max-w-[704px] rounded-xl border border-border py-6 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] ring-0">
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Revisá tu correo</CardTitle>
+          <CardTitle className="text-base font-semibold">Revisá tu email</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-sm text-muted-foreground">
           <p>
-            Te enviamos un enlace para entrar (sin contraseña). Abrilo en este
-            dispositivo; puede tardar un minuto. Revisá también spam.
+            Te enviamos un enlace para entrar a tu cuenta. Puede tardar un minuto. También reivá tu spam!
           </p>
           <Link href="/login" className="text-card-foreground underline underline-offset-4">
-            Pedir otro enlace
+            Pedir un nuevo link
           </Link>
         </CardContent>
       </Card>

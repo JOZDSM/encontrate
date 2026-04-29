@@ -10,6 +10,9 @@ export default {
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      // Users may have created an account via magic-link first.
+      // Allow linking Google to the same email to avoid OAuthAccountNotLinked.
+      allowDangerousEmailAccountLinking: true,
     }),
     Resend({
       // Auth.js docs default to AUTH_RESEND_KEY; this app uses RESEND_API_KEY.

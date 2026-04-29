@@ -140,7 +140,7 @@ export function HomeNavbar() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 md:hidden">
+          <div className="flex items-center gap-2 md:hidden">
             <Button
               variant="ghost"
               size="icon"

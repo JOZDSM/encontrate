@@ -69,6 +69,27 @@ export function SignupForm() {
     window.location.href = "/login/verify";
   }
 
+  async function onGoogle() {
+    setLoading(true);
+    setError(null);
+    try {
+      await upsertSignupProfileAction({
+        email,
+        name,
+        whatsappNumber: phoneState.normalized || whatsappNumber,
+      });
+    } catch {
+      setLoading(false);
+      setError(
+        "Revisá los campos: nombre, email y número de WhatsApp (formato internacional, ej: +34600111222).",
+      );
+      return;
+    }
+    // Google sign-in will pick up the stored SignupProfile on signIn event.
+    await signIn("google", { callbackUrl: "/listings" });
+    setLoading(false);
+  }
+
   return (
     <Card
       className={cn(
@@ -202,6 +223,17 @@ export function SignupForm() {
               disabled={loading || !formOk}
             >
               {loading ? "Creando…" : "Crear cuenta"}
+            </Button>
+
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="w-full rounded-full font-medium shadow-xs"
+              disabled={loading || !formOk}
+              onClick={onGoogle}
+            >
+              Continuar con Google
             </Button>
           </form>
 

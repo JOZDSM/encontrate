@@ -6,6 +6,7 @@ declare module "next-auth" {
       id: string;
       isAdmin?: boolean;
       isApproved?: boolean;
+      whatsappNumber?: string | null;
       /** Set when SESSION comes from DESIGN_PREVIEW (local dev only). */
       designPreview?: boolean;
     };

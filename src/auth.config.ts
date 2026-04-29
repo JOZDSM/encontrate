@@ -1,11 +1,16 @@
 import type { NextAuthConfig } from "next-auth";
 import Resend from "next-auth/providers/resend";
+import Google from "next-auth/providers/google";
 
 export default {
   trustHost: true,
   session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
   pages: { signIn: "/login", verifyRequest: "/login/verify" },
   providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+    }),
     Resend({
       // Auth.js docs default to AUTH_RESEND_KEY; this app uses RESEND_API_KEY.
       // Pass explicitly so the provider always has a key in production.

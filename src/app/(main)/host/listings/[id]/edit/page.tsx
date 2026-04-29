@@ -8,6 +8,7 @@ import { HostListingForm } from "@/components/host-listing-form";
 import { ListingAvailabilityCalendar } from "@/components/listing-availability-calendar";
 import { Card, CardContent } from "@/components/ui/card";
 import { isUserApproved } from "@/lib/approval";
+import { isUserProfileComplete } from "@/lib/profile";
 import { formatDateUTC } from "@/lib/format";
 import { prisma } from "@/lib/db";
 
@@ -19,6 +20,7 @@ export default async function EditListingPage({
   const { id } = await params;
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+  if (!isUserProfileComplete(session)) redirect("/onboarding");
   if (!isUserApproved(session)) redirect("/pending");
 
   const listing = await prisma.listing.findUnique({

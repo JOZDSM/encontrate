@@ -46,7 +46,8 @@ export function LoginForm() {
             Iniciá sesión con tu email
           </h1>
           <p className="text-sm leading-5 text-muted-foreground">
-            Cada vez que inicies sesión te enviamos un magic link. No usamos contraseña.
+            Podés iniciar sesión recibiendo un link en tu email, o, más rápido,
+            continuando con Google.
           </p>
         </div>
 

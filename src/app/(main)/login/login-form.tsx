@@ -87,6 +87,18 @@ export function LoginForm() {
             </Button>
           </form>
 
+          <div className="pt-3">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="w-full rounded-full font-medium shadow-xs"
+              onClick={() => signIn("google", { callbackUrl: "/listings" })}
+            >
+              Continuar con Google
+            </Button>
+          </div>
+
           <p className="pt-4 text-center text-sm text-muted-foreground">
             ¿Primera vez?{" "}
             <Link

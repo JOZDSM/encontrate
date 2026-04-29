@@ -7,6 +7,7 @@ import { parseDateOnly } from "@/lib/dates";
 import { parseListingSort } from "@/lib/listing-sort";
 import { getPublicListings, type AvailabilityRange } from "@/lib/listing-queries";
 import { isUserApproved } from "@/lib/approval";
+import { isUserProfileComplete } from "@/lib/profile";
 import { cn } from "@/lib/utils";
 import { addDays } from "date-fns";
 
@@ -38,6 +39,7 @@ export default async function ListingsPage({
 }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+  if (!isUserProfileComplete(session)) redirect("/onboarding");
   if (!isUserApproved(session)) redirect("/pending");
 
   const sp = await searchParams;

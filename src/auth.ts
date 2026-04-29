@@ -76,11 +76,12 @@ export async function auth(): Promise<Session | null> {
   try {
     const fresh = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { isAdmin: true, isApproved: true },
+      select: { isAdmin: true, isApproved: true, whatsappNumber: true },
     });
     if (fresh) {
       session.user.isAdmin = session.user.isAdmin || fresh.isAdmin;
       session.user.isApproved = fresh.isApproved;
+      session.user.whatsappNumber = fresh.whatsappNumber;
     }
   } catch {
     // If the DB is temporarily unavailable/misconfigured, don't crash every page render.

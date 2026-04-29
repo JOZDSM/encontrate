@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { prisma } from "@/lib/db";
 import { isUserApproved } from "@/lib/approval";
+import { isUserProfileComplete } from "@/lib/profile";
 import { canSeeFullAddress } from "@/lib/listing-visibility";
 
 export default async function ListingDetailPage({
@@ -17,6 +18,7 @@ export default async function ListingDetailPage({
   const { id } = await params;
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+  if (!isUserProfileComplete(session)) redirect("/onboarding");
 
   const listing = await prisma.listing.findUnique({
     where: { id },

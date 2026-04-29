@@ -16,6 +16,7 @@ import { formatDateLongES, formatDateUTC } from "@/lib/format";
 import { prisma } from "@/lib/db";
 import { approveUserAction } from "@/app/actions/admin-users";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default async function AdminPage() {
   const session = await auth();
@@ -54,6 +55,11 @@ export default async function AdminPage() {
             <p className="text-sm text-muted-foreground">
               Todos los anuncios y reservas activas (pendiente o confirmada).
             </p>
+            <div className="pt-3">
+              <Button asChild size="sm" variant="secondary" className="rounded-full">
+                <Link href="/admin/calendar">Ver calendario</Link>
+              </Button>
+            </div>
           </div>
 
           <section className="space-y-3">

@@ -5,8 +5,10 @@ import { AvailabilityBlockForm } from "@/components/availability-block-form";
 import { designPreviewAllowsEditAnyListing } from "@/lib/design-preview";
 import { DeleteBlockButton } from "@/components/delete-block-button";
 import { HostListingForm } from "@/components/host-listing-form";
+import { ListingAvailabilityCalendar } from "@/components/listing-availability-calendar";
 import { Card, CardContent } from "@/components/ui/card";
 import { isUserApproved } from "@/lib/approval";
+import { isUserProfileComplete } from "@/lib/profile";
 import { formatDateUTC } from "@/lib/format";
 import { prisma } from "@/lib/db";
 
@@ -18,6 +20,7 @@ export default async function EditListingPage({
   const { id } = await params;
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+  if (!isUserProfileComplete(session)) redirect("/onboarding");
   if (!isUserApproved(session)) redirect("/pending");
 
   const listing = await prisma.listing.findUnique({
@@ -25,6 +28,11 @@ export default async function EditListingPage({
     include: {
       photos: { orderBy: { sortOrder: "asc" } },
       blocks: { orderBy: { startDate: "asc" } },
+      bookings: {
+        orderBy: { startDate: "asc" },
+        where: { status: { in: ["PENDING", "CONFIRMED"] } },
+        select: { id: true, startDate: true, endDate: true, status: true },
+      },
     },
   });
   const allowAnyPreview =
@@ -58,6 +66,7 @@ export default async function EditListingPage({
               neighborhood: listing.neighborhood,
               addressDetail: listing.addressDetail ?? "",
               priceNote: listing.priceNote ?? "",
+              priceMonthlyEur: listing.priceMonthlyEur ?? null,
               timeZone: listing.timeZone,
               photoUrlsText,
 
@@ -80,6 +89,13 @@ export default async function EditListingPage({
               Intervalo en fechas tipo hotel: desde la primera noche bloqueada hasta
               el día de salida (exclusivo).
             </p>
+
+            <ListingAvailabilityCalendar
+              listingId={listing.id}
+              blocks={listing.blocks}
+              bookings={listing.bookings}
+            />
+
             <AvailabilityBlockForm listingId={listing.id} />
             <ul className="space-y-2 text-sm">
               {listing.blocks.map((b) => (

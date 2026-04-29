@@ -23,6 +23,7 @@ type Defaults = {
   country: string;
   neighborhood: string;
   addressDetail: string;
+  priceMonthlyEur: number | null;
   priceNote: string;
   timeZone: string;
   photoUrlsText: string;
@@ -48,6 +49,7 @@ const empty: Defaults = {
   country: "España",
   neighborhood: "",
   addressDetail: "",
+  priceMonthlyEur: null,
   priceNote: "",
   timeZone: "Europe/Madrid",
   photoUrlsText: "",
@@ -77,6 +79,9 @@ export function HostListingForm({
   const [country, setCountry] = useState(d.country);
   const [neighborhood, setNeighborhood] = useState(d.neighborhood);
   const [addressDetail, setAddressDetail] = useState(d.addressDetail);
+  const [priceMonthlyEur, setPriceMonthlyEur] = useState<number | null>(
+    d.priceMonthlyEur,
+  );
   const [priceNote, setPriceNote] = useState(d.priceNote);
   const [timeZone, setTimeZone] = useState(d.timeZone);
   const [photoUrlsText, setPhotoUrlsText] = useState(d.photoUrlsText);
@@ -117,6 +122,7 @@ export function HostListingForm({
       country,
       neighborhood,
       addressDetail: addressDetail || null,
+      priceMonthlyEur,
       priceNote: priceNote || null,
       timeZone,
       photoUrls,
@@ -217,14 +223,35 @@ export function HostListingForm({
           placeholder="Opcional. Visible al huésped con reserva confirmada."
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="priceNote">Precio orientativo (texto, no se cobra aquí)</Label>
-        <Input
-          id="priceNote"
-          value={priceNote}
-          onChange={(e) => setPriceNote(e.target.value)}
-          placeholder="Ej. 650 €/mes o 40 €/noche"
-        />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="priceMonthlyEur">Precio mensual (EUR)</Label>
+          <Input
+            id="priceMonthlyEur"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step={1}
+            value={priceMonthlyEur ?? ""}
+            onChange={(e) => {
+              const v = e.target.value;
+              setPriceMonthlyEur(v.trim() === "" ? null : Number(v));
+            }}
+            placeholder="Ej. 650"
+          />
+          <p className="text-xs text-muted-foreground">
+            Usado para ordenar por precio. No se cobra dentro de encontrate.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="priceNote">Precio orientativo (texto)</Label>
+          <Input
+            id="priceNote"
+            value={priceNote}
+            onChange={(e) => setPriceNote(e.target.value)}
+            placeholder="Ej. 650 €/mes o 40 €/noche"
+          />
+        </div>
       </div>
       <div className="space-y-2">
         <Label htmlFor="timeZone">Zona horaria IANA</Label>

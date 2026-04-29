@@ -4,7 +4,11 @@ import { prisma } from "@/lib/db";
 import { listingHasConflict } from "@/lib/booking-guards";
 import { addDays, differenceInCalendarDays } from "date-fns";
 
-export type PublicListingSort = "recent" | "neighborhood" | "title";
+export type PublicListingSort =
+  | "recent"
+  | "price_asc"
+  | "price_desc"
+  | "neighborhood";
 
 export type AvailabilityRange = { start: Date; end: Date };
 
@@ -103,9 +107,11 @@ export async function getPublicListings(opts: {
   const orderBy: Prisma.ListingOrderByWithRelationInput =
     opts.sort === "neighborhood"
       ? { neighborhood: "asc" }
-      : opts.sort === "title"
-        ? { title: "asc" }
-        : { createdAt: "desc" };
+      : opts.sort === "price_asc"
+        ? { priceMonthlyEur: "asc" }
+        : opts.sort === "price_desc"
+          ? { priceMonthlyEur: "desc" }
+          : { createdAt: "desc" };
 
   const listings = await prisma.listing.findMany({
     where,

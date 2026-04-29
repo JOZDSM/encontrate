@@ -101,6 +101,8 @@ model Listing {
   latitude        Float?
   longitude       Float?
   timeZone        String   @default("Europe/Madrid")
+  /// Monthly price in EUR (used for sorting; optional)
+  priceMonthlyEur Int?
   priceNote       String?
 
   // Características de la habitación (required)

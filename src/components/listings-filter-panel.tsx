@@ -17,6 +17,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -568,8 +569,9 @@ export function ListingsFilterPanel({
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 pb-0">
-          <div className="flex flex-col gap-2 pb-4">
+        <CardContent className="flex min-h-0 flex-1 flex-col px-6 pb-0">
+          <div className="-mx-6 min-h-0 flex-1 overflow-y-auto px-6">
+            <div className="flex flex-col gap-2 pb-6">
             <FilterSection title={whereTitle}>
               <BarcelonaZonePicker
                 formId="listings-filter-form"
@@ -1004,32 +1006,33 @@ export function ListingsFilterPanel({
                 </div>
               </div>
             </FilterSection>
-          </div>
-
-          <div className="sticky bottom-0 z-10 -mx-6 mt-auto border-t border-border bg-card px-6 py-4">
-            <div className="flex items-center justify-between gap-3">
-              <Button
-                type="button"
-                variant="ghost"
-                className="px-0"
-                onClick={resetAllFilters}
-              >
-                Borrar filtros
-              </Button>
-
-              <Button
-                type="button"
-                onClick={applyFilters}
-                disabled={previewLoading}
-                className="rounded-full"
-              >
-                {previewLoading
-                  ? "Calculando…"
-                  : `Mostrar ${previewCount ?? "—"} habitaciones`}
-              </Button>
             </div>
           </div>
         </CardContent>
+
+        <CardFooter className="mt-auto border-t border-foreground/10 px-6 pt-4">
+          <div className="flex w-full items-center justify-between gap-3">
+            <Button
+              type="button"
+              variant="ghost"
+              className="px-0"
+              onClick={resetAllFilters}
+            >
+              Borrar filtros
+            </Button>
+
+            <Button
+              type="button"
+              onClick={applyFilters}
+              disabled={previewLoading}
+              className="rounded-full"
+            >
+              {previewLoading
+                ? "Calculando…"
+                : `Mostrar ${previewCount ?? "—"} habitaciones`}
+            </Button>
+          </div>
+        </CardFooter>
       </form>
     </Card>
   );

@@ -123,7 +123,7 @@ export function HomeNavbar() {
                       variant="outline"
                       className="rounded-full border-primary-foreground/35 bg-transparent text-primary-foreground shadow-xs hover:bg-primary-foreground/10 dark:border-foreground/35 dark:text-foreground dark:hover:bg-foreground/10"
                     >
-                      Salir
+                      Cerrar sesión
                     </Button>
                   </form>
                 )

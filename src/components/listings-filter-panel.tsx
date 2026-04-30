@@ -445,6 +445,12 @@ export function ListingsFilterPanel({
     setWifi("");
   };
 
+  const resetAndApplyFilters = () => {
+    resetAllFilters();
+    // Submit after state updates propagate to hidden inputs.
+    window.setTimeout(() => applyFilters(), 0);
+  };
+
   const applyFilters = () => {
     const form = document.getElementById("listings-filter-form") as
       | HTMLFormElement
@@ -1056,7 +1062,7 @@ export function ListingsFilterPanel({
               type="button"
               variant="ghost"
               className="px-0"
-              onClick={resetAllFilters}
+              onClick={resetAndApplyFilters}
             >
               Borrar filtros
             </Button>

@@ -1061,7 +1061,7 @@ export function ListingsFilterPanel({
             <Button
               type="button"
               variant="link"
-              className="px-0"
+              className="px-4"
               onClick={resetAndApplyFilters}
             >
               Borrar filtros

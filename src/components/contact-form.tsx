@@ -39,7 +39,7 @@ export function ContactForm() {
           id="contact-message"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          rows={6}
+          rows={12}
           placeholder="Contanos en qué podemos ayudarte…"
           required
         />

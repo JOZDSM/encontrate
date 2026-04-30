@@ -614,112 +614,7 @@ export function ListingsFilterPanel({
                   </TabsList>
 
                   <TabsContent value="exact" className="w-full">
-                    <div className="space-y-3">
-                      <div className="bg-background rounded-lg border border-border shadow-sm">
-                        <CalendarHeader
-                          month={checkInMonth}
-                          onPrev={() => {
-                            const prev = addMonths(checkInMonth, -1);
-                            setCheckInMonth(startOfUTCMonth(prev));
-                          }}
-                          onNext={() => {
-                            const next = addMonths(checkInMonth, 1);
-                            setCheckInMonth(startOfUTCMonth(next));
-                            setCheckOutMonth((prev) => {
-                              const n =
-                                prev.getTime() <= next.getTime()
-                                  ? addMonths(next, 1)
-                                  : prev;
-                              return startOfUTCMonth(n);
-                            });
-                          }}
-                          onMonthSelect={(mIdx) => {
-                            const next = setUTCMonthYear(checkInMonth, mIdx, checkInMonth.getUTCFullYear());
-                            setCheckInMonth(next);
-                            setCheckOutMonth((prev) => {
-                              const n =
-                                prev.getTime() <= next.getTime()
-                                  ? addMonths(next, 1)
-                                  : prev;
-                              return startOfUTCMonth(n);
-                            });
-                          }}
-                          onYearSelect={(y) => {
-                            const next = setUTCMonthYear(checkInMonth, checkInMonth.getUTCMonth(), y);
-                            setCheckInMonth(next);
-                            setCheckOutMonth((prev) => {
-                              const n =
-                                prev.getTime() <= next.getTime()
-                                  ? addMonths(next, 1)
-                                  : prev;
-                              return startOfUTCMonth(n);
-                            });
-                          }}
-                        />
-                        <Calendar
-                          mode="single"
-                          month={checkInMonth}
-                          onMonthChange={(m) => {
-                            setCheckInMonth(startOfUTCMonth(m));
-                            setCheckOutMonth((prev) => {
-                              const next = prev.getTime() <= m.getTime() ? addMonths(m, 1) : prev;
-                              return startOfUTCMonth(next);
-                            });
-                          }}
-                          selected={exactCheckIn}
-                          onSelect={(d) => {
-                            if (!d) return;
-                            const next = toUTCNoonDateOnly(d);
-                            setExactCheckIn(next);
-                            if (exactCheckOut && !(next < exactCheckOut)) {
-                              setExactCheckOut(undefined);
-                            }
-                          }}
-                          modifiers={rangeModifiers}
-                          modifiersClassNames={rangeModifierClassNames}
-                          classNames={{
-                            month_caption: "hidden",
-                            nav: "hidden",
-                          }}
-                        />
-                      </div>
-                      <div className="bg-background rounded-lg border border-border shadow-sm">
-                        <CalendarHeader
-                          month={checkOutMonth}
-                          onPrev={() => setCheckOutMonth(startOfUTCMonth(addMonths(checkOutMonth, -1)))}
-                          onNext={() => setCheckOutMonth(startOfUTCMonth(addMonths(checkOutMonth, 1)))}
-                          onMonthSelect={(mIdx) =>
-                            setCheckOutMonth(
-                              setUTCMonthYear(checkOutMonth, mIdx, checkOutMonth.getUTCFullYear()),
-                            )
-                          }
-                          onYearSelect={(y) =>
-                            setCheckOutMonth(
-                              setUTCMonthYear(checkOutMonth, checkOutMonth.getUTCMonth(), y),
-                            )
-                          }
-                        />
-                        <Calendar
-                          mode="single"
-                          month={checkOutMonth}
-                          onMonthChange={(m) => setCheckOutMonth(startOfUTCMonth(m))}
-                          selected={exactCheckOut}
-                          onSelect={(d) => {
-                            if (!d) return;
-                            const next = toUTCNoonDateOnly(d);
-                            if (exactCheckIn && !(exactCheckIn < next)) return;
-                            setExactCheckOut(next);
-                          }}
-                          disabled={exactCheckIn ? { before: exactCheckIn } : undefined}
-                          modifiers={rangeModifiers}
-                          modifiersClassNames={rangeModifierClassNames}
-                          classNames={{
-                            month_caption: "hidden",
-                            nav: "hidden",
-                          }}
-                        />
-                      </div>
-
+                    <div className="mt-8 space-y-4">
                       <Select
                         value={exactFlexDays}
                         onValueChange={(v) => setExactFlexDays(v ?? "0")}
@@ -740,6 +635,144 @@ export function ListingsFilterPanel({
                           <SelectItem value="1">± 1 día</SelectItem>
                         </SelectContent>
                       </Select>
+
+                      <div className="space-y-3">
+                        <div className="bg-background rounded-lg border border-border shadow-sm">
+                          <CalendarHeader
+                            month={checkInMonth}
+                            onPrev={() => {
+                              const prev = addMonths(checkInMonth, -1);
+                              setCheckInMonth(startOfUTCMonth(prev));
+                            }}
+                            onNext={() => {
+                              const next = addMonths(checkInMonth, 1);
+                              setCheckInMonth(startOfUTCMonth(next));
+                              setCheckOutMonth((prev) => {
+                                const n =
+                                  prev.getTime() <= next.getTime()
+                                    ? addMonths(next, 1)
+                                    : prev;
+                                return startOfUTCMonth(n);
+                              });
+                            }}
+                            onMonthSelect={(mIdx) => {
+                              const next = setUTCMonthYear(
+                                checkInMonth,
+                                mIdx,
+                                checkInMonth.getUTCFullYear(),
+                              );
+                              setCheckInMonth(next);
+                              setCheckOutMonth((prev) => {
+                                const n =
+                                  prev.getTime() <= next.getTime()
+                                    ? addMonths(next, 1)
+                                    : prev;
+                                return startOfUTCMonth(n);
+                              });
+                            }}
+                            onYearSelect={(y) => {
+                              const next = setUTCMonthYear(
+                                checkInMonth,
+                                checkInMonth.getUTCMonth(),
+                                y,
+                              );
+                              setCheckInMonth(next);
+                              setCheckOutMonth((prev) => {
+                                const n =
+                                  prev.getTime() <= next.getTime()
+                                    ? addMonths(next, 1)
+                                    : prev;
+                                return startOfUTCMonth(n);
+                              });
+                            }}
+                          />
+                          <Calendar
+                            mode="single"
+                            month={checkInMonth}
+                            onMonthChange={(m) => {
+                              setCheckInMonth(startOfUTCMonth(m));
+                              setCheckOutMonth((prev) => {
+                                const next =
+                                  prev.getTime() <= m.getTime()
+                                    ? addMonths(m, 1)
+                                    : prev;
+                                return startOfUTCMonth(next);
+                              });
+                            }}
+                            selected={exactCheckIn}
+                            onSelect={(d) => {
+                              if (!d) return;
+                              const next = toUTCNoonDateOnly(d);
+                              setExactCheckIn(next);
+                              if (exactCheckOut && !(next < exactCheckOut)) {
+                                setExactCheckOut(undefined);
+                              }
+                            }}
+                            modifiers={rangeModifiers}
+                            modifiersClassNames={rangeModifierClassNames}
+                            classNames={{
+                              month_caption: "hidden",
+                              nav: "hidden",
+                            }}
+                          />
+                        </div>
+                        <div className="bg-background rounded-lg border border-border shadow-sm">
+                          <CalendarHeader
+                            month={checkOutMonth}
+                            onPrev={() =>
+                              setCheckOutMonth(
+                                startOfUTCMonth(addMonths(checkOutMonth, -1)),
+                              )
+                            }
+                            onNext={() =>
+                              setCheckOutMonth(
+                                startOfUTCMonth(addMonths(checkOutMonth, 1)),
+                              )
+                            }
+                            onMonthSelect={(mIdx) =>
+                              setCheckOutMonth(
+                                setUTCMonthYear(
+                                  checkOutMonth,
+                                  mIdx,
+                                  checkOutMonth.getUTCFullYear(),
+                                ),
+                              )
+                            }
+                            onYearSelect={(y) =>
+                              setCheckOutMonth(
+                                setUTCMonthYear(
+                                  checkOutMonth,
+                                  checkOutMonth.getUTCMonth(),
+                                  y,
+                                ),
+                              )
+                            }
+                          />
+                          <Calendar
+                            mode="single"
+                            month={checkOutMonth}
+                            onMonthChange={(m) =>
+                              setCheckOutMonth(startOfUTCMonth(m))
+                            }
+                            selected={exactCheckOut}
+                            onSelect={(d) => {
+                              if (!d) return;
+                              const next = toUTCNoonDateOnly(d);
+                              if (exactCheckIn && !(exactCheckIn < next)) return;
+                              setExactCheckOut(next);
+                            }}
+                            disabled={
+                              exactCheckIn ? { before: exactCheckIn } : undefined
+                            }
+                            modifiers={rangeModifiers}
+                            modifiersClassNames={rangeModifierClassNames}
+                            classNames={{
+                              month_caption: "hidden",
+                              nav: "hidden",
+                            }}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </TabsContent>
 

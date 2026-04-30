@@ -40,6 +40,7 @@ export function ContactForm() {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={12}
+          className="min-h-32"
           placeholder="Contanos en qué podemos ayudarte…"
           required
         />

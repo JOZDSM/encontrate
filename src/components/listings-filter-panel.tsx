@@ -1058,14 +1058,13 @@ export function ListingsFilterPanel({
 
         <CardFooter className="mt-auto border-t border-foreground/10 px-6 py-4">
           <div className="flex w-full items-center justify-between gap-3">
-            <Button
+            <button
               type="button"
-              variant="link"
-              className="h-auto p-0"
+              className="text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               onClick={resetAndApplyFilters}
             >
               Borrar filtros
-            </Button>
+            </button>
 
             <Button
               type="button"

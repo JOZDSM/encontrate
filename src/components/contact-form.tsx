@@ -33,7 +33,7 @@ export function ContactForm() {
         setSuccess("Mensaje enviado. Te responderemos lo antes posible.");
       }}
     >
-      <div className="space-y-2">
+      <div className="space-y-4">
         <Label htmlFor="contact-message">Mensaje</Label>
         <Textarea
           id="contact-message"

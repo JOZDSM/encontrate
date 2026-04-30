@@ -1060,7 +1060,7 @@ export function ListingsFilterPanel({
           <div className="flex w-full items-center justify-between gap-3">
             <Button
               type="button"
-              variant="ghost"
+              variant="link"
               className="px-0"
               onClick={resetAndApplyFilters}
             >

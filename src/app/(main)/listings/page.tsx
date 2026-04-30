@@ -161,6 +161,7 @@ export default async function ListingsPage({
               defaultCountry={country}
               defaultCheckIn={sp.checkIn}
               defaultCheckOut={sp.checkOut}
+              defaultFlexDays={sp.flexDays}
               defaultZones={zones}
               defaultBedSize={sp.bedSize}
               defaultWindowType={sp.windowType}

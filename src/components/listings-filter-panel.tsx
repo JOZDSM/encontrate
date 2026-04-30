@@ -47,6 +47,7 @@ type PanelProps = {
   defaultCountry: string;
   defaultCheckIn?: string;
   defaultCheckOut?: string;
+  defaultFlexDays?: string;
   defaultZones?: string[];
   defaultBedSize?: string;
   defaultWindowType?: string;
@@ -193,6 +194,7 @@ export function ListingsFilterPanel({
   defaultCountry,
   defaultCheckIn,
   defaultCheckOut,
+  defaultFlexDays,
   defaultZones = [],
   defaultBedSize,
   defaultWindowType,
@@ -212,7 +214,12 @@ export function ListingsFilterPanel({
   const [exactCheckOut, setExactCheckOut] = useState<Date | undefined>(() =>
     defaultCheckOut ? parseDateOnly(defaultCheckOut) : undefined,
   );
-  const [exactFlexDays, setExactFlexDays] = useState<string>("0");
+  const [exactFlexDays, setExactFlexDays] = useState<string>(() => {
+    const raw = defaultFlexDays?.trim();
+    if (!raw) return "0";
+    const allowed = new Set(["0", "1", "2", "3", "7", "14"]);
+    return allowed.has(raw) ? raw : "0";
+  });
 
   const [checkInMonth, setCheckInMonth] = useState<Date>(() => {
     const base = defaultCheckIn ? parseDateOnly(defaultCheckIn) : new Date();

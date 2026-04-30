@@ -11,14 +11,14 @@ export function SiteFooter() {
       )}
     >
       <p className="px-4 leading-snug">
-        Encontrate solamente genera encuentros entre personas.
+        Encontrate solamente genera encuentros entre personas.{" "}
+        <Link
+          href="/aviso"
+          className="underline underline-offset-2 hover:text-primary-foreground dark:text-foreground"
+        >
+          Aviso legal
+        </Link>
       </p>
-      <Link
-        href="/aviso"
-        className="inline underline underline-offset-2 hover:text-primary-foreground dark:text-foreground"
-      >
-        Aviso legal
-      </Link>
     </footer>
   );
 }

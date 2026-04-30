@@ -15,7 +15,7 @@ export function SiteFooter() {
       </p>
       <Link
         href="/aviso"
-        className="inline-block underline underline-offset-2 hover:text-primary-foreground dark:text-foreground"
+        className="inline underline underline-offset-2 hover:text-primary-foreground dark:text-foreground"
       >
         Aviso legal
       </Link>

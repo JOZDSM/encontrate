@@ -11,8 +11,7 @@ export function SiteFooter() {
       )}
     >
       <p className="px-4 leading-snug">
-        encontrate solo conecta personas. No somos parte del contrato de
-        alquiler ni procesamos pagos.
+        Encontrate solamente genera encuentros entre personas.
       </p>
       <Link
         href="/aviso"

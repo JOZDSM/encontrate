@@ -135,7 +135,7 @@ export function HomeNavbar() {
                 variant="secondary"
                 className="rounded-full bg-brand-background text-primary-foreground shadow-xs hover:bg-brand-background/90"
               >
-                <Link href="/aviso">Contacto</Link>
+                <Link href="/contacto">Contacto</Link>
               </Button>
             </div>
           </div>
@@ -235,7 +235,7 @@ export function HomeNavbar() {
               </Link>
             )}
             <Link
-              href="/aviso"
+              href="/contacto"
               className="rounded-lg px-3 py-3 text-base font-semibold hover:bg-muted"
               onClick={closeMenu}
             >

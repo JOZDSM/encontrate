@@ -369,7 +369,7 @@ export function HostListingWizard() {
 
   return (
     <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 flex-col px-4 py-10">
-      <Card className="flex min-h-0 w-full max-w-[1220px] flex-1 flex-col border border-border bg-card shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
+      <Card className="mx-auto flex min-h-0 w-full max-w-[1220px] flex-1 flex-col border border-border bg-card shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
         <CardContent className="flex min-h-0 flex-1 flex-col gap-16 p-6 text-card-foreground">
           <div
             className={cn(

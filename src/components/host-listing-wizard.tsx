@@ -9,6 +9,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { BarcelonaZonePicker } from "@/components/barcelona-zone-picker";
 import { cn } from "@/lib/utils";
 
 const TOTAL_STEPS = 6;
@@ -21,6 +22,7 @@ export function HostListingWizard() {
   const [title, setTitle] = useState("");
   const [descriptionHtml, setDescriptionHtml] = useState("");
   const [descriptionText, setDescriptionText] = useState("");
+  const [neighborhoodZone, setNeighborhoodZone] = useState<string>("");
 
   const editor = useEditor({
     extensions: [
@@ -51,8 +53,9 @@ export function HostListingWizard() {
   const canGoNext = useMemo(() => {
     if (stepIndex === 0) return title.trim().length > 0;
     if (stepIndex === 1) return descriptionText.trim().length > 0;
+    if (stepIndex === 2) return neighborhoodZone.trim().length > 0;
     return true;
-  }, [stepIndex, title, descriptionText]);
+  }, [stepIndex, title, descriptionText, neighborhoodZone]);
   const progressValue = Math.min(1, Math.max(0, (stepIndex + 1) / TOTAL_STEPS));
 
   return (
@@ -154,6 +157,29 @@ export function HostListingWizard() {
                   >
                     <EditorContent editor={editor} />
                   </div>
+                </div>
+              </div>
+            ) : stepIndex === 2 ? (
+              <div className="space-y-10">
+                <div className="text-center">
+                  <h1 className="text-[36px] leading-[40px] font-extrabold">
+                    Seleccioná el barrio de tu habitación
+                  </h1>
+                  <p className="text-xs leading-4 text-muted-foreground">
+                    There can only be one!
+                  </p>
+                </div>
+
+                <div className="mx-auto w-full max-w-[560px]">
+                  <BarcelonaZonePicker
+                    formId="host-listing-wizard"
+                    autoSubmit={false}
+                    singleSelect
+                    title={null}
+                    subtitle={null}
+                    zones={neighborhoodZone ? [neighborhoodZone] : []}
+                    onChangeZones={(z) => setNeighborhoodZone(z[0] ?? "")}
+                  />
                 </div>
               </div>
             ) : (

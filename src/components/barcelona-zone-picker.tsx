@@ -19,6 +19,11 @@ type Props = {
   onChangeZones?: (zones: string[]) => void;
   /** If true, selection changes auto-submit the parent form. */
   autoSubmit?: boolean;
+  /** When true, only one zone can be selected at a time. */
+  singleSelect?: boolean;
+  /** Override the default title/subtitle text. */
+  title?: React.ReactNode;
+  subtitle?: React.ReactNode;
 };
 
 const ZONE_PATH_CLASS =
@@ -172,6 +177,9 @@ export function BarcelonaZonePicker({
   formId,
   onChangeZones,
   autoSubmit = true,
+  singleSelect = false,
+  title,
+  subtitle,
 }: Props) {
   const [uncontrolledSelected, setUncontrolledSelected] = useState<Set<string>>(
     () => new Set(defaultZones.filter((z) => z in BARCELONA_ZONE_LABELS)),
@@ -212,15 +220,23 @@ export function BarcelonaZonePicker({
   const toggle = (zone: string) => {
     if (zones) {
       const next = new Set(selected);
-      if (next.has(zone)) next.delete(zone);
-      else next.add(zone);
+      if (next.has(zone)) {
+        next.delete(zone);
+      } else {
+        if (singleSelect) next.clear();
+        next.add(zone);
+      }
       onChangeZones?.([...next].sort());
       return;
     }
     setUncontrolledSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(zone)) next.delete(zone);
-      else next.add(zone);
+      if (next.has(zone)) {
+        next.delete(zone);
+      } else {
+        if (singleSelect) next.clear();
+        next.add(zone);
+      }
       return next;
     });
   };
@@ -252,10 +268,10 @@ export function BarcelonaZonePicker({
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-1">
         <p className="text-base leading-6 font-medium text-foreground">
-          ¿Dónde estás buscando?
+          {title ?? "¿Dónde estás buscando?"}
         </p>
         <p className="text-sm leading-5 text-muted-foreground">
-          Elegí tus barrios de interés
+          {subtitle ?? "Elegí tus barrios de interés"}
         </p>
       </div>
 

@@ -10,5 +10,9 @@ export default async function NewListingPage() {
   if (!isUserProfileComplete(session)) redirect("/onboarding");
   if (!isUserApproved(session)) redirect("/pending");
 
-  return <HostListingWizard />;
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <HostListingWizard />
+    </div>
+  );
 }

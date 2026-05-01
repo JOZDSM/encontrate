@@ -368,12 +368,12 @@ export function HostListingWizard() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[1440px] flex-1 items-center justify-center px-4 py-10">
-      <Card className="flex w-full max-w-[1220px] flex-col border border-border bg-card shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
-        <CardContent className="flex min-h-[560px] flex-1 flex-col p-6 text-card-foreground">
+    <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 flex-col px-4 py-10">
+      <Card className="flex min-h-0 w-full max-w-[1220px] flex-1 flex-col border border-border bg-card shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
+        <CardContent className="flex min-h-0 flex-1 flex-col gap-16 p-6 text-card-foreground">
           <div
             className={cn(
-              "mx-auto flex w-full flex-1 flex-col",
+              "mx-auto flex min-h-0 w-full flex-1 flex-col",
               stepIndex === 3 ? "max-w-full" : "max-w-[730px]",
             )}
           >
@@ -852,7 +852,7 @@ export function HostListingWizard() {
             )}
           </div>
 
-          <div className="mt-auto h-[92px] border-t border-border pt-4">
+          <div className="shrink-0 border-t border-border pt-4">
             <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
               <div
                 className="h-full rounded-full bg-foreground transition-[width] duration-300 ease-out"

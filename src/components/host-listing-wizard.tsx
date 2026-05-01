@@ -38,7 +38,7 @@ export function HostListingWizard() {
     editorProps: {
       attributes: {
         class:
-          "prose prose-invert max-w-none focus:outline-none text-sm leading-5 text-foreground",
+          "max-w-none focus:outline-none text-sm leading-5 text-foreground [&_p]:m-0 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-6 [&_li]:my-1",
       },
     },
     onUpdate: ({ editor }) => {

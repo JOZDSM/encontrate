@@ -2,7 +2,16 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bold, Italic, List } from "lucide-react";
+import {
+  Bold,
+  Italic,
+  List,
+  MoreHorizontal,
+  Upload,
+  ImagePlus,
+  Trash2,
+  RefreshCcw,
+} from "lucide-react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -10,9 +19,124 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { BarcelonaZonePicker } from "@/components/barcelona-zone-picker";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  rectSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const TOTAL_STEPS = 6;
+
+type UploadedPhoto = { id: string; url: string };
+
+function makeId() {
+  return Math.random().toString(16).slice(2) + Date.now().toString(16);
+}
+
+function SortablePhoto({
+  photo,
+  onDelete,
+  onReplace,
+}: {
+  photo: UploadedPhoto;
+  onDelete: () => void;
+  onReplace: (file: File) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: photo.id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="group relative overflow-hidden rounded-2xl border border-border bg-muted/20"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={photo.url}
+        alt=""
+        className="h-full w-full object-cover"
+        draggable={false}
+      />
+
+      <div className="absolute top-2 right-2 flex items-center gap-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex size-8 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition-colors hover:bg-black/55"
+              aria-label="Opciones de foto"
+            >
+              <MoreHorizontal className="size-4" aria-hidden />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "image/*";
+                input.onchange = () => {
+                  const f = input.files?.[0];
+                  if (f) onReplace(f);
+                };
+                input.click();
+              }}
+            >
+              <RefreshCcw className="mr-2 size-4" aria-hidden />
+              Reemplazar
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onSelect={(e) => {
+                e.preventDefault();
+                onDelete();
+              }}
+            >
+              <Trash2 className="mr-2 size-4" aria-hidden />
+              Eliminar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <button
+          type="button"
+          className="inline-flex size-8 cursor-grab items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition-colors hover:bg-black/55 active:cursor-grabbing"
+          aria-label="Reordenar"
+          {...attributes}
+          {...listeners}
+        >
+          <span className="sr-only">Arrastrar</span>
+          <MoreHorizontal className="size-4 opacity-0" aria-hidden />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export function HostListingWizard() {
   const router = useRouter();
@@ -23,6 +147,8 @@ export function HostListingWizard() {
   const [descriptionHtml, setDescriptionHtml] = useState("");
   const [descriptionText, setDescriptionText] = useState("");
   const [neighborhoodZone, setNeighborhoodZone] = useState<string>("");
+  const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
+  const [photoUploadingCount, setPhotoUploadingCount] = useState(0);
 
   const editor = useEditor({
     extensions: [
@@ -58,13 +184,58 @@ export function HostListingWizard() {
   }, [stepIndex, title, descriptionText, neighborhoodZone]);
   const progressValue = Math.min(1, Math.max(0, (stepIndex + 1) / TOTAL_STEPS));
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+  );
+
+  async function uploadOne(file: File): Promise<string> {
+    const fd = new FormData();
+    fd.set("file", file);
+    const res = await fetch("/api/uploads/photos", { method: "POST", body: fd });
+    if (!res.ok) throw new Error("upload failed");
+    const json = (await res.json()) as { url?: string };
+    if (!json.url) throw new Error("missing url");
+    return json.url;
+  }
+
+  async function addFiles(files: FileList | File[]) {
+    const arr = Array.from(files);
+    if (arr.length === 0) return;
+    const remaining = Math.max(0, 5 - photos.length);
+    const picked = arr.slice(0, remaining).filter((f) => f.type.startsWith("image/"));
+    if (picked.length === 0) return;
+
+    setPhotoUploadingCount((n) => n + picked.length);
+    try {
+      const urls = await Promise.all(picked.map((f) => uploadOne(f)));
+      setPhotos((prev) => [
+        ...prev,
+        ...urls.map((url) => ({ id: makeId(), url })),
+      ]);
+    } finally {
+      setPhotoUploadingCount((n) => Math.max(0, n - picked.length));
+    }
+  }
+
+  async function replacePhoto(photoId: string, file: File) {
+    setPhotoUploadingCount((n) => n + 1);
+    try {
+      const url = await uploadOne(file);
+      setPhotos((prev) =>
+        prev.map((p) => (p.id === photoId ? { ...p, url } : p)),
+      );
+    } finally {
+      setPhotoUploadingCount((n) => Math.max(0, n - 1));
+    }
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-[1440px] flex-1 items-center justify-center px-4 py-10">
       <Card className="flex w-full max-w-[1220px] flex-col border border-border bg-card shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
         <CardContent className="flex min-h-[560px] flex-1 flex-col p-6 text-card-foreground">
-          <div className="mx-auto flex w-full max-w-[730px] flex-1 flex-col justify-center">
+          <div className="mx-auto flex w-full max-w-[730px] flex-1 flex-col">
             {stepIndex === 0 ? (
-              <div className="space-y-6">
+              <div className="my-auto space-y-6">
                 <div className="space-y-2">
                   <h1 className="text-[36px] leading-[40px] font-extrabold">
                     Dale un nombre a tu habitación
@@ -87,7 +258,7 @@ export function HostListingWizard() {
                 </div>
               </div>
             ) : stepIndex === 1 ? (
-              <div className="space-y-6">
+              <div className="my-auto space-y-6">
                 <div className="space-y-2">
                   <h1 className="text-[36px] leading-[40px] font-extrabold">
                     Dale una descripción a tu habitación
@@ -160,7 +331,7 @@ export function HostListingWizard() {
                 </div>
               </div>
             ) : stepIndex === 2 ? (
-              <div className="space-y-10">
+              <div className="my-auto space-y-10">
                 <div className="text-center">
                   <h1 className="text-[36px] leading-[40px] font-extrabold">
                     Seleccioná el barrio de tu habitación
@@ -179,6 +350,115 @@ export function HostListingWizard() {
                     zones={neighborhoodZone ? [neighborhoodZone] : []}
                     onChangeZones={(z) => setNeighborhoodZone(z[0] ?? "")}
                   />
+                </div>
+              </div>
+            ) : stepIndex === 3 ? (
+              <div className="flex min-h-0 flex-1 flex-col">
+                <div className="space-y-2">
+                  <h1 className="text-[36px] leading-[40px] font-extrabold">
+                    Agregá fotos
+                  </h1>
+                  <p className="text-sm leading-5 text-muted-foreground">
+                    Por ahora este paso es opcional. Podés agregar hasta 5 fotos.
+                  </p>
+                </div>
+
+                <div className="mt-6 min-h-0 flex-1 overflow-y-auto pr-1">
+                  {photos.length === 0 ? (
+                    <label
+                      className={cn(
+                        "flex w-full cursor-pointer items-center justify-center rounded-xl border border-border bg-muted/10 px-4 py-12 text-sm text-muted-foreground transition-colors hover:bg-muted/20",
+                      )}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        void addFiles(e.dataTransfer.files);
+                      }}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => {
+                          const files = e.target.files;
+                          if (files) void addFiles(files);
+                          e.currentTarget.value = "";
+                        }}
+                      />
+                      <div className="flex flex-col items-center gap-3">
+                        <ImagePlus className="size-6" aria-hidden />
+                        <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium text-foreground shadow-xs">
+                          <Upload className="size-4" aria-hidden />
+                          Cargar imágenes
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          Podés arrastrar y soltar
+                        </span>
+                      </div>
+                    </label>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-muted-foreground">
+                          Ta-da! ¿Cómo se ve?
+                        </p>
+                        <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-background px-3 py-2 text-xs font-medium text-foreground shadow-xs hover:bg-muted/30">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            onChange={(e) => {
+                              const files = e.target.files;
+                              if (files) void addFiles(files);
+                              e.currentTarget.value = "";
+                            }}
+                          />
+                          <Upload className="size-4" aria-hidden />
+                          Agregar más
+                        </label>
+                      </div>
+
+                      <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={({ active, over }) => {
+                          if (!over || active.id === over.id) return;
+                          setPhotos((prev) => {
+                            const oldIndex = prev.findIndex((p) => p.id === active.id);
+                            const newIndex = prev.findIndex((p) => p.id === over.id);
+                            if (oldIndex === -1 || newIndex === -1) return prev;
+                            return arrayMove(prev, oldIndex, newIndex);
+                          });
+                        }}
+                      >
+                        <SortableContext
+                          items={photos.map((p) => p.id)}
+                          strategy={rectSortingStrategy}
+                        >
+                          <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+                            {photos.map((p) => (
+                              <SortablePhoto
+                                key={p.id}
+                                photo={p}
+                                onDelete={() =>
+                                  setPhotos((prev) => prev.filter((x) => x.id !== p.id))
+                                }
+                                onReplace={(file) => void replacePhoto(p.id, file)}
+                              />
+                            ))}
+                          </div>
+                        </SortableContext>
+                      </DndContext>
+
+                      {photoUploadingCount > 0 ? (
+                        <p className="text-xs text-muted-foreground">
+                          Subiendo {photoUploadingCount}…
+                        </p>
+                      ) : null}
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (

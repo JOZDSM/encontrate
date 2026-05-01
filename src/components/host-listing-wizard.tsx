@@ -175,8 +175,7 @@ export function HostListingWizard() {
                     formId="host-listing-wizard"
                     autoSubmit={false}
                     singleSelect
-                    title={null}
-                    subtitle={null}
+                    variant="wizard"
                     zones={neighborhoodZone ? [neighborhoodZone] : []}
                     onChangeZones={(z) => setNeighborhoodZone(z[0] ?? "")}
                   />

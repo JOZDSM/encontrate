@@ -24,6 +24,8 @@ type Props = {
   /** Override the default title/subtitle text. */
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
+  /** UI layout preset. */
+  variant?: "filters" | "wizard";
 };
 
 const ZONE_PATH_CLASS =
@@ -180,6 +182,7 @@ export function BarcelonaZonePicker({
   singleSelect = false,
   title,
   subtitle,
+  variant = "filters",
 }: Props) {
   const [uncontrolledSelected, setUncontrolledSelected] = useState<Set<string>>(
     () => new Set(defaultZones.filter((z) => z in BARCELONA_ZONE_LABELS)),
@@ -264,66 +267,123 @@ export function BarcelonaZonePicker({
       </>
     );
 
+  const selectedZones = useMemo(
+    () =>
+      [...selected].sort(
+        (a, b) =>
+          BARCELONA_ZONE_ORDER.indexOf(a) - BARCELONA_ZONE_ORDER.indexOf(b),
+      ),
+    [selected],
+  );
+
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-1">
-        <p className="text-base leading-6 font-medium text-foreground">
-          {title ?? "¿Dónde estás buscando?"}
-        </p>
-        <p className="text-sm leading-5 text-muted-foreground">
-          {subtitle ?? "Elegí tus barrios de interés"}
-        </p>
-      </div>
-
       <input type="hidden" name={name} value={value} form={formId} readOnly />
 
-      <div
-        className="-mx-4 w-[calc(100%+2rem)] max-w-none rounded-md bg-muted/35 px-1 py-1 [&_svg]:max-h-none"
-        role="group"
-        aria-label="Mapa esquemático de barrios"
-      >
-        <ZoneSvg selected={selected} toggle={toggle} />
-      </div>
+      {variant === "filters" ? (
+        <>
+          <div className="flex flex-col gap-1">
+            <p className="text-base leading-6 font-medium text-foreground">
+              {title ?? "¿Dónde estás buscando?"}
+            </p>
+            <p className="text-sm leading-5 text-muted-foreground">
+              {subtitle ?? "Elegí tus barrios de interés"}
+            </p>
+          </div>
 
-      <div className="flex flex-col gap-2">
-        <p className="text-muted-foreground text-xs font-medium">
-          Barrios seleccionados
-        </p>
-        <div className="flex flex-wrap gap-1">
-          {BARCELONA_ZONE_ORDER.map((zone) => {
-            const on = selected.has(zone);
-            const label = BARCELONA_ZONE_LABELS[zone];
-            return (
-              <button
-                key={zone}
-                type="button"
-                aria-pressed={on}
-                className={cn(
-                  badgeVariants({ variant: "outline" }),
-                  "h-auto min-h-8 cursor-pointer rounded-full px-2 py-1.5 text-xs font-medium shadow-xs",
-                  on
-                    ? "border-foreground bg-accent text-accent-foreground hover:bg-accent/90"
-                    : "border-border bg-background text-foreground hover:bg-muted/60",
-                )}
-                onClick={() => toggle(zone)}
-              >
-                <span className="flex items-center gap-1.5">
-                  {on ? (
-                    <CircleCheck
-                      className="size-4 shrink-0"
-                      strokeWidth={2}
-                      aria-hidden
-                    />
-                  ) : null}
-                  {label}
-                </span>
-              </button>
-            );
-          })}
+          <div
+            className="-mx-4 w-[calc(100%+2rem)] max-w-none rounded-md bg-muted/35 px-1 py-1 [&_svg]:max-h-none"
+            role="group"
+            aria-label="Mapa esquemático de barrios"
+          >
+            <ZoneSvg selected={selected} toggle={toggle} />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <p className="text-muted-foreground text-xs font-medium">
+              Barrios seleccionados
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {BARCELONA_ZONE_ORDER.map((zone) => {
+                const on = selected.has(zone);
+                const label = BARCELONA_ZONE_LABELS[zone];
+                return (
+                  <button
+                    key={zone}
+                    type="button"
+                    aria-pressed={on}
+                    className={cn(
+                      badgeVariants({ variant: "outline" }),
+                      "h-auto min-h-8 cursor-pointer rounded-full px-2 py-1.5 text-xs font-medium shadow-xs",
+                      on
+                        ? "border-foreground bg-accent text-accent-foreground hover:bg-accent/90"
+                        : "border-border bg-background text-foreground hover:bg-muted/60",
+                    )}
+                    onClick={() => toggle(zone)}
+                  >
+                    <span className="flex items-center gap-1.5">
+                      {on ? (
+                        <CircleCheck
+                          className="size-4 shrink-0"
+                          strokeWidth={2}
+                          aria-hidden
+                        />
+                      ) : null}
+                      {label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <p className="border-t border-border pt-3 text-xs leading-snug">
+            {summary}
+          </p>
+        </>
+      ) : (
+        <div className="grid items-center gap-10 md:grid-cols-[1fr_auto]">
+          <div
+            className="mx-auto w-full max-w-[520px] rounded-md bg-muted/35 px-1 py-1 [&_svg]:max-h-none"
+            role="group"
+            aria-label="Mapa esquemático de barrios"
+          >
+            <ZoneSvg selected={selected} toggle={toggle} />
+          </div>
+
+          <div className="flex items-center justify-center md:justify-end">
+            {selectedZones.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {selectedZones.map((zone) => (
+                  <button
+                    key={zone}
+                    type="button"
+                    aria-label={`Quitar ${BARCELONA_ZONE_LABELS[zone]}`}
+                    className={cn(
+                      badgeVariants({ variant: "outline" }),
+                      "h-auto min-h-8 cursor-pointer rounded-full px-3 py-2 text-xs font-medium shadow-xs border-foreground bg-accent text-accent-foreground hover:bg-accent/90",
+                    )}
+                    onClick={() => toggle(zone)}
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <CircleCheck
+                        className="size-4 shrink-0"
+                        strokeWidth={2}
+                        aria-hidden
+                      />
+                      {BARCELONA_ZONE_LABELS[zone]}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <span className="text-xs text-muted-foreground">
+                Elegí un barrio en el mapa
+              </span>
+            )}
+          </div>
         </div>
-      </div>
-
-      <p className="border-t border-border pt-3 text-xs leading-snug">{summary}</p>
+      )}
     </div>
   );
 }

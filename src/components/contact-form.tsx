@@ -34,7 +34,7 @@ export function ContactForm() {
       }}
     >
       <div className="space-y-4">
-        <Label htmlFor="contact-message">Mensaje</Label>
+        <Label htmlFor="contact-message" className="sr-only">Mensaje</Label>
         <Textarea
           id="contact-message"
           value={message}
@@ -44,9 +44,6 @@ export function ContactForm() {
           placeholder="Contanos en qué podemos ayudarte…"
           required
         />
-        <p className="text-xs text-muted-foreground">
-          Incluí el máximo de detalle posible. No compartas contraseñas.
-        </p>
       </div>
 
       {error ? (

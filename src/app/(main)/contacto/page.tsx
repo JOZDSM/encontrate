@@ -17,7 +17,7 @@ export default async function ContactoPage() {
         <CardHeader className="space-y-2">
           <CardTitle className="text-2xl font-semibold">Contacto</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Escribinos tu mensaje y te responderemos por email o WhatsApp.
+            Mandanos tu mensaje y te responderemos lo antes posible.
           </p>
         </CardHeader>
         <CardContent>

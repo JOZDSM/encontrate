@@ -2,6 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Bold, Italic, List } from "lucide-react";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Placeholder from "@tiptap/extension-placeholder";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,8 +19,38 @@ export function HostListingWizard() {
 
   // Step 1: listing title only for now.
   const [title, setTitle] = useState("");
+  const [descriptionHtml, setDescriptionHtml] = useState("");
 
-  const canGoNext = useMemo(() => title.trim().length > 0, [title]);
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        heading: false,
+        codeBlock: false,
+        blockquote: false,
+        orderedList: false,
+      }),
+      Placeholder.configure({
+        placeholder:
+          "Ej. Si estás buscando una habitación grande, con baño privado, amueblada, con cama doble…",
+      }),
+    ],
+    content: "",
+    editorProps: {
+      attributes: {
+        class:
+          "prose prose-invert max-w-none focus:outline-none text-sm leading-5 text-foreground",
+      },
+    },
+    onUpdate: ({ editor }) => {
+      setDescriptionHtml(editor.getHTML());
+    },
+  });
+
+  const canGoNext = useMemo(() => {
+    if (stepIndex === 0) return title.trim().length > 0;
+    if (stepIndex === 1) return editor ? editor.getText().trim().length > 0 : false;
+    return true;
+  }, [stepIndex, title, editor]);
   const progressValue = Math.min(1, Math.max(0, (stepIndex + 1) / TOTAL_STEPS));
 
   return (
@@ -45,6 +79,71 @@ export function HostListingWizard() {
                     placeholder="Ej. Habitación doble con balcón a 3 minutos de la Sagrada Familia."
                     aria-label="Título del anuncio"
                   />
+                </div>
+              </div>
+            ) : stepIndex === 1 ? (
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <h1 className="text-[36px] leading-[40px] font-extrabold">
+                    Dale una descripción a tu habitación
+                  </h1>
+                  <p className="text-sm leading-5 text-muted-foreground">
+                    Incluí toda la información necesaria, especialmente precios — si querés
+                    contarlos por acá — ya que por ahora no habilitamos un filtro por precio
+                    como lo hacemos con otras características en los pasos siguientes.
+                    <br />
+                    (Siempre podés volver a este paso a editar tu descripción)
+                  </p>
+                </div>
+
+                <div className="w-full space-y-3">
+                  <div className="flex items-center justify-between rounded-xl border border-input bg-input/30 px-3 py-2">
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        className={cn(
+                          "rounded-lg",
+                          editor?.isActive("bold") ? "bg-muted" : "",
+                        )}
+                        onClick={() => editor?.chain().focus().toggleBold().run()}
+                        aria-label="Negrita"
+                      >
+                        <Bold className="size-4" aria-hidden />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        className={cn(
+                          "rounded-lg",
+                          editor?.isActive("italic") ? "bg-muted" : "",
+                        )}
+                        onClick={() => editor?.chain().focus().toggleItalic().run()}
+                        aria-label="Cursiva"
+                      >
+                        <Italic className="size-4" aria-hidden />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-xs"
+                        className={cn(
+                          "rounded-lg",
+                          editor?.isActive("bulletList") ? "bg-muted" : "",
+                        )}
+                        onClick={() => editor?.chain().focus().toggleBulletList().run()}
+                        aria-label="Lista con viñetas"
+                      >
+                        <List className="size-4" aria-hidden />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="min-h-[140px] w-full rounded-xl border border-input bg-input/30 px-3 py-3">
+                    <EditorContent editor={editor} />
+                  </div>
                 </div>
               </div>
             ) : (
@@ -80,7 +179,7 @@ export function HostListingWizard() {
                 type="button"
                 size="sm"
                 className="rounded-full"
-                disabled={stepIndex === 0 ? !canGoNext : false}
+                disabled={!canGoNext}
                 onClick={() =>
                   setStepIndex((s) => Math.min(TOTAL_STEPS - 1, s + 1))
                 }

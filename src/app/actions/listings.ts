@@ -35,12 +35,18 @@ const listingSchema = z.object({
 
   // Características de la habitación (required)
   bedSize: z.enum(["INDIVIDUAL", "DOBLE"]),
-  windowType: z.enum([
-    "CALLE",
-    "CORAZON_DE_MANZANA",
-    "POZO_DE_AIRE",
-    "SIN_VENTANA",
-  ]),
+  windowTypes: z
+    .array(
+      z.enum([
+        "CALLE",
+        "CORAZON_DE_MANZANA",
+        "POZO_DE_AIRE",
+        "SIN_VENTANA",
+      ]),
+    )
+    .min(1)
+    .max(4)
+    .transform((values) => [...new Set(values)]),
   roomSizeSqm: z.number().int().min(5).max(150),
   furnished: z.boolean(),
 
@@ -81,7 +87,7 @@ export async function createListing(
       priceNote: data.priceNote ?? null,
       timeZone: data.timeZone,
       bedSize: data.bedSize,
-      windowType: data.windowType,
+      windowTypes: data.windowTypes,
       roomSizeSqm: data.roomSizeSqm,
       furnished: data.furnished,
       apartmentRooms: data.apartmentRooms,
@@ -142,7 +148,7 @@ export async function updateListing(
         priceNote: data.priceNote ?? null,
         timeZone: data.timeZone,
         bedSize: data.bedSize,
-        windowType: data.windowType,
+        windowTypes: data.windowTypes,
         roomSizeSqm: data.roomSizeSqm,
         furnished: data.furnished,
         apartmentRooms: data.apartmentRooms,

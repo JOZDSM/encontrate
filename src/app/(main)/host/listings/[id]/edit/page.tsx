@@ -71,7 +71,7 @@ export default async function EditListingPage({
               photoUrlsText,
 
               bedSize: listing.bedSize,
-              windowType: listing.windowType,
+              windowTypes: listing.windowTypes,
               roomSizeSqm: listing.roomSizeSqm,
               furnished: listing.furnished,
               apartmentRooms: listing.apartmentRooms,

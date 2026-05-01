@@ -67,7 +67,9 @@ export async function getPublicListings(opts: {
     opts.windowType &&
     Object.prototype.hasOwnProperty.call(WindowType, opts.windowType)
   ) {
-    andParts.push({ windowType: opts.windowType as WindowType });
+    andParts.push({
+      windowTypes: { has: opts.windowType as WindowType },
+    });
   }
   if (typeof opts.roomSizeSqm === "number" && Number.isFinite(opts.roomSizeSqm)) {
     andParts.push({ roomSizeSqm: { gte: opts.roomSizeSqm } });

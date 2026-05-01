@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createListing, updateListing } from "@/app/actions/listings";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -15,6 +16,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { BARCELONA_ZONE_LABELS, BARCELONA_ZONE_ORDER } from "@/lib/barcelona-zones";
+import {
+  LISTING_WINDOW_OPTIONS,
+  type ListingWindowValue,
+} from "@/lib/listing-window-options";
+import { cn } from "@/lib/utils";
 
 type Defaults = {
   title: string;
@@ -29,11 +35,7 @@ type Defaults = {
   photoUrlsText: string;
 
   bedSize: "INDIVIDUAL" | "DOBLE";
-  windowType:
-    | "CALLE"
-    | "CORAZON_DE_MANZANA"
-    | "POZO_DE_AIRE"
-    | "SIN_VENTANA";
+  windowTypes: ListingWindowValue[];
   roomSizeSqm: number;
   furnished: boolean;
   apartmentRooms: number;
@@ -55,7 +57,7 @@ const empty: Defaults = {
   photoUrlsText: "",
 
   bedSize: "INDIVIDUAL",
-  windowType: "CALLE",
+  windowTypes: ["CALLE"],
   roomSizeSqm: 10,
   furnished: true,
   apartmentRooms: 3,
@@ -87,8 +89,8 @@ export function HostListingForm({
   const [photoUrlsText, setPhotoUrlsText] = useState(d.photoUrlsText);
 
   const [bedSize, setBedSize] = useState<Defaults["bedSize"]>(d.bedSize);
-  const [windowType, setWindowType] = useState<Defaults["windowType"]>(
-    d.windowType,
+  const [windowTypes, setWindowTypes] = useState<Defaults["windowTypes"]>(
+    d.windowTypes,
   );
   const [roomSizeSqm, setRoomSizeSqm] = useState(d.roomSizeSqm);
   const [furnished, setFurnished] = useState(d.furnished);
@@ -128,7 +130,7 @@ export function HostListingForm({
       photoUrls,
 
       bedSize,
-      windowType,
+      windowTypes,
       roomSizeSqm,
       furnished,
       apartmentRooms,
@@ -288,24 +290,55 @@ export function HostListingForm({
           </Select>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           <Label>Ventana</Label>
-          <Select
-            value={windowType}
-            onValueChange={(v) => setWindowType(v as Defaults["windowType"])}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Elegí tipo de ventana" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="CALLE">Ventana a la calle</SelectItem>
-              <SelectItem value="CORAZON_DE_MANZANA">
-                Ventana a corazón de manzana
-              </SelectItem>
-              <SelectItem value="POZO_DE_AIRE">Ventana a pozo de aire</SelectItem>
-              <SelectItem value="SIN_VENTANA">Sin ventana</SelectItem>
-            </SelectContent>
-          </Select>
+          <p className="text-xs text-muted-foreground">
+            Podés marcar más de una si aplica.
+          </p>
+          <div className="space-y-3">
+            {LISTING_WINDOW_OPTIONS.map((opt) => {
+              const checked = windowTypes.includes(opt.value);
+              return (
+                <label
+                  key={opt.value}
+                  className={cn(
+                    "flex cursor-pointer gap-3 rounded-2xl border p-4 transition-colors",
+                    checked
+                      ? "border-foreground/70 bg-muted/25"
+                      : "border-border bg-muted/5 hover:bg-muted/15",
+                  )}
+                >
+                  <Checkbox
+                    checked={checked}
+                    onCheckedChange={(v) => {
+                      const on = v === true;
+                      setWindowTypes((prev) => {
+                        if (on) {
+                          return prev.includes(opt.value)
+                            ? prev
+                            : [...prev, opt.value];
+                        }
+                        return prev.filter((x) => x !== opt.value);
+                      });
+                    }}
+                    className="mt-1 shrink-0"
+                    aria-labelledby={`host-form-win-${opt.value}-title`}
+                  />
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <span
+                      id={`host-form-win-${opt.value}-title`}
+                      className="block text-sm font-semibold text-foreground"
+                    >
+                      {opt.title}
+                    </span>
+                    <span className="block text-sm leading-5 text-muted-foreground">
+                      {opt.description}
+                    </span>
+                  </div>
+                </label>
+              );
+            })}
+          </div>
         </div>
 
         <div className="space-y-2">

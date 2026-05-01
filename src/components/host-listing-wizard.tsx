@@ -21,6 +21,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
@@ -48,46 +49,14 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import {
+  LISTING_WINDOW_OPTIONS,
+  type ListingWindowValue,
+} from "@/lib/listing-window-options";
 
 const TOTAL_STEPS = 6;
 
 const ROOM_SIZE_STEPS = [5, 10, 15, 20, 21] as const;
-
-type WizardWindowType =
-  | "CALLE"
-  | "CORAZON_DE_MANZANA"
-  | "POZO_DE_AIRE"
-  | "SIN_VENTANA";
-
-const WINDOW_OPTIONS: {
-  value: WizardWindowType;
-  title: string;
-  description: string;
-}[] = [
-  {
-    value: "CALLE",
-    title: "A la calle",
-    description:
-      "La habitación tiene al menos una ventana que da a la calle.",
-  },
-  {
-    value: "CORAZON_DE_MANZANA",
-    title: "A corazón de manzana",
-    description:
-      "La habitación tiene al menos una ventana que da al típico corazón de manzana que permite mucha luz.",
-  },
-  {
-    value: "POZO_DE_AIRE",
-    title: "A pozo de aire",
-    description:
-      "La habitación tiene al menos una ventana que da a un pozo de aire o patio interno pequeño.",
-  },
-  {
-    value: "SIN_VENTANA",
-    title: "Sin ventana :/",
-    description: "La habitación no tiene ninguna ventana.",
-  },
-];
 
 function roomStepIndex(sqm: number): number {
   const i = ROOM_SIZE_STEPS.indexOf(
@@ -257,7 +226,7 @@ export function HostListingWizard() {
   const [photoUploadError, setPhotoUploadError] = useState<string | null>(null);
 
   const [bedSize, setBedSize] = useState<"INDIVIDUAL" | "DOBLE">("DOBLE");
-  const [windowType, setWindowType] = useState<WizardWindowType | null>(null);
+  const [windowTypes, setWindowTypes] = useState<ListingWindowValue[]>([]);
   const [roomSizeSqm, setRoomSizeSqm] =
     useState<(typeof ROOM_SIZE_STEPS)[number]>(5);
   const [furnished, setFurnished] = useState(true);
@@ -293,9 +262,9 @@ export function HostListingWizard() {
     if (stepIndex === 1) return descriptionText.trim().length > 0;
     if (stepIndex === 2) return neighborhoodZone.trim().length > 0;
     if (stepIndex === 3) return true;
-    if (stepIndex === 4) return windowType !== null;
+    if (stepIndex === 4) return windowTypes.length > 0;
     return true;
-  }, [stepIndex, title, descriptionText, neighborhoodZone, windowType]);
+  }, [stepIndex, title, descriptionText, neighborhoodZone, windowTypes]);
   const progressValue = Math.min(1, Math.max(0, (stepIndex + 1) / TOTAL_STEPS));
 
   const sensors = useSensors(
@@ -696,8 +665,8 @@ export function HostListingWizard() {
                     Características de la habitación
                   </h1>
                   <p className="text-sm leading-5 text-muted-foreground">
-                    Knowledge is power 💪 Seleccioná lo más que puedas, al menos el tipo de
-                    ventana…
+                    Knowledge is power 💪 Seleccioná lo más que puedas; al menos una opción
+                    de ventana…
                   </p>
                 </div>
 
@@ -739,39 +708,53 @@ export function HostListingWizard() {
 
                   <section className="space-y-3">
                     <p className="text-sm font-medium">Ventana</p>
-                    <RadioGroup
-                      value={windowType ?? undefined}
-                      onValueChange={(v) =>
-                        setWindowType(v as WizardWindowType)
-                      }
-                      className="gap-3"
-                    >
-                      {WINDOW_OPTIONS.map((opt) => (
-                        <label
-                          key={opt.value}
-                          className={cn(
-                            "flex cursor-pointer gap-3 rounded-2xl border p-4 transition-colors",
-                            windowType === opt.value
-                              ? "border-foreground/70 bg-muted/25"
-                              : "border-border bg-muted/5 hover:bg-muted/15",
-                          )}
-                        >
-                          <RadioGroupItem
-                            value={opt.value}
-                            id={`wizard-win-${opt.value}`}
-                            className="mt-1 shrink-0"
-                          />
-                          <div className="min-w-0 flex-1 space-y-1">
-                            <span className="block text-sm font-semibold text-foreground">
-                              {opt.title}
-                            </span>
-                            <span className="block text-sm leading-5 text-muted-foreground">
-                              {opt.description}
-                            </span>
-                          </div>
-                        </label>
-                      ))}
-                    </RadioGroup>
+                    <p className="text-xs text-muted-foreground">
+                      Podés marcar más de una si aplica.
+                    </p>
+                    <div className="space-y-3">
+                      {LISTING_WINDOW_OPTIONS.map((opt) => {
+                        const checked = windowTypes.includes(opt.value);
+                        return (
+                          <label
+                            key={opt.value}
+                            className={cn(
+                              "flex cursor-pointer gap-3 rounded-2xl border p-4 transition-colors",
+                              checked
+                                ? "border-foreground/70 bg-muted/25"
+                                : "border-border bg-muted/5 hover:bg-muted/15",
+                            )}
+                          >
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={(v) => {
+                                const on = v === true;
+                                setWindowTypes((prev) => {
+                                  if (on) {
+                                    return prev.includes(opt.value)
+                                      ? prev
+                                      : [...prev, opt.value];
+                                  }
+                                  return prev.filter((x) => x !== opt.value);
+                                });
+                              }}
+                              className="mt-1 shrink-0"
+                              aria-labelledby={`wizard-win-${opt.value}-title`}
+                            />
+                            <div className="min-w-0 flex-1 space-y-1">
+                              <span
+                                id={`wizard-win-${opt.value}-title`}
+                                className="block text-sm font-semibold text-foreground"
+                              >
+                                {opt.title}
+                              </span>
+                              <span className="block text-sm leading-5 text-muted-foreground">
+                                {opt.description}
+                              </span>
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
                   </section>
 
                   <Separator />

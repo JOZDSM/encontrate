@@ -107,7 +107,8 @@ model Listing {
 
   // Características de la habitación (required)
   bedSize         BedSize  @default(INDIVIDUAL)
-  windowType      WindowType @default(CALLE)
+  /// Ventanas que aplican a la habitación (una o más).
+  windowTypes     WindowType[] @default([])
   roomSizeSqm     Int      @default(10)
   furnished       Boolean  @default(true)
 

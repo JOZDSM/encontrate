@@ -143,7 +143,15 @@ export function HostListingWizard() {
                     </div>
                   </div>
 
-                  <div className="min-h-[140px] w-full rounded-xl border border-input bg-input/30 px-3 py-3 outline-none transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
+                  <div
+                    className="min-h-[140px] w-full cursor-text rounded-xl border border-input bg-input/30 px-3 py-3 outline-none transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 [&_.ProseMirror]:min-h-[140px]"
+                    onMouseDown={(e) => {
+                      // Make the whole surface focus the editor.
+                      if (!editor) return;
+                      e.preventDefault();
+                      editor.chain().focus().run();
+                    }}
+                  >
                     <EditorContent editor={editor} />
                   </div>
                 </div>

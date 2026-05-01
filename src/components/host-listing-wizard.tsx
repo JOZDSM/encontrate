@@ -20,6 +20,7 @@ export function HostListingWizard() {
   // Step 1: listing title only for now.
   const [title, setTitle] = useState("");
   const [descriptionHtml, setDescriptionHtml] = useState("");
+  const [descriptionText, setDescriptionText] = useState("");
 
   const editor = useEditor({
     extensions: [
@@ -43,14 +44,15 @@ export function HostListingWizard() {
     },
     onUpdate: ({ editor }) => {
       setDescriptionHtml(editor.getHTML());
+      setDescriptionText(editor.getText());
     },
   });
 
   const canGoNext = useMemo(() => {
     if (stepIndex === 0) return title.trim().length > 0;
-    if (stepIndex === 1) return editor ? editor.getText().trim().length > 0 : false;
+    if (stepIndex === 1) return descriptionText.trim().length > 0;
     return true;
-  }, [stepIndex, title, editor]);
+  }, [stepIndex, title, descriptionText]);
   const progressValue = Math.min(1, Math.max(0, (stepIndex + 1) / TOTAL_STEPS));
 
   return (

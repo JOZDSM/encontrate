@@ -141,7 +141,7 @@ export function HostListingWizard() {
                     </div>
                   </div>
 
-                  <div className="min-h-[140px] w-full rounded-xl border border-input bg-input/30 px-3 py-3">
+                  <div className="min-h-[140px] w-full rounded-xl border border-input bg-input/30 px-3 py-3 outline-none transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
                     <EditorContent editor={editor} />
                   </div>
                 </div>

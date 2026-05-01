@@ -6,7 +6,9 @@ import {
   Bold,
   Italic,
   List,
+  Minus,
   MoreHorizontal,
+  Plus,
   Upload,
   ImagePlus,
   Trash2,
@@ -19,6 +21,9 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { BarcelonaZonePicker } from "@/components/barcelona-zone-picker";
 import {
@@ -45,6 +50,56 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 const TOTAL_STEPS = 6;
+
+const ROOM_SIZE_STEPS = [5, 10, 15, 20, 21] as const;
+
+type WizardWindowType =
+  | "CALLE"
+  | "CORAZON_DE_MANZANA"
+  | "POZO_DE_AIRE"
+  | "SIN_VENTANA";
+
+const WINDOW_OPTIONS: {
+  value: WizardWindowType;
+  title: string;
+  description: string;
+}[] = [
+  {
+    value: "CALLE",
+    title: "A la calle",
+    description:
+      "La habitación tiene al menos una ventana que da a la calle.",
+  },
+  {
+    value: "CORAZON_DE_MANZANA",
+    title: "A corazón de manzana",
+    description:
+      "La habitación tiene al menos una ventana que da al típico corazón de manzana que permite mucha luz.",
+  },
+  {
+    value: "POZO_DE_AIRE",
+    title: "A pozo de aire",
+    description:
+      "La habitación tiene al menos una ventana que da a un pozo de aire o patio interno pequeño.",
+  },
+  {
+    value: "SIN_VENTANA",
+    title: "Sin ventana :/",
+    description: "La habitación no tiene ninguna ventana.",
+  },
+];
+
+function roomStepIndex(sqm: number): number {
+  const i = ROOM_SIZE_STEPS.indexOf(
+    sqm as (typeof ROOM_SIZE_STEPS)[number],
+  );
+  return i === -1 ? 0 : i;
+}
+
+function formatRoomSizeDisplay(sqm: number): string {
+  if (sqm === 21) return "+20";
+  return String(sqm);
+}
 
 type UploadedPhoto = { id: string; url: string };
 
@@ -201,6 +256,12 @@ export function HostListingWizard() {
   const [photoUploadingCount, setPhotoUploadingCount] = useState(0);
   const [photoUploadError, setPhotoUploadError] = useState<string | null>(null);
 
+  const [bedSize, setBedSize] = useState<"INDIVIDUAL" | "DOBLE">("DOBLE");
+  const [windowType, setWindowType] = useState<WizardWindowType | null>(null);
+  const [roomSizeSqm, setRoomSizeSqm] =
+    useState<(typeof ROOM_SIZE_STEPS)[number]>(5);
+  const [furnished, setFurnished] = useState(true);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -231,8 +292,10 @@ export function HostListingWizard() {
     if (stepIndex === 0) return title.trim().length > 0;
     if (stepIndex === 1) return descriptionText.trim().length > 0;
     if (stepIndex === 2) return neighborhoodZone.trim().length > 0;
+    if (stepIndex === 3) return true;
+    if (stepIndex === 4) return windowType !== null;
     return true;
-  }, [stepIndex, title, descriptionText, neighborhoodZone]);
+  }, [stepIndex, title, descriptionText, neighborhoodZone, windowType]);
   const progressValue = Math.min(1, Math.max(0, (stepIndex + 1) / TOTAL_STEPS));
 
   const sensors = useSensors(
@@ -624,6 +687,179 @@ export function HostListingWizard() {
                       ) : null}
                     </div>
                   )}
+                </div>
+              </div>
+            ) : stepIndex === 4 ? (
+              <div className="flex min-h-0 flex-1 flex-col">
+                <div className="shrink-0 space-y-2">
+                  <h1 className="text-[36px] leading-[40px] font-extrabold">
+                    Características de la habitación
+                  </h1>
+                  <p className="text-sm leading-5 text-muted-foreground">
+                    Knowledge is power 💪 Seleccioná lo más que puedas, al menos el tipo de
+                    ventana…
+                  </p>
+                </div>
+
+                <div className="mt-6 min-h-0 flex-1 space-y-6 overflow-y-auto pr-1">
+                  <section className="space-y-3">
+                    <p className="text-sm font-medium">Tamaño de cama</p>
+                    <RadioGroup
+                      value={bedSize}
+                      onValueChange={(v) =>
+                        setBedSize(v as "INDIVIDUAL" | "DOBLE")
+                      }
+                      className="gap-3"
+                    >
+                      <label className="flex cursor-pointer items-center gap-3">
+                        <RadioGroupItem value="DOBLE" id="wizard-bed-doble" />
+                        <Label
+                          htmlFor="wizard-bed-doble"
+                          className="cursor-pointer font-normal"
+                        >
+                          Doble
+                        </Label>
+                      </label>
+                      <label className="flex cursor-pointer items-center gap-3">
+                        <RadioGroupItem
+                          value="INDIVIDUAL"
+                          id="wizard-bed-individual"
+                        />
+                        <Label
+                          htmlFor="wizard-bed-individual"
+                          className="cursor-pointer font-normal"
+                        >
+                          Individual
+                        </Label>
+                      </label>
+                    </RadioGroup>
+                  </section>
+
+                  <Separator />
+
+                  <section className="space-y-3">
+                    <p className="text-sm font-medium">Ventana</p>
+                    <RadioGroup
+                      value={windowType ?? undefined}
+                      onValueChange={(v) =>
+                        setWindowType(v as WizardWindowType)
+                      }
+                      className="gap-3"
+                    >
+                      {WINDOW_OPTIONS.map((opt) => (
+                        <label
+                          key={opt.value}
+                          className={cn(
+                            "flex cursor-pointer gap-3 rounded-2xl border p-4 transition-colors",
+                            windowType === opt.value
+                              ? "border-foreground/70 bg-muted/25"
+                              : "border-border bg-muted/5 hover:bg-muted/15",
+                          )}
+                        >
+                          <RadioGroupItem
+                            value={opt.value}
+                            id={`wizard-win-${opt.value}`}
+                            className="mt-1 shrink-0"
+                          />
+                          <div className="min-w-0 flex-1 space-y-1">
+                            <span className="block text-sm font-semibold text-foreground">
+                              {opt.title}
+                            </span>
+                            <span className="block text-sm leading-5 text-muted-foreground">
+                              {opt.description}
+                            </span>
+                          </div>
+                        </label>
+                      ))}
+                    </RadioGroup>
+                  </section>
+
+                  <Separator />
+
+                  <section className="space-y-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">
+                          Tamaño aproximado de la habitación (m2)
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Puede ser a ojo 👁️
+                        </p>
+                      </div>
+                      <div className="inline-flex shrink-0 items-stretch overflow-hidden rounded-xl border border-input bg-input/30">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-10 rounded-none border-r border-border px-3"
+                          aria-label="Medida anterior"
+                          disabled={roomStepIndex(roomSizeSqm) <= 0}
+                          onClick={() =>
+                            setRoomSizeSqm((prev) => {
+                              const i = roomStepIndex(prev);
+                              return ROOM_SIZE_STEPS[Math.max(0, i - 1)];
+                            })
+                          }
+                        >
+                          <Minus className="size-4" aria-hidden />
+                        </Button>
+                        <span className="flex min-w-[3rem] items-center justify-center px-3 text-sm font-medium tabular-nums">
+                          {formatRoomSizeDisplay(roomSizeSqm)}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-10 rounded-none border-l border-border px-3"
+                          aria-label="Medida siguiente"
+                          disabled={
+                            roomStepIndex(roomSizeSqm) >=
+                            ROOM_SIZE_STEPS.length - 1
+                          }
+                          onClick={() =>
+                            setRoomSizeSqm((prev) => {
+                              const i = roomStepIndex(prev);
+                              return ROOM_SIZE_STEPS[
+                                Math.min(ROOM_SIZE_STEPS.length - 1, i + 1)
+                              ];
+                            })
+                          }
+                        >
+                          <Plus className="size-4" aria-hidden />
+                        </Button>
+                      </div>
+                    </div>
+                  </section>
+
+                  <Separator />
+
+                  <section className="space-y-3">
+                    <p className="text-sm font-medium">Habitación amueblada</p>
+                    <RadioGroup
+                      value={furnished ? "si" : "no"}
+                      onValueChange={(v) => setFurnished(v === "si")}
+                      className="gap-3"
+                    >
+                      <label className="flex cursor-pointer items-center gap-3">
+                        <RadioGroupItem value="si" id="wizard-furn-yes" />
+                        <Label
+                          htmlFor="wizard-furn-yes"
+                          className="cursor-pointer font-normal"
+                        >
+                          Sí
+                        </Label>
+                      </label>
+                      <label className="flex cursor-pointer items-center gap-3">
+                        <RadioGroupItem value="no" id="wizard-furn-no" />
+                        <Label
+                          htmlFor="wizard-furn-no"
+                          className="cursor-pointer font-normal"
+                        >
+                          No
+                        </Label>
+                      </label>
+                    </RadioGroup>
+                  </section>
                 </div>
               </div>
             ) : (

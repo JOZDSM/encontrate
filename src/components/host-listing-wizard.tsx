@@ -50,6 +50,12 @@ function makeId() {
   return Math.random().toString(16).slice(2) + Date.now().toString(16);
 }
 
+/** Some browsers/OS combos omit `file.type`; fall back on extension. */
+function looksLikeImageFile(file: File): boolean {
+  if (file.type.startsWith("image/")) return true;
+  return /\.(jpe?g|png|gif|webp|heic|heif|avif|bmp)$/i.test(file.name);
+}
+
 function SortablePhoto({
   photo,
   onDelete,
@@ -149,6 +155,7 @@ export function HostListingWizard() {
   const [neighborhoodZone, setNeighborhoodZone] = useState<string>("");
   const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
   const [photoUploadingCount, setPhotoUploadingCount] = useState(0);
+  const [photoUploadError, setPhotoUploadError] = useState<string | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -191,19 +198,44 @@ export function HostListingWizard() {
   async function uploadOne(file: File): Promise<string> {
     const fd = new FormData();
     fd.set("file", file);
-    const res = await fetch("/api/uploads/photos", { method: "POST", body: fd });
-    if (!res.ok) throw new Error("upload failed");
-    const json = (await res.json()) as { url?: string };
-    if (!json.url) throw new Error("missing url");
-    return json.url;
+    const res = await fetch("/api/uploads/photos", {
+      method: "POST",
+      body: fd,
+      credentials: "include",
+    });
+    let body: { error?: string; url?: string } | null = null;
+    try {
+      body = (await res.json()) as { error?: string; url?: string };
+    } catch {
+      body = null;
+    }
+    if (!res.ok) {
+      let message = body?.error ?? "No se pudo subir la imagen.";
+      if (!body?.error) {
+        if (res.status === 401) message = "Tenés que iniciar sesión.";
+        else if (res.status === 403)
+          message = "Tu cuenta está pendiente de aprobación.";
+        else if (res.status === 413)
+          message = "La imagen es demasiado grande (máx. 4 MB).";
+      }
+      throw new Error(message);
+    }
+    if (!body?.url) throw new Error("No se pudo subir la imagen.");
+    return body.url;
   }
 
   async function addFiles(files: FileList | File[]) {
     const arr = Array.from(files);
     if (arr.length === 0) return;
+    setPhotoUploadError(null);
     const remaining = Math.max(0, 5 - photos.length);
-    const picked = arr.slice(0, remaining).filter((f) => f.type.startsWith("image/"));
-    if (picked.length === 0) return;
+    const picked = arr.slice(0, remaining).filter(looksLikeImageFile);
+    if (picked.length === 0) {
+      setPhotoUploadError(
+        "No encontramos imágenes válidas (JPEG, PNG, WebP, GIF…).",
+      );
+      return;
+    }
 
     setPhotoUploadingCount((n) => n + picked.length);
     try {
@@ -212,21 +244,36 @@ export function HostListingWizard() {
         ...prev,
         ...urls.map((url) => ({ id: makeId(), url })),
       ]);
+    } catch (e) {
+      setPhotoUploadError(e instanceof Error ? e.message : messageFallback());
     } finally {
       setPhotoUploadingCount((n) => Math.max(0, n - picked.length));
     }
   }
 
   async function replacePhoto(photoId: string, file: File) {
+    if (!looksLikeImageFile(file)) {
+      setPhotoUploadError(
+        "Elegí un archivo de imagen (JPEG, PNG, WebP, GIF…).",
+      );
+      return;
+    }
+    setPhotoUploadError(null);
     setPhotoUploadingCount((n) => n + 1);
     try {
       const url = await uploadOne(file);
       setPhotos((prev) =>
         prev.map((p) => (p.id === photoId ? { ...p, url } : p)),
       );
+    } catch (e) {
+      setPhotoUploadError(e instanceof Error ? e.message : messageFallback());
     } finally {
       setPhotoUploadingCount((n) => Math.max(0, n - 1));
     }
+  }
+
+  function messageFallback() {
+    return "No se pudo subir la imagen.";
   }
 
   return (
@@ -361,6 +408,16 @@ export function HostListingWizard() {
                   <p className="text-sm leading-5 text-muted-foreground">
                     Por ahora este paso es opcional. Podés agregar hasta 5 fotos.
                   </p>
+                  {photoUploadError ? (
+                    <p className="text-sm text-destructive" role="alert">
+                      {photoUploadError}
+                    </p>
+                  ) : null}
+                  {photoUploadingCount > 0 && photos.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">
+                      Subiendo {photoUploadingCount}…
+                    </p>
+                  ) : null}
                 </div>
 
                 <div className="mt-6 min-h-0 flex-1 overflow-y-auto pr-1">

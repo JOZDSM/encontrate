@@ -40,11 +40,11 @@ export default async function RootLayout({
         geistMono.variable,
       )}
     >
-      <body className="flex min-h-svh flex-col overflow-x-hidden bg-black">
+      <body className="flex min-h-svh flex-col overflow-x-hidden overflow-y-hidden bg-black">
         <Providers session={session}>
           <SiteChrome>
-            <main className="flex min-h-svh flex-col pt-20 md:pt-28">
-              <div className="text-primary-foreground flex flex-1 flex-col">
+            <main className="flex min-h-0 flex-1 flex-col overflow-hidden pt-20 md:pt-28">
+              <div className="text-primary-foreground flex min-h-0 flex-1 flex-col overflow-y-auto">
                 {children}
               </div>
               <SiteFooter />

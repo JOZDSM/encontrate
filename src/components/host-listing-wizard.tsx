@@ -368,135 +368,147 @@ export function HostListingWizard() {
   }
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 flex-col px-4 py-10">
-      <Card className="mx-auto flex min-h-0 w-full max-w-[1220px] flex-1 flex-col border border-border bg-card shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
-        <CardContent className="flex min-h-0 flex-1 flex-col gap-16 p-6 text-card-foreground">
+    <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 flex-col overflow-hidden px-4 py-6 md:py-8">
+      <Card className="mx-auto flex min-h-0 w-full max-w-[1220px] flex-1 flex-col overflow-hidden border border-border bg-card shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
+        <CardContent className="flex min-h-0 flex-1 flex-col gap-16 overflow-hidden p-6 text-card-foreground">
           <div
             className={cn(
-              "mx-auto flex min-h-0 w-full flex-1 flex-col",
+              "mx-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden",
               stepIndex === 3 ? "max-w-full" : "max-w-[730px]",
             )}
           >
             {stepIndex === 0 ? (
-              <div className="my-auto space-y-6">
-                <div className="space-y-2">
-                  <h1 className="text-[36px] leading-[40px] font-extrabold">
-                    Dale un nombre a tu habitación
-                  </h1>
-                  <p className="text-sm leading-5 text-muted-foreground">
-                    Los títulos cortos que resaltan dónde está el piso (y qué lo
-                    destaca) funcionan mejor.
-                  </p>
-                </div>
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-y-contain">
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <h1 className="text-[36px] leading-[40px] font-extrabold">
+                        Dale un nombre a tu habitación
+                      </h1>
+                      <p className="text-sm leading-5 text-muted-foreground">
+                        Los títulos cortos que resaltan dónde está el piso (y qué lo
+                        destaca) funcionan mejor.
+                      </p>
+                    </div>
 
-                <div className="w-full">
-                  <Textarea
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    rows={2}
-                    className="min-h-20"
-                    placeholder="Ej. Habitación doble con balcón a 3 minutos de la Sagrada Familia."
-                    aria-label="Título del anuncio"
-                  />
+                    <div className="w-full">
+                      <Textarea
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        rows={2}
+                        className="min-h-20"
+                        placeholder="Ej. Habitación doble con balcón a 3 minutos de la Sagrada Familia."
+                        aria-label="Título del anuncio"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : stepIndex === 1 ? (
-              <div className="my-auto space-y-6">
-                <div className="space-y-2">
-                  <h1 className="text-[36px] leading-[40px] font-extrabold">
-                    Dale una descripción a tu habitación
-                  </h1>
-                  <p className="text-sm leading-5 text-muted-foreground">
-                    Incluí toda la información necesaria, especialmente precios — si querés
-                    contarlos por acá — ya que por ahora no habilitamos un filtro por precio
-                    como lo hacemos con otras características en los pasos siguientes.
-                    <br />
-                    (Siempre podés volver a este paso a editar tu descripción)
-                  </p>
-                </div>
-
-                <div className="w-full space-y-3">
-                  <div className="flex items-center justify-between rounded-xl border border-input bg-input/30 px-3 py-2">
-                    <div className="flex items-center gap-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-xs"
-                        className={cn(
-                          "rounded-lg",
-                          editor?.isActive("bold") ? "bg-muted" : "",
-                        )}
-                        onClick={() => editor?.chain().focus().toggleBold().run()}
-                        aria-label="Negrita"
-                      >
-                        <Bold className="size-4" aria-hidden />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-xs"
-                        className={cn(
-                          "rounded-lg",
-                          editor?.isActive("italic") ? "bg-muted" : "",
-                        )}
-                        onClick={() => editor?.chain().focus().toggleItalic().run()}
-                        aria-label="Cursiva"
-                      >
-                        <Italic className="size-4" aria-hidden />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-xs"
-                        className={cn(
-                          "rounded-lg",
-                          editor?.isActive("bulletList") ? "bg-muted" : "",
-                        )}
-                        onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                        aria-label="Lista con viñetas"
-                      >
-                        <List className="size-4" aria-hidden />
-                      </Button>
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-y-contain">
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <h1 className="text-[36px] leading-[40px] font-extrabold">
+                        Dale una descripción a tu habitación
+                      </h1>
+                      <p className="text-sm leading-5 text-muted-foreground">
+                        Incluí toda la información necesaria, especialmente precios — si querés
+                        contarlos por acá — ya que por ahora no habilitamos un filtro por precio
+                        como lo hacemos con otras características en los pasos siguientes.
+                        <br />
+                        (Siempre podés volver a este paso a editar tu descripción)
+                      </p>
                     </div>
-                  </div>
 
-                  <div
-                    className="min-h-[140px] w-full cursor-text rounded-xl border border-input bg-input/30 px-3 py-3 outline-none transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 [&_.ProseMirror]:min-h-[140px]"
-                    onMouseDown={(e) => {
-                      // Make the whole surface focus the editor.
-                      if (!editor) return;
-                      e.preventDefault();
-                      editor.chain().focus().run();
-                    }}
-                  >
-                    <EditorContent editor={editor} />
+                    <div className="w-full space-y-3">
+                      <div className="flex items-center justify-between rounded-xl border border-input bg-input/30 px-3 py-2">
+                        <div className="flex items-center gap-1">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            className={cn(
+                              "rounded-lg",
+                              editor?.isActive("bold") ? "bg-muted" : "",
+                            )}
+                            onClick={() => editor?.chain().focus().toggleBold().run()}
+                            aria-label="Negrita"
+                          >
+                            <Bold className="size-4" aria-hidden />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            className={cn(
+                              "rounded-lg",
+                              editor?.isActive("italic") ? "bg-muted" : "",
+                            )}
+                            onClick={() => editor?.chain().focus().toggleItalic().run()}
+                            aria-label="Cursiva"
+                          >
+                            <Italic className="size-4" aria-hidden />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            className={cn(
+                              "rounded-lg",
+                              editor?.isActive("bulletList") ? "bg-muted" : "",
+                            )}
+                            onClick={() => editor?.chain().focus().toggleBulletList().run()}
+                            aria-label="Lista con viñetas"
+                          >
+                            <List className="size-4" aria-hidden />
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div
+                        className="min-h-[140px] w-full cursor-text rounded-xl border border-input bg-input/30 px-3 py-3 outline-none transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 [&_.ProseMirror]:min-h-[140px]"
+                        onMouseDown={(e) => {
+                          // Make the whole surface focus the editor.
+                          if (!editor) return;
+                          e.preventDefault();
+                          editor.chain().focus().run();
+                        }}
+                      >
+                        <EditorContent editor={editor} />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             ) : stepIndex === 2 ? (
-              <div className="my-auto space-y-10">
-                <div className="text-center">
-                  <h1 className="text-[36px] leading-[40px] font-extrabold">
-                    Seleccioná el barrio de tu habitación
-                  </h1>
-                  <p className="text-xs leading-4 text-muted-foreground">
-                    There can only be one!
-                  </p>
-                </div>
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-y-contain">
+                  <div className="space-y-10">
+                    <div className="text-center">
+                      <h1 className="text-[36px] leading-[40px] font-extrabold">
+                        Seleccioná el barrio de tu habitación
+                      </h1>
+                      <p className="text-xs leading-4 text-muted-foreground">
+                        There can only be one!
+                      </p>
+                    </div>
 
-                <div className="mx-auto w-full max-w-[560px]">
-                  <BarcelonaZonePicker
-                    formId="host-listing-wizard"
-                    autoSubmit={false}
-                    singleSelect
-                    variant="wizard"
-                    zones={neighborhoodZone ? [neighborhoodZone] : []}
-                    onChangeZones={(z) => setNeighborhoodZone(z[0] ?? "")}
-                  />
+                    <div className="mx-auto w-full max-w-[560px]">
+                      <BarcelonaZonePicker
+                        formId="host-listing-wizard"
+                        autoSubmit={false}
+                        singleSelect
+                        variant="wizard"
+                        zones={neighborhoodZone ? [neighborhoodZone] : []}
+                        onChangeZones={(z) => setNeighborhoodZone(z[0] ?? "")}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : stepIndex === 3 ? (
-              <div className="flex min-h-0 flex-1 flex-col">
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
                 <div className="shrink-0 space-y-2">
                   {photos.length === 0 ? (
                     <>
@@ -551,7 +563,7 @@ export function HostListingWizard() {
                   ) : null}
                 </div>
 
-                <div className="mt-6 min-h-0 flex-1 overflow-y-auto pr-1">
+                <div className="mt-6 min-h-0 flex-1 overflow-y-auto overscroll-y-contain pr-1">
                   {photos.length === 0 ? (
                     <label
                       className={cn(
@@ -659,7 +671,7 @@ export function HostListingWizard() {
                 </div>
               </div>
             ) : stepIndex === 4 ? (
-              <div className="flex min-h-0 flex-1 flex-col">
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
                 <div className="shrink-0 space-y-2">
                   <h1 className="text-[36px] leading-[40px] font-extrabold">
                     Características de la habitación
@@ -670,7 +682,7 @@ export function HostListingWizard() {
                   </p>
                 </div>
 
-                <div className="mt-6 min-h-0 flex-1 space-y-6 overflow-y-auto pr-1">
+                <div className="mt-6 min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-y-contain pr-1">
                   <section className="space-y-3">
                     <p className="text-sm font-medium">Tamaño de cama</p>
                     <RadioGroup

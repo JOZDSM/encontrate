@@ -239,6 +239,8 @@ export function HostListingWizard() {
   const router = useRouter();
   const [stepIndex, setStepIndex] = useState(0);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [publishWithoutPhotosOpen, setPublishWithoutPhotosOpen] =
+    useState(false);
 
   // Step 1: listing title only for now.
   const [title, setTitle] = useState("");
@@ -297,10 +299,19 @@ export function HostListingWizard() {
     if (stepIndex === 1)
       return d.length >= 10 && d.length <= 8000;
     if (stepIndex === 2) return neighborhoodZone.trim().length > 0;
-    if (stepIndex === 3) return true;
+    // Don't leave the photo step while uploads are in flight — otherwise
+    // `photos` can still be empty when the user reaches Finalizar (data loss).
+    if (stepIndex === 3) return photoUploadingCount === 0;
     if (stepIndex === 4) return windowTypes.length > 0;
     return true;
-  }, [stepIndex, title, descriptionText, neighborhoodZone, windowTypes]);
+  }, [
+    stepIndex,
+    title,
+    descriptionText,
+    neighborhoodZone,
+    windowTypes,
+    photoUploadingCount,
+  ]);
   const progressValue = Math.min(1, Math.max(0, (stepIndex + 1) / TOTAL_STEPS));
 
   const sensors = useSensors(
@@ -403,8 +414,14 @@ export function HostListingWizard() {
     setPhotos((prev) => prev.filter((p) => p.id !== photoId));
   }
 
-  async function handleFinish() {
+  async function submitListingToServer() {
     if (!canGoNext || submitting) return;
+    if (photoUploadingCount > 0) {
+      setSubmitError(
+        "Esperá a que terminen de subir las fotos antes de publicar.",
+      );
+      return;
+    }
     const t = title.trim();
     const d = descriptionText.trim();
     if (t.length < 3 || t.length > 120) {
@@ -452,6 +469,39 @@ export function HostListingWizard() {
       return;
     }
     router.push(`/host/listings/${res.id}/edit`);
+  }
+
+  function tryFinishWizard() {
+    if (!canGoNext || submitting) return;
+    const t = title.trim();
+    const d = descriptionText.trim();
+    if (t.length < 3 || t.length > 120) {
+      setSubmitError("El título debe tener entre 3 y 120 caracteres.");
+      return;
+    }
+    if (d.length < 10 || d.length > 8000) {
+      setSubmitError("La descripción debe tener entre 10 y 8000 caracteres.");
+      return;
+    }
+    const neighborhoodLabel =
+      neighborhoodZone && BARCELONA_ZONE_LABELS[neighborhoodZone]
+        ? BARCELONA_ZONE_LABELS[neighborhoodZone]
+        : "";
+    if (!neighborhoodLabel.trim()) {
+      setSubmitError("Elegí un barrio antes de publicar.");
+      return;
+    }
+    if (photoUploadingCount > 0) {
+      setSubmitError(
+        "Esperá a que terminen de subir las fotos antes de publicar.",
+      );
+      return;
+    }
+    if (photos.length === 0) {
+      setPublishWithoutPhotosOpen(true);
+      return;
+    }
+    void submitListingToServer();
   }
 
   const isLastStep = stepIndex === TOTAL_STEPS - 1;
@@ -605,7 +655,12 @@ export function HostListingWizard() {
                         Agregá fotos
                       </h1>
                       <p className="text-sm leading-5 text-muted-foreground">
-                        Por ahora este paso es opcional. Podés agregar hasta 5 fotos.
+                        Podés saltear este paso, pero si no subís fotos tu anuncio{" "}
+                        <span className="font-medium text-foreground">
+                          no tendrá miniatura en los resultados de búsqueda
+                        </span>{" "}
+                        ni galería en la página pública. Podés sumar hasta 5 fotos (y editarlas
+                        después).
                       </p>
                     </>
                   ) : (
@@ -645,9 +700,11 @@ export function HostListingWizard() {
                       {photoUploadError}
                     </p>
                   ) : null}
-                  {photoUploadingCount > 0 && photos.length === 0 ? (
+                  {photoUploadingCount > 0 ? (
                     <p className="text-xs text-muted-foreground">
-                      Subiendo {photoUploadingCount}…
+                      Subiendo {photoUploadingCount}{" "}
+                      {photoUploadingCount === 1 ? "foto" : "fotos"}… Esperá para ir al
+                      siguiente paso.
                     </p>
                   ) : null}
                 </div>
@@ -1179,10 +1236,14 @@ export function HostListingWizard() {
                 size="sm"
                 className="rounded-full"
                 disabled={
-                  isLastStep ? submitting || !canGoNext : !canGoNext
+                  isLastStep
+                    ? submitting ||
+                      !canGoNext ||
+                      photoUploadingCount > 0
+                    : !canGoNext
                 }
                 onClick={() => {
-                  if (isLastStep) void handleFinish();
+                  if (isLastStep) tryFinishWizard();
                   else
                     setStepIndex((s) => Math.min(TOTAL_STEPS - 1, s + 1));
                 }}
@@ -1197,6 +1258,45 @@ export function HostListingWizard() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog
+        open={publishWithoutPhotosOpen}
+        onOpenChange={setPublishWithoutPhotosOpen}
+      >
+        <DialogContent className="gap-4 border-border sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>¿Publicar sin fotos?</DialogTitle>
+            <DialogDescription>
+              El anuncio se creará igual, pero va a verse sin imagen en la lista y sin galería en
+              la ficha. Siempre podés cargar fotos después desde «Editar anuncio».
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full"
+              onClick={() => {
+                setPublishWithoutPhotosOpen(false);
+                setStepIndex(3);
+              }}
+            >
+              Ir a fotos
+            </Button>
+            <Button
+              type="button"
+              className="rounded-full"
+              disabled={photoUploadingCount > 0}
+              onClick={() => {
+                setPublishWithoutPhotosOpen(false);
+                void submitListingToServer();
+              }}
+            >
+              Publicar igual
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
         <DialogContent className="gap-4 border-border sm:max-w-md">

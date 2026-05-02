@@ -64,7 +64,21 @@ export default async function ListingDetailPage({
                 />
               ))}
             </div>
-          ) : null}
+          ) : (
+            <div className="rounded-xl border border-dashed border-border bg-muted/15 px-4 py-6 text-center text-sm text-muted-foreground">
+              <p>Este anuncio no tiene fotos cargadas.</p>
+              {isHost ? (
+                <p className="mt-2">
+                  <Button variant="link" className="h-auto p-0 text-foreground" asChild>
+                    <Link href={`/host/listings/${listing.id}/edit`}>
+                      Subí fotos desde editar anuncio
+                    </Link>
+                  </Button>{" "}
+                  para que aparezcan acá y en los resultados de búsqueda.
+                </p>
+              ) : null}
+            </div>
+          )}
 
           <div className="prose prose-neutral dark:prose-invert max-w-none">
             <p className="whitespace-pre-wrap">{listing.description}</p>

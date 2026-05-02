@@ -14,11 +14,11 @@ import {
   Bath,
   BedDouble,
   DoorOpen,
+  Grid2X2,
   Home,
   Ruler,
   Sofa,
   Wifi,
-  Wind,
 } from "lucide-react";
 import {
   LISTING_WINDOW_OPTIONS,
@@ -212,7 +212,7 @@ export default async function ListingDetailPage({
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Wind className="mt-0.5 size-4 text-foreground" aria-hidden />
+                  <Grid2X2 className="mt-0.5 size-4 text-foreground" aria-hidden />
                   <div>
                     <p className="text-foreground">
                       {windowTypesLabel(listing.windowTypes as ListingWindowValue[])}

@@ -1,4 +1,4 @@
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 
 /** Visible character count for TipTap HTML or legacy plain text (validation). */
 export function listingDescriptionPlainTextLength(raw: string): number {
@@ -6,14 +6,14 @@ export function listingDescriptionPlainTextLength(raw: string): number {
   return t.replace(/\s+/g, " ").trim().length;
 }
 
-const SANITIZE: Parameters<typeof DOMPurify.sanitize>[1] = {
-  ALLOWED_TAGS: ["p", "br", "strong", "em", "b", "i", "ul", "ol", "li"],
-  ALLOWED_ATTR: [],
+const SANITIZE_OPTS: sanitizeHtml.IOptions = {
+  allowedTags: ["p", "br", "strong", "em", "b", "i", "ul", "ol", "li"],
+  allowedAttributes: {},
 };
 
-/** Persisted / displayed HTML — strip scripts and unexpected tags. */
+/** Persisted / displayed HTML — strip scripts and unexpected tags (Node-safe, no jsdom). */
 export function sanitizeListingDescriptionHtml(dirty: string): string {
-  return DOMPurify.sanitize(dirty.trim(), SANITIZE);
+  return sanitizeHtml(dirty.trim(), SANITIZE_OPTS);
 }
 
 function escapeHtml(text: string): string {

@@ -9,6 +9,12 @@ export function listingDescriptionPlainTextLength(raw: string): number {
 const SANITIZE_OPTS: sanitizeHtml.IOptions = {
   allowedTags: ["p", "br", "strong", "em", "b", "i", "ul", "ol", "li"],
   allowedAttributes: {},
+  exclusiveFilter: (frame) => {
+    // TipTap often leaves empty paragraphs (<p></p>) which create huge vertical gaps.
+    if (frame.tag !== "p") return false;
+    const text = (frame.text ?? "").replace(/\u00a0/g, " ").trim();
+    return text.length === 0;
+  },
 };
 
 /** Persisted / displayed HTML — strip scripts and unexpected tags (Node-safe, no jsdom). */

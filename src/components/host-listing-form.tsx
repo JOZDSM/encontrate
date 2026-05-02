@@ -252,8 +252,9 @@ export function HostListingForm({
             className="min-h-[140px] w-full cursor-text rounded-xl border border-input bg-input/30 px-3 py-3 outline-none transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 [&_.ProseMirror]:min-h-[140px]"
             onMouseDown={(e) => {
               if (!editor) return;
-              e.preventDefault();
-              editor.chain().focus().run();
+              // Only force focus when clicking the padding/wrapper.
+              // Don't prevent default, otherwise ProseMirror can't place the caret on click.
+              if (e.target === e.currentTarget) editor.chain().focus().run();
             }}
           >
             <EditorContent editor={editor} />

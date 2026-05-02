@@ -61,7 +61,7 @@ export default async function ListingDetailPage({
     where: { id },
     include: {
       photos: { orderBy: { sortOrder: "asc" } },
-      host: { select: { id: true, name: true } },
+      host: { select: { id: true, name: true, email: true, whatsappNumber: true } },
     },
   });
   if (!listing) notFound();

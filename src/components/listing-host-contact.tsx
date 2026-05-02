@@ -41,16 +41,18 @@ export function ListingHostContact({
 
         <div className="flex flex-wrap items-center gap-2">
           <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                className="h-12 rounded-2xl px-5"
-              >
-                <Phone className="mr-3 size-6" aria-hidden />
-                <span className="text-base font-semibold">Teléfono</span>
-              </Button>
-            </DialogTrigger>
+            <DialogTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-12 rounded-2xl px-5"
+                >
+                  <Phone className="mr-3 size-6" aria-hidden />
+                  <span className="text-base font-semibold">Teléfono</span>
+                </Button>
+              }
+            />
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Teléfono</DialogTitle>
@@ -66,16 +68,18 @@ export function ListingHostContact({
           </Dialog>
 
           <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                className="h-12 rounded-2xl px-5"
-              >
-                <Mail className="mr-3 size-6" aria-hidden />
-                <span className="text-base font-semibold">Email</span>
-              </Button>
-            </DialogTrigger>
+            <DialogTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-12 rounded-2xl px-5"
+                >
+                  <Mail className="mr-3 size-6" aria-hidden />
+                  <span className="text-base font-semibold">Email</span>
+                </Button>
+              }
+            />
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Email</DialogTitle>
@@ -96,11 +100,16 @@ export function ListingHostContact({
               setSuccess(null);
             }}
           >
-            <DialogTrigger asChild>
-              <Button type="button" className="h-12 rounded-2xl px-5 text-base font-semibold">
-                Enviar solicitud
-              </Button>
-            </DialogTrigger>
+            <DialogTrigger
+              render={
+                <Button
+                  type="button"
+                  className="h-12 rounded-2xl px-5 text-base font-semibold"
+                >
+                  Enviar solicitud
+                </Button>
+              }
+            />
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Enviar solicitud</DialogTitle>

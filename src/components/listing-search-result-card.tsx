@@ -31,7 +31,7 @@ export function ListingSearchResultCard({
     <Card className="relative flex flex-row gap-0 overflow-hidden py-0 transition-colors hover:bg-muted/15">
       <Link
         href={`/listings/${listing.id}`}
-        className="text-card-foreground flex min-w-0 flex-1 flex-row gap-4 no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="text-card-foreground flex min-w-0 flex-1 flex-row items-start gap-4 no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         <div className="relative aspect-square w-24 shrink-0 overflow-hidden bg-muted sm:w-28">
           {cover ? (

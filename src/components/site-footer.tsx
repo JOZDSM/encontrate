@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { isPublicListingDetailPath } from "@/lib/listing-route";
 import { cn } from "@/lib/utils";
 
 export function SiteFooter() {
   const pathname = usePathname();
-  const plainBackground = pathname?.startsWith("/listings");
+  const plainBackground = isPublicListingDetailPath(pathname);
 
   return (
     <footer

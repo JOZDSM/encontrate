@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { EncontrateMark } from "@/components/encontrate-mark";
+import { isPublicListingDetailPath } from "@/lib/listing-route";
 import { cn } from "@/lib/utils";
 
 const logo = Poppins({
@@ -31,7 +32,7 @@ export function HomeNavbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const closeMenu = () => setMenuOpen(false);
-  const plainBackground = pathname?.startsWith("/listings");
+  const plainBackground = isPublicListingDetailPath(pathname);
 
   return (
     <>

@@ -33,16 +33,16 @@ export function ListingSearchResultCard({
         href={`/listings/${listing.id}`}
         className="text-card-foreground flex min-w-0 flex-1 flex-row gap-4 no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
-        <div className="relative w-28 shrink-0 self-stretch bg-muted">
+        <div className="relative aspect-square w-24 shrink-0 overflow-hidden bg-muted sm:w-28">
           {cover ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={cover}
               alt=""
-              className="absolute inset-0 size-full object-cover"
+              className="size-full object-cover"
             />
           ) : (
-            <div className="flex size-full min-h-[7rem] items-center justify-center text-muted-foreground">
+            <div className="flex size-full items-center justify-center text-muted-foreground">
               <ImageIcon className="size-10 opacity-50" aria-hidden />
             </div>
           )}

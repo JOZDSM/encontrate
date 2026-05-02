@@ -19,7 +19,7 @@ export function Providers({
       refetchOnWindowFocus={!designPreview}
       refetchInterval={designPreview ? 0 : undefined}
     >
-      <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+      <div className="flex h-full min-h-0 flex-1 flex-col">{children}</div>
     </SessionProvider>
   );
 }

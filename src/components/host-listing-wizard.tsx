@@ -368,8 +368,8 @@ export function HostListingWizard() {
   }
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 flex-col overflow-hidden px-4 py-6 md:py-8">
-      <Card className="mx-auto flex min-h-0 w-full max-w-[1220px] flex-1 flex-col overflow-hidden border border-border bg-card shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
+    <div className="mx-auto flex h-full max-h-full min-h-0 w-full max-w-[1440px] flex-1 flex-col overflow-hidden px-4 py-4 md:py-6">
+      <Card className="mx-auto flex h-full max-h-full min-h-0 w-full max-w-[1220px] flex-1 flex-col overflow-hidden border border-border bg-card shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
         <CardContent className="flex min-h-0 flex-1 flex-col gap-16 overflow-hidden p-6 text-card-foreground">
           <div
             className={cn(

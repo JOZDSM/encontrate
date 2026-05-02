@@ -33,7 +33,7 @@ export function RotatingSiteBackground({
   const inner = !isHome;
 
   return (
-    <div className="relative flex min-h-0 w-full flex-1 flex-col">
+    <div className="relative flex h-full min-h-0 w-full flex-1 flex-col">
       {/* Photo stack */}
       <div
         aria-hidden
@@ -77,7 +77,7 @@ export function RotatingSiteBackground({
         )}
       />
 
-      <div className="relative z-[2] flex min-h-0 w-full flex-1 flex-col">
+      <div className="relative z-[2] flex h-full min-h-0 w-full flex-1 flex-col">
         {children}
       </div>
     </div>

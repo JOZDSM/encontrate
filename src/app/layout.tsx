@@ -35,16 +35,16 @@ export default async function RootLayout({
       lang="es"
       className={cn(
         "dark",
-        "min-h-svh antialiased font-sans",
+        "h-svh min-h-0 antialiased font-sans",
         figtree.variable,
         geistMono.variable,
       )}
     >
-      <body className="flex min-h-svh flex-col overflow-x-hidden overflow-y-hidden bg-black">
+      <body className="flex h-svh min-h-0 flex-col overflow-x-hidden overflow-y-hidden bg-black">
         <Providers session={session}>
           <SiteChrome>
-            <main className="flex min-h-0 flex-1 flex-col overflow-hidden pt-20 md:pt-28">
-              <div className="text-primary-foreground flex min-h-0 flex-1 flex-col overflow-y-auto">
+            <main className="flex h-full min-h-0 flex-1 flex-col overflow-hidden pt-20 md:pt-28">
+              <div className="text-primary-foreground flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain">
                 {children}
               </div>
               <SiteFooter />

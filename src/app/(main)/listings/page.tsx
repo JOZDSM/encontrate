@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import type { ListingSearchResult } from "@/components/listing-search-result-card";
 import { ListingsFilterPanel } from "@/components/listings-filter-panel";
 import { ListingsResultsPanel } from "@/components/listings-results-panel";
 import { parseBarcelonaZonesParam } from "@/lib/barcelona-zones";
@@ -146,6 +147,16 @@ export default async function ListingsPage({
 
   const listings = await getPublicListings(publicListingOpts);
 
+  const listingCards: ListingSearchResult[] = listings.map((l) => ({
+    id: l.id,
+    title: l.title,
+    description: l.description,
+    neighborhood: l.neighborhood,
+    city: l.city,
+    priceNote: l.priceNote ?? null,
+    photos: l.photos.map((p) => ({ url: p.url })),
+  }));
+
   return (
     <div className="text-primary-foreground flex min-h-0 flex-1 flex-col">
       <div className="flex min-h-0 flex-1 flex-col px-4">
@@ -176,7 +187,7 @@ export default async function ListingsPage({
           </aside>
 
           <section className="text-card-foreground flex min-h-[min(50vh,400px)] min-w-0 flex-1 flex-col md:min-h-0">
-            <ListingsResultsPanel listings={listings} sort={sort} />
+            <ListingsResultsPanel listings={listingCards} sort={sort} />
           </section>
         </div>
       </div>

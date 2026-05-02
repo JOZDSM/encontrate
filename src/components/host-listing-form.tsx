@@ -21,6 +21,9 @@ import {
   type ListingWindowValue,
 } from "@/lib/listing-window-options";
 import { cn } from "@/lib/utils";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Placeholder from "@tiptap/extension-placeholder";
 
 type Defaults = {
   title: string;
@@ -102,6 +105,37 @@ export function HostListingForm({
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        heading: false,
+        codeBlock: false,
+        blockquote: false,
+        orderedList: false,
+      }),
+      Placeholder.configure({
+        placeholder: "Describí tu habitación y el piso…",
+      }),
+    ],
+    content: description,
+    editorProps: {
+      attributes: {
+        class:
+          "min-h-32 w-full rounded-2xl border border-input bg-input/30 px-4 py-3 text-sm leading-5 text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+      },
+    },
+    onUpdate: ({ editor }) => {
+      setDescription(editor.getText());
+    },
+  });
+
+  useEffect(() => {
+    if (!editor) return;
+    // Keep editor in sync when defaults change (edit page loads server data).
+    editor.commands.setContent(description || "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor]);
+
   useEffect(() => {
     if (!success) return;
     const id = window.setTimeout(() => setSuccess(null), 2500);
@@ -168,14 +202,12 @@ export function HostListingForm({
       </div>
       <div className="space-y-2">
         <Label htmlFor="description">Descripción</Label>
-        <Textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-          minLength={10}
-          rows={6}
-        />
+        <div id="description" aria-label="Descripción" className="space-y-2">
+          <EditorContent editor={editor} />
+          <p className="text-xs text-muted-foreground">
+            Tip: podés usar negrita, itálica y viñetas. Se guarda el texto.
+          </p>
+        </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">

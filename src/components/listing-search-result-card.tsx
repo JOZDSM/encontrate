@@ -31,24 +31,24 @@ export function ListingSearchResultCard({
     <Card className="relative flex flex-row gap-0 overflow-hidden py-0 transition-colors hover:bg-muted/15">
       <Link
         href={`/listings/${listing.id}`}
-        className="text-card-foreground flex min-w-0 flex-1 flex-row items-start gap-4 no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="text-card-foreground flex min-h-0 min-w-0 flex-1 flex-row items-stretch gap-4 no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
-        <div className="relative aspect-square w-24 shrink-0 overflow-hidden bg-muted sm:w-28">
+        <div className="relative aspect-square w-auto shrink-0 self-stretch overflow-hidden bg-muted min-h-0">
           {cover ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={cover}
               alt=""
-              className="size-full object-cover"
+              className="absolute inset-0 size-full object-cover"
             />
           ) : (
-            <div className="flex size-full items-center justify-center text-muted-foreground">
+            <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
               <ImageIcon className="size-10 opacity-50" aria-hidden />
             </div>
           )}
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 px-4 py-4 pr-10">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-2 px-4 py-4 pr-10">
           <h3 className="text-sm leading-snug font-semibold sm:text-base">
             {listing.title}
           </h3>

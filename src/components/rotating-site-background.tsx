@@ -25,6 +25,15 @@ export function RotatingSiteBackground({
 }) {
   const [bgIndex, setBgIndex] = useState(0);
 
+  useEffect(() => {
+    if (disabled) return;
+    if (HOME_HERO_IMAGES.length <= 1) return;
+    const id = window.setInterval(() => {
+      setBgIndex((i) => (i + 1) % HOME_HERO_IMAGES.length);
+    }, 10_000);
+    return () => window.clearInterval(id);
+  }, [disabled]);
+
   if (disabled) {
     return (
       <div className="relative flex h-full min-h-0 w-full flex-1 flex-col bg-background text-foreground">
@@ -32,14 +41,6 @@ export function RotatingSiteBackground({
       </div>
     );
   }
-
-  useEffect(() => {
-    if (HOME_HERO_IMAGES.length <= 1) return;
-    const id = window.setInterval(() => {
-      setBgIndex((i) => (i + 1) % HOME_HERO_IMAGES.length);
-    }, 10_000);
-    return () => window.clearInterval(id);
-  }, []);
 
   const inner = !isHome;
 

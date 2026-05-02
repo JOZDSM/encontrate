@@ -5,7 +5,7 @@ export function SiteFooter() {
   return (
     <footer
       className={cn(
-        "flex h-28 shrink-0 flex-col items-center justify-center gap-1 border-t border-border px-4 text-center text-sm text-primary-foreground/80 dark:text-foreground",
+        "flex shrink-0 flex-col items-center justify-center gap-1 border-t border-border px-4 py-6 text-center text-sm text-primary-foreground/80 dark:text-foreground",
         "transition-[border-color] duration-300 ease-out",
         "md:border-transparent md:hover:border-border md:focus-within:border-border",
       )}

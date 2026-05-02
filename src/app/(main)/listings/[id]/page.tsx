@@ -4,11 +4,47 @@ import { auth } from "@/auth";
 import { BookingRequestForm } from "@/components/booking-request-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { prisma } from "@/lib/db";
 import { isUserApproved } from "@/lib/approval";
 import { isUserProfileComplete } from "@/lib/profile";
 import { canSeeFullAddress } from "@/lib/listing-visibility";
+import {
+  Bath,
+  BedDouble,
+  DoorOpen,
+  Home,
+  Ruler,
+  Sofa,
+  Wifi,
+  Wind,
+} from "lucide-react";
+import {
+  LISTING_WINDOW_OPTIONS,
+  type ListingWindowValue,
+} from "@/lib/listing-window-options";
+
+function formatMonthlyPriceEur(priceMonthlyEur: number | null): string | null {
+  if (typeof priceMonthlyEur !== "number") return null;
+  if (!Number.isFinite(priceMonthlyEur)) return null;
+  if (priceMonthlyEur <= 0) return null;
+  const formatted = new Intl.NumberFormat("es-ES", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(priceMonthlyEur);
+  return `${formatted} / mes`;
+}
+
+function bedSizeLabel(v: "INDIVIDUAL" | "DOBLE"): string {
+  return v === "INDIVIDUAL" ? "Cama individual" : "Cama doble";
+}
+
+function windowTypesLabel(values: ListingWindowValue[]): string {
+  const dict = new Map(LISTING_WINDOW_OPTIONS.map((o) => [o.value, o.title]));
+  const labels = values.map((v) => dict.get(v) ?? v);
+  return labels.join(" · ");
+}
 
 export default async function ListingDetailPage({
   params,
@@ -34,92 +70,229 @@ export default async function ListingDetailPage({
 
   const showAddress = await canSeeFullAddress(session, listing);
   const isHost = session?.user?.id === listing.hostId;
+  const monthlyPrice = formatMonthlyPriceEur(listing.priceMonthlyEur);
+  const hostName = listing.host.name?.trim() || "Anfitrión";
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-10">
-      <Card className="border border-border bg-card shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
-        <CardContent className="space-y-8 p-6 text-card-foreground">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary">{listing.neighborhood}</Badge>
-              <span className="text-sm text-muted-foreground">
-                {listing.city}, {listing.country}
-              </span>
-            </div>
-            <h1 className="text-3xl font-semibold tracking-tight">{listing.title}</h1>
+    <div className="mx-auto w-full max-w-5xl px-4 pt-6 pb-10">
+      <div className="space-y-6 text-primary-foreground">
+        <header className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary">{listing.neighborhood}</Badge>
+            <span className="text-sm text-muted-foreground">
+              {listing.city}, {listing.country}
+            </span>
+          </div>
+          <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+            {listing.title}
+          </h1>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
             {listing.priceNote ? (
-              <p className="text-lg font-medium">{listing.priceNote}</p>
+              <span className="font-medium text-primary-foreground/90">
+                {listing.priceNote}
+              </span>
+            ) : null}
+            {!listing.priceNote && monthlyPrice ? (
+              <span className="font-medium text-primary-foreground/90">
+                {monthlyPrice}
+              </span>
+            ) : null}
+            {listing.priceNote && monthlyPrice ? (
+              <span className="text-muted-foreground">{monthlyPrice}</span>
             ) : null}
           </div>
+          {isHost ? (
+            <div className="pt-1">
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/host/listings/${listing.id}/edit`}>Editar anuncio</Link>
+              </Button>
+            </div>
+          ) : null}
+        </header>
 
-          {listing.photos.length > 0 ? (
-            <div className="grid gap-2 sm:grid-cols-2">
-              {listing.photos.map((p) => (
+        {listing.photos.length > 0 ? (
+          <section className="overflow-hidden rounded-2xl border border-border bg-muted/10">
+            <div className="grid gap-1 sm:gap-2 md:grid-cols-4 md:grid-rows-2">
+              {/* Hero */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={listing.photos[0]?.url}
+                alt=""
+                className="aspect-[16/10] w-full object-cover md:col-span-2 md:row-span-2 md:aspect-auto"
+              />
+              {listing.photos.slice(1, 5).map((p, idx) => (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   key={p.id}
                   src={p.url}
                   alt=""
-                  className="aspect-video w-full rounded-lg object-cover"
+                  className="hidden aspect-[16/10] w-full object-cover md:block"
+                  style={{
+                    gridColumnStart: 3 + (idx % 2),
+                    gridRowStart: 1 + Math.floor(idx / 2),
+                  }}
                 />
               ))}
+              {/* Mobile strip */}
+              <div className="flex gap-2 overflow-x-auto px-3 py-3 md:hidden">
+                {listing.photos.map((p) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={p.id}
+                    src={p.url}
+                    alt=""
+                    className="h-20 w-28 shrink-0 rounded-lg object-cover"
+                  />
+                ))}
+              </div>
             </div>
-          ) : (
-            <div className="rounded-xl border border-dashed border-border bg-muted/15 px-4 py-6 text-center text-sm text-muted-foreground">
-              <p>Este anuncio no tiene fotos cargadas.</p>
-              {isHost ? (
-                <p className="mt-2">
-                  <Button variant="link" className="h-auto p-0 text-foreground" asChild>
-                    <Link href={`/host/listings/${listing.id}/edit`}>
-                      Subí fotos desde editar anuncio
-                    </Link>
-                  </Button>{" "}
-                  para que aparezcan acá y en los resultados de búsqueda.
-                </p>
-              ) : null}
-            </div>
-          )}
+          </section>
+        ) : (
+          <section className="rounded-2xl border border-dashed border-border bg-muted/15 px-4 py-10 text-center text-sm text-muted-foreground">
+            <p>Este anuncio no tiene fotos cargadas.</p>
+            {isHost ? (
+              <p className="mt-2">
+                <Button
+                  variant="link"
+                  className="h-auto p-0 text-primary-foreground"
+                  asChild
+                >
+                  <Link href={`/host/listings/${listing.id}/edit`}>
+                    Subí fotos desde editar anuncio
+                  </Link>
+                </Button>{" "}
+                para que aparezcan acá y en los resultados de búsqueda.
+              </p>
+            ) : null}
+          </section>
+        )}
 
+        <Separator />
+
+        <section className="space-y-4">
+          <h2 className="text-lg font-semibold tracking-tight">Tu anfitrión</h2>
+          <p className="text-sm text-muted-foreground">
+            Publicado por <span className="font-medium text-primary-foreground/90">{hostName}</span>.
+          </p>
+        </section>
+
+        <Separator />
+
+        <section className="space-y-5">
+          <h2 className="text-lg font-semibold tracking-tight">Características</h2>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border border-border bg-card/40 p-4">
+              <p className="text-sm font-medium">Habitación</p>
+              <div className="mt-3 space-y-3 text-sm text-muted-foreground">
+                <div className="flex items-start gap-3">
+                  <BedDouble className="mt-0.5 size-4 text-primary-foreground/90" aria-hidden />
+                  <div>
+                    <p className="text-primary-foreground/90">{bedSizeLabel(listing.bedSize)}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Ruler className="mt-0.5 size-4 text-primary-foreground/90" aria-hidden />
+                  <div>
+                    <p className="text-primary-foreground/90">
+                      {listing.roomSizeSqm} m² aprox.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Wind className="mt-0.5 size-4 text-primary-foreground/90" aria-hidden />
+                  <div>
+                    <p className="text-primary-foreground/90">
+                      {windowTypesLabel(listing.windowTypes as ListingWindowValue[])}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Sofa className="mt-0.5 size-4 text-primary-foreground/90" aria-hidden />
+                  <div>
+                    <p className="text-primary-foreground/90">
+                      {listing.furnished ? "Amueblada" : "Sin amueblar"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-card/40 p-4">
+              <p className="text-sm font-medium">Piso</p>
+              <div className="mt-3 space-y-3 text-sm text-muted-foreground">
+                <div className="flex items-start gap-3">
+                  <DoorOpen className="mt-0.5 size-4 text-primary-foreground/90" aria-hidden />
+                  <p className="text-primary-foreground/90">
+                    {listing.apartmentRooms} habitaciones
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Bath className="mt-0.5 size-4 text-primary-foreground/90" aria-hidden />
+                  <p className="text-primary-foreground/90">{listing.apartmentBaths} baños</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Home className="mt-0.5 size-4 text-primary-foreground/90" aria-hidden />
+                  <p className="text-primary-foreground/90">
+                    {listing.apartmentSizeSqm} m² aprox.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Wifi className="mt-0.5 size-4 text-primary-foreground/90" aria-hidden />
+                  <p className="text-primary-foreground/90">
+                    {listing.wifi ? "Con WIFI" : "Sin WIFI"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <Separator />
+
+        <section className="space-y-4">
+          <h2 className="text-lg font-semibold tracking-tight">Descripción</h2>
           <div className="prose prose-neutral dark:prose-invert max-w-none">
             <p className="whitespace-pre-wrap">{listing.description}</p>
           </div>
+        </section>
 
-          <div className="rounded-xl border border-border bg-muted/30 p-4 text-sm">
-            <p className="font-medium">Ubicación aproximada</p>
-            <p className="text-muted-foreground">
-              {listing.neighborhood}, {listing.city}
+        <Separator />
+
+        <section className="space-y-3 rounded-2xl border border-border bg-muted/20 p-4">
+          <h2 className="text-sm font-medium">Ubicación</h2>
+          <p className="text-sm text-muted-foreground">
+            {listing.neighborhood}, {listing.city}
+          </p>
+          {showAddress && listing.addressDetail ? (
+            <p className="text-sm">
+              <span className="font-medium">Dirección: </span>
+              {listing.addressDetail}
             </p>
-            {showAddress && listing.addressDetail ? (
-              <p className="mt-2">
-                <span className="font-medium">Dirección: </span>
-                {listing.addressDetail}
-              </p>
-            ) : !showAddress && listing.addressDetail ? (
-              <p className="mt-2 text-muted-foreground">
-                La dirección completa se muestra al huésped cuando la reserva está
-                confirmada.
-              </p>
-            ) : null}
-          </div>
+          ) : !showAddress && listing.addressDetail ? (
+            <p className="text-sm text-muted-foreground">
+              La dirección completa se muestra al huésped cuando la reserva está confirmada.
+            </p>
+          ) : null}
+        </section>
 
-          {isHost ? (
-            <Button variant="outline" asChild>
-              <Link href={`/host/listings/${listing.id}/edit`}>Editar anuncio</Link>
-            </Button>
-          ) : session?.user ? (
-            <BookingRequestForm listingId={listing.id} />
+        <Separator />
+
+        {!isHost ? (
+          session?.user ? (
+            <section>
+              <BookingRequestForm listingId={listing.id} />
+            </section>
           ) : (
-            <div className="rounded-xl border border-border bg-muted/20 p-4 text-sm">
-              <p className="mb-3">
-                Inicia sesión para solicitar fechas en este anuncio.
-              </p>
+            <section className="rounded-2xl border border-border bg-muted/20 p-4 text-sm">
+              <p className="mb-3">Inicia sesión para solicitar fechas en este anuncio.</p>
               <Button asChild>
                 <Link href="/login">Entrar</Link>
               </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </section>
+          )
+        ) : null}
+      </div>
     </div>
   );
 }

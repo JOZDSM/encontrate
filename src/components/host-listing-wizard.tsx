@@ -291,8 +291,11 @@ export function HostListingWizard() {
   });
 
   const canGoNext = useMemo(() => {
-    if (stepIndex === 0) return title.trim().length > 0;
-    if (stepIndex === 1) return descriptionText.trim().length > 0;
+    const t = title.trim();
+    const d = descriptionText.trim();
+    if (stepIndex === 0) return t.length >= 3 && t.length <= 120;
+    if (stepIndex === 1)
+      return d.length >= 10 && d.length <= 8000;
     if (stepIndex === 2) return neighborhoodZone.trim().length > 0;
     if (stepIndex === 3) return true;
     if (stepIndex === 4) return windowTypes.length > 0;
@@ -402,6 +405,16 @@ export function HostListingWizard() {
 
   async function handleFinish() {
     if (!canGoNext || submitting) return;
+    const t = title.trim();
+    const d = descriptionText.trim();
+    if (t.length < 3 || t.length > 120) {
+      setSubmitError("El título debe tener entre 3 y 120 caracteres.");
+      return;
+    }
+    if (d.length < 10 || d.length > 8000) {
+      setSubmitError("La descripción debe tener entre 10 y 8000 caracteres.");
+      return;
+    }
     const neighborhoodLabel =
       neighborhoodZone && BARCELONA_ZONE_LABELS[neighborhoodZone]
         ? BARCELONA_ZONE_LABELS[neighborhoodZone]
@@ -414,8 +427,8 @@ export function HostListingWizard() {
     setSubmitting(true);
     setSubmitError(null);
     const res = await createListing({
-      title: title.trim(),
-      description: descriptionText.trim(),
+      title: t,
+      description: d,
       city: "Barcelona",
       country: "España",
       neighborhood: neighborhoodLabel.trim(),

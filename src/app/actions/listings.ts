@@ -15,6 +15,28 @@ const allowedNeighborhoodLabels = new Set(
   Object.values(BARCELONA_ZONE_LABELS).map((s) => s.trim()),
 );
 
+function listingParseErrorMessage(err: z.ZodError): string {
+  const issue = err.issues[0];
+  if (!issue) return "Revisa los campos del formulario.";
+  const top = issue.path[0];
+  if (top === "title") {
+    return "El título debe tener entre 3 y 120 caracteres.";
+  }
+  if (top === "description") {
+    return "La descripción debe tener entre 10 y 8000 caracteres.";
+  }
+  if (top === "neighborhood") {
+    return issue.message === "Barrio inválido." ? issue.message : "Revisá el barrio seleccionado.";
+  }
+  if (top === "photoUrls") {
+    return "Alguna foto no se pudo validar. Probá volver a subir las imágenes.";
+  }
+  if (top === "windowTypes") {
+    return "Elegí al menos un tipo de ventana.";
+  }
+  return "Revisa los campos del formulario.";
+}
+
 const listingSchema = z.object({
   title: z.string().min(3).max(120),
   description: z.string().min(10).max(8000),
@@ -70,7 +92,7 @@ export async function createListing(
 
   const parsed = listingSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: "Revisa los campos del formulario." };
+    return { ok: false, error: listingParseErrorMessage(parsed.error) };
   }
 
   const data = parsed.data;
@@ -129,7 +151,7 @@ export async function updateListing(
 
   const parsed = listingSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: "Revisa los campos del formulario." };
+    return { ok: false, error: listingParseErrorMessage(parsed.error) };
   }
 
   const data = parsed.data;

@@ -269,6 +269,8 @@ export default async function ListingDetailPage({
           </div>
         </section>
 
+        <Separator className="my-8" />
+
         <section className="space-y-3 rounded-2xl border border-border bg-muted/20 p-4">
           <h2 className="text-sm font-medium">Ubicación</h2>
           <p className="text-sm text-muted-foreground">

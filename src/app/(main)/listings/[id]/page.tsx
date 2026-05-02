@@ -190,6 +190,15 @@ export default async function ListingDetailPage({
 
         <Separator className="my-8" />
 
+        <section className="space-y-4">
+          <h2 className="text-lg font-semibold tracking-tight">Descripción</h2>
+          <div className="prose prose-neutral dark:prose-invert max-w-none">
+            <p className="whitespace-pre-wrap">{listing.description}</p>
+          </div>
+        </section>
+
+        <Separator className="my-8" />
+
         <section className="space-y-5">
           <h2 className="text-lg font-semibold tracking-tight">Características</h2>
 
@@ -259,17 +268,6 @@ export default async function ListingDetailPage({
             </div>
           </div>
         </section>
-
-        <Separator className="my-8" />
-
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold tracking-tight">Descripción</h2>
-          <div className="prose prose-neutral dark:prose-invert max-w-none">
-            <p className="whitespace-pre-wrap">{listing.description}</p>
-          </div>
-        </section>
-
-        <Separator className="my-8" />
 
         <section className="space-y-3 rounded-2xl border border-border bg-muted/20 p-4">
           <h2 className="text-sm font-medium">Ubicación</h2>

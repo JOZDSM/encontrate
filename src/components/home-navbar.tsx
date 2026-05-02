@@ -37,7 +37,7 @@ export function HomeNavbar() {
     <>
       <header
         className={cn(
-          "fixed top-0 right-0 left-0 z-30 flex h-20 flex-col items-center justify-center border-b border-border px-4 md:h-28",
+          "fixed top-0 right-0 left-0 z-[100] flex h-20 flex-col items-center justify-center border-b border-border px-4 md:h-28",
           "transition-[border-color] duration-300 ease-out",
           "md:border-transparent md:hover:border-border md:focus-within:border-border",
           plainBackground ? "bg-background text-foreground" : undefined,

@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Bold, Italic, List } from "lucide-react";
 
 type Defaults = {
   title: string;
@@ -121,7 +122,7 @@ export function HostListingForm({
     editorProps: {
       attributes: {
         class:
-          "min-h-32 w-full rounded-2xl border border-input bg-input/30 px-4 py-3 text-sm leading-5 text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+          "max-w-none focus:outline-none text-sm leading-5 text-foreground [&_p]:m-0 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-6 [&_li]:my-1",
       },
     },
     onUpdate: ({ editor }) => {
@@ -202,11 +203,61 @@ export function HostListingForm({
       </div>
       <div className="space-y-2">
         <Label htmlFor="description">Descripción</Label>
-        <div id="description" aria-label="Descripción" className="space-y-2">
-          <EditorContent editor={editor} />
-          <p className="text-xs text-muted-foreground">
-            Tip: podés usar negrita, itálica y viñetas. Se guarda el texto.
-          </p>
+        <div id="description" aria-label="Descripción" className="space-y-3">
+          <div className="flex items-center justify-between rounded-xl border border-input bg-input/30 px-3 py-2">
+            <div className="flex items-center gap-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className={cn(
+                  "rounded-lg",
+                  editor?.isActive("bold") ? "bg-muted" : "",
+                )}
+                onClick={() => editor?.chain().focus().toggleBold().run()}
+                aria-label="Negrita"
+              >
+                <Bold className="size-4" aria-hidden />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className={cn(
+                  "rounded-lg",
+                  editor?.isActive("italic") ? "bg-muted" : "",
+                )}
+                onClick={() => editor?.chain().focus().toggleItalic().run()}
+                aria-label="Cursiva"
+              >
+                <Italic className="size-4" aria-hidden />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className={cn(
+                  "rounded-lg",
+                  editor?.isActive("bulletList") ? "bg-muted" : "",
+                )}
+                onClick={() => editor?.chain().focus().toggleBulletList().run()}
+                aria-label="Lista con viñetas"
+              >
+                <List className="size-4" aria-hidden />
+              </Button>
+            </div>
+          </div>
+
+          <div
+            className="min-h-[140px] w-full cursor-text rounded-xl border border-input bg-input/30 px-3 py-3 outline-none transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 [&_.ProseMirror]:min-h-[140px]"
+            onMouseDown={(e) => {
+              if (!editor) return;
+              e.preventDefault();
+              editor.chain().focus().run();
+            }}
+          >
+            <EditorContent editor={editor} />
+          </div>
         </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">

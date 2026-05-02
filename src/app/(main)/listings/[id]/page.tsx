@@ -192,9 +192,9 @@ export default async function ListingDetailPage({
 
         <section className="space-y-4">
           <h2 className="text-lg font-semibold tracking-tight">Descripción</h2>
-          <div className="prose prose-neutral dark:prose-invert max-w-none">
-            <p className="whitespace-pre-wrap">{listing.description}</p>
-          </div>
+          <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
+            {listing.description}
+          </p>
         </section>
 
         <Separator className="my-8" />

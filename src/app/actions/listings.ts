@@ -10,6 +10,10 @@ import {
 import { BARCELONA_ZONE_LABELS } from "@/lib/barcelona-zones";
 import { isUserApproved } from "@/lib/approval";
 import { prisma } from "@/lib/db";
+import {
+  listingDescriptionPlainTextLength,
+  sanitizeListingDescriptionHtml,
+} from "@/lib/listing-description-html";
 
 const allowedNeighborhoodLabels = new Set(
   Object.values(BARCELONA_ZONE_LABELS).map((s) => s.trim()),
@@ -39,7 +43,16 @@ function listingParseErrorMessage(err: z.ZodError): string {
 
 const listingSchema = z.object({
   title: z.string().min(3).max(120),
-  description: z.string().min(10).max(8000),
+  description: z
+    .string()
+    .max(60_000)
+    .refine(
+      (s) => {
+        const len = listingDescriptionPlainTextLength(s);
+        return len >= 10 && len <= 8000;
+      },
+      { message: "La descripción debe tener entre 10 y 8000 caracteres." },
+    ),
   city: z.string().min(2).max(80),
   country: z.string().min(2).max(80),
   neighborhood: z
@@ -100,7 +113,7 @@ export async function createListing(
     data: {
       hostId: session.user.id,
       title: data.title,
-      description: data.description,
+      description: sanitizeListingDescriptionHtml(data.description),
       city: data.city,
       country: data.country,
       neighborhood: data.neighborhood,
@@ -161,7 +174,7 @@ export async function updateListing(
       where: { id },
       data: {
         title: data.title,
-        description: data.description,
+        description: sanitizeListingDescriptionHtml(data.description),
         city: data.city,
         country: data.country,
         neighborhood: data.neighborhood,

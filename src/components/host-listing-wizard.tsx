@@ -443,9 +443,10 @@ export function HostListingWizard() {
 
     setSubmitting(true);
     setSubmitError(null);
+    const descriptionPayload = (editor?.getHTML() ?? descriptionHtml).trim();
     const res = await createListing({
       title: t,
-      description: d,
+      description: descriptionPayload,
       city: "Barcelona",
       country: "España",
       neighborhood: neighborhoodLabel.trim(),

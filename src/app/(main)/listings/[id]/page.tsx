@@ -24,6 +24,7 @@ import {
   LISTING_WINDOW_OPTIONS,
   type ListingWindowValue,
 } from "@/lib/listing-window-options";
+import { listingDescriptionDisplayHtml } from "@/lib/listing-description-html";
 
 function formatMonthlyPriceEur(priceMonthlyEur: number | null): string | null {
   if (typeof priceMonthlyEur !== "number") return null;
@@ -192,9 +193,12 @@ export default async function ListingDetailPage({
 
         <section className="space-y-4">
           <h2 className="text-lg font-semibold tracking-tight">Descripción</h2>
-          <p className="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
-            {listing.description}
-          </p>
+          <div
+            className="listing-description-html max-w-none text-sm leading-relaxed text-muted-foreground [&_li]:my-0 [&_li]:pl-0 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2 [&_p]:first:mt-0 [&_p]:last:mb-0 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5"
+            dangerouslySetInnerHTML={{
+              __html: listingDescriptionDisplayHtml(listing.description),
+            }}
+          />
         </section>
 
         <Separator className="my-8" />

@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Heart, ImageIcon, Mail, Phone } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { stripHtmlForSnippet } from "@/lib/listing-description-html";
 
 /** Minimal plain shape from the server — avoids RSC/flight dropping nested Prisma relations. */
 export type ListingSearchResult = {
@@ -110,7 +111,7 @@ export function ListingSearchResultCard({
               {metaParts.join(" · ")}
             </p>
             <p className="line-clamp-2 text-xs text-muted-foreground sm:text-sm">
-              {snippet(listing.description, 220)}
+              {snippet(stripHtmlForSnippet(listing.description), 220)}
             </p>
             <div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 text-xs sm:text-sm">
               <span className="inline-flex items-center gap-1.5">

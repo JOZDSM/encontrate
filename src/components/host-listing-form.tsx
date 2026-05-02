@@ -126,16 +126,16 @@ export function HostListingForm({
       },
     },
     onUpdate: ({ editor }) => {
-      setDescription(editor.getText());
+      setDescription(editor.getHTML());
     },
   });
 
+  const serverDescription = defaults?.description ?? "";
+
   useEffect(() => {
     if (!editor) return;
-    // Keep editor in sync when defaults change (edit page loads server data).
-    editor.commands.setContent(description || "");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editor]);
+    editor.commands.setContent(serverDescription || "");
+  }, [editor, listingId, serverDescription]);
 
   useEffect(() => {
     if (!success) return;
@@ -154,7 +154,7 @@ export function HostListingForm({
       .filter(Boolean);
     const payload = {
       title,
-      description,
+      description: (editor?.getHTML() ?? description).trim(),
       city,
       country,
       neighborhood,

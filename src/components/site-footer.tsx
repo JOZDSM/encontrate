@@ -5,7 +5,7 @@ export function SiteFooter() {
   return (
     <footer
       className={cn(
-        "flex shrink-0 flex-col items-center justify-center gap-1 border-t border-border px-4 py-6 text-center text-sm text-primary-foreground/80 dark:text-foreground",
+        "flex shrink-0 flex-col items-center justify-center gap-1 border-t border-border bg-background px-4 py-6 text-center text-sm text-muted-foreground",
         "transition-[border-color] duration-300 ease-out",
         "md:border-transparent md:hover:border-border md:focus-within:border-border",
       )}
@@ -14,7 +14,7 @@ export function SiteFooter() {
         Encontrate solamente genera encuentros entre personas.{" "}
         <Link
           href="/aviso"
-          className="underline underline-offset-2 hover:text-primary-foreground dark:text-foreground"
+          className="text-foreground underline underline-offset-2 hover:text-foreground/80"
         >
           Aviso legal
         </Link>

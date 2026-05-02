@@ -15,12 +15,23 @@ import { cn } from "@/lib/utils";
 export function RotatingSiteBackground({
   children,
   isHome,
+  disabled = false,
 }: {
   children: React.ReactNode;
   /** `/` only. Everything else uses dark scrim + blurred photos. */
   isHome: boolean;
+  /** When true, render children without any background layers. */
+  disabled?: boolean;
 }) {
   const [bgIndex, setBgIndex] = useState(0);
+
+  if (disabled) {
+    return (
+      <div className="relative flex h-full min-h-0 w-full flex-1 flex-col bg-background text-foreground">
+        {children}
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (HOME_HERO_IMAGES.length <= 1) return;

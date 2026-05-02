@@ -76,7 +76,7 @@ export default async function ListingDetailPage({
 
   return (
     <div className="bg-background">
-      <div className="mx-auto w-full max-w-5xl px-4 pt-6 pb-10 text-foreground">
+      <div className="mx-auto w-full max-w-5xl px-4 pt-8 pb-12 text-foreground">
         <header className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">{listing.neighborhood}</Badge>
@@ -174,7 +174,7 @@ export default async function ListingDetailPage({
           </section>
         )}
 
-        <Separator />
+        <Separator className="my-8" />
 
         <section className="space-y-4">
           <h2 className="text-lg font-semibold tracking-tight">
@@ -188,7 +188,7 @@ export default async function ListingDetailPage({
           />
         </section>
 
-        <Separator />
+        <Separator className="my-8" />
 
         <section className="space-y-5">
           <h2 className="text-lg font-semibold tracking-tight">Características</h2>
@@ -260,7 +260,7 @@ export default async function ListingDetailPage({
           </div>
         </section>
 
-        <Separator />
+        <Separator className="my-8" />
 
         <section className="space-y-4">
           <h2 className="text-lg font-semibold tracking-tight">Descripción</h2>
@@ -269,7 +269,7 @@ export default async function ListingDetailPage({
           </div>
         </section>
 
-        <Separator />
+        <Separator className="my-8" />
 
         <section className="space-y-3 rounded-2xl border border-border bg-muted/20 p-4">
           <h2 className="text-sm font-medium">Ubicación</h2>
@@ -288,7 +288,7 @@ export default async function ListingDetailPage({
           ) : null}
         </section>
 
-        <Separator />
+        <Separator className="my-8" />
 
         {!isHost ? (
           session?.user ? (

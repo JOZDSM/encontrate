@@ -39,6 +39,7 @@ export function HomeNavbar() {
           "fixed top-0 right-0 left-0 z-30 flex h-20 flex-col items-center justify-center border-b border-border px-4 md:h-28",
           "transition-[border-color] duration-300 ease-out",
           "md:border-transparent md:hover:border-border md:focus-within:border-border",
+          "bg-background text-foreground",
         )}
       >
         <div className="flex w-full max-w-[1440px] items-center justify-between">
@@ -46,7 +47,7 @@ export function HomeNavbar() {
             href="/"
             className={cn(
               logo.className,
-              "text-primary-foreground inline-flex items-center gap-2 text-2xl leading-8 dark:text-foreground",
+              "inline-flex items-center gap-2 text-2xl leading-8 text-foreground",
             )}
             onClick={(e) => {
               if (pathname === "/") {
@@ -60,7 +61,7 @@ export function HomeNavbar() {
           </Link>
 
           <div className="hidden flex-wrap items-center justify-end gap-3 md:flex lg:gap-4">
-            <nav className="flex max-w-2xl flex-wrap items-center justify-end gap-x-2 gap-y-1 text-sm font-semibold text-primary-foreground dark:text-foreground sm:gap-x-4">
+            <nav className="flex max-w-2xl flex-wrap items-center justify-end gap-x-2 gap-y-1 text-sm font-semibold text-foreground sm:gap-x-4">
               <Link
                 href="/listings"
                 className="whitespace-nowrap hover:underline hover:underline-offset-4"
@@ -112,7 +113,7 @@ export function HomeNavbar() {
 
               {showPanel ? (
                 designPreview ? (
-                  <span className="text-primary-foreground/80 max-w-[10rem] text-xs leading-snug dark:text-foreground/80">
+                  <span className="max-w-[10rem] text-xs leading-snug text-muted-foreground">
                     Modo diseño (local)
                   </span>
                 ) : (

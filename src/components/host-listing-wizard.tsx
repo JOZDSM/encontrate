@@ -61,10 +61,18 @@ import {
   LISTING_WINDOW_OPTIONS,
   type ListingWindowValue,
 } from "@/lib/listing-window-options";
+import { createListing } from "@/app/actions/listings";
+import { BARCELONA_ZONE_LABELS } from "@/lib/barcelona-zones";
 
 const TOTAL_STEPS = 6;
 
 const ROOM_SIZE_STEPS = [5, 10, 15, 20, 21] as const;
+
+/** Same options as `HostListingForm` / listing filters: 40, 50, … 280 m² */
+const APARTMENT_SIZE_STEPS = Array.from(
+  { length: 25 },
+  (_, i) => (i + 4) * 10,
+) as readonly number[];
 
 function roomStepIndex(sqm: number): number {
   const i = ROOM_SIZE_STEPS.indexOf(
@@ -76,6 +84,13 @@ function roomStepIndex(sqm: number): number {
 function formatRoomSizeDisplay(sqm: number): string {
   if (sqm === 21) return "+20";
   return String(sqm);
+}
+
+function apartmentSizeStepIndex(sqm: number): number {
+  const i = APARTMENT_SIZE_STEPS.indexOf(
+    sqm as (typeof APARTMENT_SIZE_STEPS)[number],
+  );
+  return i === -1 ? 0 : i;
 }
 
 type UploadedPhoto = { id: string; url: string };
@@ -240,6 +255,15 @@ export function HostListingWizard() {
     useState<(typeof ROOM_SIZE_STEPS)[number]>(5);
   const [furnished, setFurnished] = useState(true);
 
+  const [apartmentRooms, setApartmentRooms] = useState(1);
+  const [apartmentBaths, setApartmentBaths] = useState(1);
+  const [apartmentSizeSqm, setApartmentSizeSqm] = useState(
+    APARTMENT_SIZE_STEPS[0],
+  );
+  const [wifi, setWifi] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -375,6 +399,49 @@ export function HostListingWizard() {
   function removePhoto(photoId: string) {
     setPhotos((prev) => prev.filter((p) => p.id !== photoId));
   }
+
+  async function handleFinish() {
+    if (!canGoNext || submitting) return;
+    const neighborhoodLabel =
+      neighborhoodZone && BARCELONA_ZONE_LABELS[neighborhoodZone]
+        ? BARCELONA_ZONE_LABELS[neighborhoodZone]
+        : "";
+    if (!neighborhoodLabel.trim()) {
+      setSubmitError("Elegí un barrio antes de publicar.");
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitError(null);
+    const res = await createListing({
+      title: title.trim(),
+      description: descriptionText.trim(),
+      city: "Barcelona",
+      country: "España",
+      neighborhood: neighborhoodLabel.trim(),
+      addressDetail: null,
+      priceMonthlyEur: null,
+      priceNote: null,
+      timeZone: "Europe/Madrid",
+      photoUrls: photos.map((p) => p.url),
+      bedSize,
+      windowTypes,
+      roomSizeSqm,
+      furnished,
+      apartmentRooms,
+      apartmentBaths,
+      apartmentSizeSqm,
+      wifi,
+    });
+    setSubmitting(false);
+    if (!res.ok) {
+      setSubmitError(res.error);
+      return;
+    }
+    router.push(`/host/listings/${res.id}/edit`);
+  }
+
+  const isLastStep = stepIndex === TOTAL_STEPS - 1;
 
   return (
     <div className="mx-auto flex h-full max-h-full min-h-0 w-full max-w-[1440px] flex-1 flex-col overflow-hidden px-4 pt-4 pb-2 md:pt-6 md:pb-3">
@@ -866,14 +933,208 @@ export function HostListingWizard() {
                   </section>
                 </div>
               </div>
-            ) : (
-              <div className="text-muted-foreground text-sm">
-                Paso {stepIndex + 1} de {TOTAL_STEPS} (pendiente de diseño).
+            ) : stepIndex === 5 ? (
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                <div className="shrink-0 space-y-2">
+                  <h1 className="text-[36px] leading-[40px] font-extrabold">
+                    Características del piso
+                  </h1>
+                  <p className="text-sm leading-5 text-muted-foreground">
+                    Ídem.
+                  </p>
+                </div>
+
+                <div className="mt-6 min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-y-contain pr-1">
+                  <section className="space-y-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">
+                          Número de habitaciones
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Para dar una idea.
+                        </p>
+                      </div>
+                      <div className="inline-flex shrink-0 items-stretch overflow-hidden rounded-xl border border-input bg-input/30">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-10 rounded-none border-r border-border px-3"
+                          aria-label="Una habitación menos"
+                          disabled={apartmentRooms <= 1}
+                          onClick={() =>
+                            setApartmentRooms((n) => Math.max(1, n - 1))
+                          }
+                        >
+                          <Minus className="size-4" aria-hidden />
+                        </Button>
+                        <span className="flex min-w-[3rem] items-center justify-center px-3 text-sm font-medium tabular-nums">
+                          {apartmentRooms}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-10 rounded-none border-l border-border px-3"
+                          aria-label="Una habitación más"
+                          disabled={apartmentRooms >= 20}
+                          onClick={() =>
+                            setApartmentRooms((n) => Math.min(20, n + 1))
+                          }
+                        >
+                          <Plus className="size-4" aria-hidden />
+                        </Button>
+                      </div>
+                    </div>
+                  </section>
+
+                  <Separator />
+
+                  <section className="space-y-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">Número de baños</p>
+                        <p className="text-sm text-muted-foreground">
+                          Importante.
+                        </p>
+                      </div>
+                      <div className="inline-flex shrink-0 items-stretch overflow-hidden rounded-xl border border-input bg-input/30">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-10 rounded-none border-r border-border px-3"
+                          aria-label="Un baño menos"
+                          disabled={apartmentBaths <= 1}
+                          onClick={() =>
+                            setApartmentBaths((n) => Math.max(1, n - 1))
+                          }
+                        >
+                          <Minus className="size-4" aria-hidden />
+                        </Button>
+                        <span className="flex min-w-[3rem] items-center justify-center px-3 text-sm font-medium tabular-nums">
+                          {apartmentBaths}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-10 rounded-none border-l border-border px-3"
+                          aria-label="Un baño más"
+                          disabled={apartmentBaths >= 20}
+                          onClick={() =>
+                            setApartmentBaths((n) => Math.min(20, n + 1))
+                          }
+                        >
+                          <Plus className="size-4" aria-hidden />
+                        </Button>
+                      </div>
+                    </div>
+                  </section>
+
+                  <Separator />
+
+                  <section className="space-y-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">
+                          Tamaño aproximado del piso (m2)
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Otra vez, puede ser a ojo 👁️
+                        </p>
+                      </div>
+                      <div className="inline-flex shrink-0 items-stretch overflow-hidden rounded-xl border border-input bg-input/30">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-10 rounded-none border-r border-border px-3"
+                          aria-label="Tamaño del piso anterior"
+                          disabled={
+                            apartmentSizeStepIndex(apartmentSizeSqm) <= 0
+                          }
+                          onClick={() =>
+                            setApartmentSizeSqm((prev) => {
+                              const i = apartmentSizeStepIndex(prev);
+                              return APARTMENT_SIZE_STEPS[Math.max(0, i - 1)];
+                            })
+                          }
+                        >
+                          <Minus className="size-4" aria-hidden />
+                        </Button>
+                        <span className="flex min-w-[3rem] items-center justify-center px-3 text-sm font-medium tabular-nums">
+                          {apartmentSizeSqm}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-10 rounded-none border-l border-border px-3"
+                          aria-label="Tamaño del piso siguiente"
+                          disabled={
+                            apartmentSizeStepIndex(apartmentSizeSqm) >=
+                            APARTMENT_SIZE_STEPS.length - 1
+                          }
+                          onClick={() =>
+                            setApartmentSizeSqm((prev) => {
+                              const i = apartmentSizeStepIndex(prev);
+                              return APARTMENT_SIZE_STEPS[
+                                Math.min(
+                                  APARTMENT_SIZE_STEPS.length - 1,
+                                  i + 1,
+                                )
+                              ];
+                            })
+                          }
+                        >
+                          <Plus className="size-4" aria-hidden />
+                        </Button>
+                      </div>
+                    </div>
+                  </section>
+
+                  <Separator />
+
+                  <section className="space-y-3">
+                    <p className="text-sm font-medium">WIFI</p>
+                    <RadioGroup
+                      value={wifi ? "si" : "no"}
+                      onValueChange={(v) => setWifi(v === "si")}
+                      className="gap-3"
+                    >
+                      <label className="flex cursor-pointer items-center gap-3">
+                        <RadioGroupItem value="si" id="wizard-wifi-yes" />
+                        <Label
+                          htmlFor="wizard-wifi-yes"
+                          className="cursor-pointer font-normal"
+                        >
+                          Sí
+                        </Label>
+                      </label>
+                      <label className="flex cursor-pointer items-center gap-3">
+                        <RadioGroupItem value="no" id="wizard-wifi-no" />
+                        <Label
+                          htmlFor="wizard-wifi-no"
+                          className="cursor-pointer font-normal"
+                        >
+                          No
+                        </Label>
+                      </label>
+                    </RadioGroup>
+                  </section>
+                </div>
               </div>
-            )}
+            ) : null}
           </div>
 
           <div className="shrink-0 border-t border-border pt-4">
+            {submitError ? (
+              <p className="mb-4 text-sm text-destructive" role="alert">
+                {submitError}
+              </p>
+            ) : null}
             <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
               <div
                 className="h-full rounded-full bg-foreground transition-[width] duration-300 ease-out"
@@ -904,12 +1165,20 @@ export function HostListingWizard() {
                 type="button"
                 size="sm"
                 className="rounded-full"
-                disabled={!canGoNext}
-                onClick={() =>
-                  setStepIndex((s) => Math.min(TOTAL_STEPS - 1, s + 1))
+                disabled={
+                  isLastStep ? submitting || !canGoNext : !canGoNext
                 }
+                onClick={() => {
+                  if (isLastStep) void handleFinish();
+                  else
+                    setStepIndex((s) => Math.min(TOTAL_STEPS - 1, s + 1));
+                }}
               >
-                Siguiente
+                {isLastStep
+                  ? submitting
+                    ? "Publicando…"
+                    : "Finalizar"
+                  : "Siguiente"}
               </Button>
             </div>
           </div>

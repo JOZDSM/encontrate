@@ -25,12 +25,26 @@ export async function sendHostInquiry(
   const previewBlock = designPreviewWriteBlockedMessage(session);
   if (previewBlock) return { ok: false, error: previewBlock };
 
-  if (!rateLimit(`host-inquiry:${session.user.id}`, 10, 60_000)) {
-    return { ok: false, error: "Demasiadas solicitudes. Espera un momento." };
-  }
-
   const parsed = inquirySchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Mensaje no válido." };
+
+  // One inquiry per user per listing (hard limit).
+  const alreadySent = await prisma.message.findFirst({
+    where: {
+      listingId: parsed.data.listingId,
+      senderId: session.user.id,
+      bookingId: null,
+    },
+    select: { id: true },
+  });
+  if (alreadySent) {
+    return { ok: false, error: "Ya enviaste una solicitud para este anuncio." };
+  }
+
+  // Burst protection (still useful even with the one-per-listing check).
+  if (!rateLimit(`host-inquiry:${session.user.id}`, 6, 60_000)) {
+    return { ok: false, error: "Demasiadas solicitudes. Espera un momento." };
+  }
 
   const listing = await prisma.listing.findUnique({
     where: { id: parsed.data.listingId },

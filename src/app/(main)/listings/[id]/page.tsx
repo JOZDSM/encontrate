@@ -9,6 +9,7 @@ import { prisma } from "@/lib/db";
 import { isUserApproved } from "@/lib/approval";
 import { isUserProfileComplete } from "@/lib/profile";
 import { canSeeFullAddress } from "@/lib/listing-visibility";
+import { ListingHostContact } from "@/components/listing-host-contact";
 import {
   Bath,
   BedDouble,
@@ -74,26 +75,23 @@ export default async function ListingDetailPage({
   const hostName = listing.host.name?.trim() || "Anfitrión";
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 pt-6 pb-10">
-      <div className="space-y-6 text-primary-foreground">
+    <div className="bg-background">
+      <div className="mx-auto w-full max-w-5xl px-4 pt-6 pb-10 text-foreground">
         <header className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">{listing.neighborhood}</Badge>
-            <span className="text-sm text-muted-foreground">
-              {listing.city}, {listing.country}
-            </span>
           </div>
           <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
             {listing.title}
           </h1>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
             {listing.priceNote ? (
-              <span className="font-medium text-primary-foreground/90">
+              <span className="font-medium">
                 {listing.priceNote}
               </span>
             ) : null}
             {!listing.priceNote && monthlyPrice ? (
-              <span className="font-medium text-primary-foreground/90">
+              <span className="font-medium">
                 {monthlyPrice}
               </span>
             ) : null}
@@ -112,40 +110,49 @@ export default async function ListingDetailPage({
 
         {listing.photos.length > 0 ? (
           <section className="overflow-hidden rounded-2xl border border-border bg-muted/10">
-            <div className="grid gap-1 sm:gap-2 md:grid-cols-4 md:grid-rows-2">
-              {/* Hero */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+            {listing.photos.length === 1 ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={listing.photos[0]?.url}
                 alt=""
-                className="aspect-[16/10] w-full object-cover md:col-span-2 md:row-span-2 md:aspect-auto"
+                className="aspect-[16/10] w-full object-cover sm:aspect-[2/1]"
               />
-              {listing.photos.slice(1, 5).map((p, idx) => (
-                // eslint-disable-next-line @next/next/no-img-element
+            ) : (
+              <div className="grid gap-1 sm:gap-2 md:grid-cols-4 md:grid-rows-2">
+                {/* Hero */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  key={p.id}
-                  src={p.url}
+                  src={listing.photos[0]?.url}
                   alt=""
-                  className="hidden aspect-[16/10] w-full object-cover md:block"
-                  style={{
-                    gridColumnStart: 3 + (idx % 2),
-                    gridRowStart: 1 + Math.floor(idx / 2),
-                  }}
+                  className="aspect-[16/10] w-full object-cover md:col-span-2 md:row-span-2 md:aspect-auto"
                 />
-              ))}
-              {/* Mobile strip */}
-              <div className="flex gap-2 overflow-x-auto px-3 py-3 md:hidden">
-                {listing.photos.map((p) => (
+                {listing.photos.slice(1, 5).map((p, idx) => (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     key={p.id}
                     src={p.url}
                     alt=""
-                    className="h-20 w-28 shrink-0 rounded-lg object-cover"
+                    className="hidden aspect-[16/10] w-full object-cover md:block"
+                    style={{
+                      gridColumnStart: 3 + (idx % 2),
+                      gridRowStart: 1 + Math.floor(idx / 2),
+                    }}
                   />
                 ))}
+                {/* Mobile strip */}
+                <div className="flex gap-2 overflow-x-auto px-3 py-3 md:hidden">
+                  {listing.photos.map((p) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={p.id}
+                      src={p.url}
+                      alt=""
+                      className="h-20 w-28 shrink-0 rounded-lg object-cover"
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </section>
         ) : (
           <section className="rounded-2xl border border-dashed border-border bg-muted/15 px-4 py-10 text-center text-sm text-muted-foreground">
@@ -154,7 +161,7 @@ export default async function ListingDetailPage({
               <p className="mt-2">
                 <Button
                   variant="link"
-                  className="h-auto p-0 text-primary-foreground"
+                  className="h-auto p-0"
                   asChild
                 >
                   <Link href={`/host/listings/${listing.id}/edit`}>
@@ -170,10 +177,15 @@ export default async function ListingDetailPage({
         <Separator />
 
         <section className="space-y-4">
-          <h2 className="text-lg font-semibold tracking-tight">Tu anfitrión</h2>
-          <p className="text-sm text-muted-foreground">
-            Publicado por <span className="font-medium text-primary-foreground/90">{hostName}</span>.
-          </p>
+          <h2 className="text-lg font-semibold tracking-tight">
+            Información del anfitrión
+          </h2>
+          <ListingHostContact
+            listingId={listing.id}
+            hostName={hostName}
+            hostEmail={listing.host.email ?? null}
+            hostWhatsappNumber={listing.host.whatsappNumber ?? null}
+          />
         </section>
 
         <Separator />
@@ -186,31 +198,31 @@ export default async function ListingDetailPage({
               <p className="text-sm font-medium">Habitación</p>
               <div className="mt-3 space-y-3 text-sm text-muted-foreground">
                 <div className="flex items-start gap-3">
-                  <BedDouble className="mt-0.5 size-4 text-primary-foreground/90" aria-hidden />
+                  <BedDouble className="mt-0.5 size-4 text-foreground" aria-hidden />
                   <div>
-                    <p className="text-primary-foreground/90">{bedSizeLabel(listing.bedSize)}</p>
+                    <p className="text-foreground">{bedSizeLabel(listing.bedSize)}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Ruler className="mt-0.5 size-4 text-primary-foreground/90" aria-hidden />
+                  <Ruler className="mt-0.5 size-4 text-foreground" aria-hidden />
                   <div>
-                    <p className="text-primary-foreground/90">
+                    <p className="text-foreground">
                       {listing.roomSizeSqm} m² aprox.
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Wind className="mt-0.5 size-4 text-primary-foreground/90" aria-hidden />
+                  <Wind className="mt-0.5 size-4 text-foreground" aria-hidden />
                   <div>
-                    <p className="text-primary-foreground/90">
+                    <p className="text-foreground">
                       {windowTypesLabel(listing.windowTypes as ListingWindowValue[])}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Sofa className="mt-0.5 size-4 text-primary-foreground/90" aria-hidden />
+                  <Sofa className="mt-0.5 size-4 text-foreground" aria-hidden />
                   <div>
-                    <p className="text-primary-foreground/90">
+                    <p className="text-foreground">
                       {listing.furnished ? "Amueblada" : "Sin amueblar"}
                     </p>
                   </div>
@@ -222,24 +234,24 @@ export default async function ListingDetailPage({
               <p className="text-sm font-medium">Piso</p>
               <div className="mt-3 space-y-3 text-sm text-muted-foreground">
                 <div className="flex items-start gap-3">
-                  <DoorOpen className="mt-0.5 size-4 text-primary-foreground/90" aria-hidden />
-                  <p className="text-primary-foreground/90">
+                  <DoorOpen className="mt-0.5 size-4 text-foreground" aria-hidden />
+                  <p className="text-foreground">
                     {listing.apartmentRooms} habitaciones
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Bath className="mt-0.5 size-4 text-primary-foreground/90" aria-hidden />
-                  <p className="text-primary-foreground/90">{listing.apartmentBaths} baños</p>
+                  <Bath className="mt-0.5 size-4 text-foreground" aria-hidden />
+                  <p className="text-foreground">{listing.apartmentBaths} baños</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Home className="mt-0.5 size-4 text-primary-foreground/90" aria-hidden />
-                  <p className="text-primary-foreground/90">
+                  <Home className="mt-0.5 size-4 text-foreground" aria-hidden />
+                  <p className="text-foreground">
                     {listing.apartmentSizeSqm} m² aprox.
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Wifi className="mt-0.5 size-4 text-primary-foreground/90" aria-hidden />
-                  <p className="text-primary-foreground/90">
+                  <Wifi className="mt-0.5 size-4 text-foreground" aria-hidden />
+                  <p className="text-foreground">
                     {listing.wifi ? "Con WIFI" : "Sin WIFI"}
                   </p>
                 </div>

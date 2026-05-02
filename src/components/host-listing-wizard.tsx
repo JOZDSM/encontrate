@@ -21,6 +21,14 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -215,6 +223,7 @@ function SortablePhoto({
 export function HostListingWizard() {
   const router = useRouter();
   const [stepIndex, setStepIndex] = useState(0);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
   // Step 1: listing title only for now.
   const [title, setTitle] = useState("");
@@ -879,11 +888,16 @@ export function HostListingWizard() {
                 size="sm"
                 className={cn("rounded-full")}
                 onClick={() => {
-                  if (stepIndex === 0) router.back();
+                  if (stepIndex === 0) setCancelDialogOpen(true);
                   else setStepIndex((s) => Math.max(0, s - 1));
                 }}
+                aria-label={
+                  stepIndex === 0
+                    ? "Cancelar carga del anuncio"
+                    : "Paso anterior"
+                }
               >
-                Atrás
+                {stepIndex === 0 ? "Cancelar" : "Atrás"}
               </Button>
 
               <Button
@@ -901,6 +915,37 @@ export function HostListingWizard() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent className="gap-4 border-border sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>¿Salir de cargar tu habitación?</DialogTitle>
+            <DialogDescription>
+              Si salís, se perderá lo que hayas cargado en este formulario.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full"
+              onClick={() => setCancelDialogOpen(false)}
+            >
+              Seguir editando
+            </Button>
+            <Button
+              type="button"
+              className="rounded-full"
+              onClick={() => {
+                setCancelDialogOpen(false);
+                router.back();
+              }}
+            >
+              Salir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

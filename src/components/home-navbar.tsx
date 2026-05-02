@@ -31,6 +31,7 @@ export function HomeNavbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const closeMenu = () => setMenuOpen(false);
+  const plainBackground = pathname?.startsWith("/listings");
 
   return (
     <>
@@ -39,7 +40,7 @@ export function HomeNavbar() {
           "fixed top-0 right-0 left-0 z-30 flex h-20 flex-col items-center justify-center border-b border-border px-4 md:h-28",
           "transition-[border-color] duration-300 ease-out",
           "md:border-transparent md:hover:border-border md:focus-within:border-border",
-          "bg-background text-foreground",
+          plainBackground ? "bg-background text-foreground" : undefined,
         )}
       >
         <div className="flex w-full max-w-[1440px] items-center justify-between">
@@ -47,7 +48,10 @@ export function HomeNavbar() {
             href="/"
             className={cn(
               logo.className,
-              "inline-flex items-center gap-2 text-2xl leading-8 text-foreground",
+              "inline-flex items-center gap-2 text-2xl leading-8",
+              plainBackground
+                ? "text-foreground"
+                : "text-primary-foreground dark:text-foreground",
             )}
             onClick={(e) => {
               if (pathname === "/") {
@@ -61,7 +65,14 @@ export function HomeNavbar() {
           </Link>
 
           <div className="hidden flex-wrap items-center justify-end gap-3 md:flex lg:gap-4">
-            <nav className="flex max-w-2xl flex-wrap items-center justify-end gap-x-2 gap-y-1 text-sm font-semibold text-foreground sm:gap-x-4">
+            <nav
+              className={cn(
+                "flex max-w-2xl flex-wrap items-center justify-end gap-x-2 gap-y-1 text-sm font-semibold sm:gap-x-4",
+                plainBackground
+                  ? "text-foreground"
+                  : "text-primary-foreground dark:text-foreground",
+              )}
+            >
               <Link
                 href="/listings"
                 className="whitespace-nowrap hover:underline hover:underline-offset-4"
@@ -113,7 +124,14 @@ export function HomeNavbar() {
 
               {showPanel ? (
                 designPreview ? (
-                  <span className="max-w-[10rem] text-xs leading-snug text-muted-foreground">
+                  <span
+                    className={cn(
+                      "max-w-[10rem] text-xs leading-snug",
+                      plainBackground
+                        ? "text-muted-foreground"
+                        : "text-primary-foreground/80 dark:text-foreground/80",
+                    )}
+                  >
                     Modo diseño (local)
                   </span>
                 ) : (

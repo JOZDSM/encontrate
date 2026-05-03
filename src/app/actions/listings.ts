@@ -137,6 +137,7 @@ export async function createListing(
 
   revalidatePath("/listings");
   revalidatePath("/host/listings");
+  revalidatePath("/mis-cosas/anuncios");
   return { ok: true, id: listing.id };
 }
 
@@ -200,6 +201,7 @@ export async function updateListing(
   revalidatePath("/listings");
   revalidatePath(`/listings/${id}`);
   revalidatePath("/host/listings");
+  revalidatePath("/mis-cosas/anuncios");
   revalidatePath(`/host/listings/${id}/edit`);
   return { ok: true };
 }

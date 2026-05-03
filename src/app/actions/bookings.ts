@@ -75,13 +75,13 @@ export async function createBookingRequest(
       subject: `Nueva solicitud: ${listing.title}`,
       html: `<p>Tienes una nueva solicitud de reserva en <strong>${listing.title}</strong>.</p>
         <p>Entrada: ${parsed.data.startDate} · Salida: ${parsed.data.endDate}</p>
-        <p><a href="${process.env.NEXT_PUBLIC_APP_URL ?? ""}/host/bookings">Ver solicitudes</a></p>`,
+        <p><a href="${process.env.NEXT_PUBLIC_APP_URL ?? ""}/mis-cosas/mensajes">Ver mensajes</a></p>`,
     });
   }
 
   revalidatePath(`/listings/${listing.id}`);
-  revalidatePath("/dashboard");
-  revalidatePath("/host/bookings");
+  revalidatePath("/mis-cosas/mensajes");
+  revalidatePath(`/dashboard/bookings/${booking.id}`);
   revalidatePath("/admin");
   return { ok: true, id: booking.id };
 }
@@ -139,12 +139,12 @@ export async function confirmBooking(
       subject: `Reserva confirmada: ${booking.listing.title}`,
       html: `<p>Tu reserva en <strong>${booking.listing.title}</strong> fue <strong>confirmada</strong>.</p>
         <p>Podrás ver la dirección completa en tu panel si el anfitrión la indicó.</p>
-        <p><a href="${process.env.NEXT_PUBLIC_APP_URL ?? ""}/dashboard">Ver mis reservas</a></p>`,
+        <p><a href="${process.env.NEXT_PUBLIC_APP_URL ?? ""}/mis-cosas/mensajes">Ver mensajes</a></p>`,
     });
   }
 
-  revalidatePath("/host/bookings");
-  revalidatePath("/dashboard");
+  revalidatePath("/mis-cosas/mensajes");
+  revalidatePath(`/dashboard/bookings/${bookingId}`);
   revalidatePath(`/listings/${booking.listingId}`);
   revalidatePath("/admin");
   return { ok: true };
@@ -182,8 +182,8 @@ export async function declineBooking(
     });
   }
 
-  revalidatePath("/host/bookings");
-  revalidatePath("/dashboard");
+  revalidatePath("/mis-cosas/mensajes");
+  revalidatePath(`/dashboard/bookings/${bookingId}`);
   revalidatePath("/admin");
   return { ok: true };
 }
@@ -223,8 +223,8 @@ export async function cancelBookingAsGuest(
     });
   }
 
-  revalidatePath("/dashboard");
-  revalidatePath("/host/bookings");
+  revalidatePath("/mis-cosas/mensajes");
+  revalidatePath(`/dashboard/bookings/${bookingId}`);
   revalidatePath(`/listings/${booking.listingId}`);
   revalidatePath("/admin");
   return { ok: true };

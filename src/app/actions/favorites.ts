@@ -38,7 +38,7 @@ export async function toggleListingFavorite(
     if (existing) {
       await prisma.favoriteListing.delete({ where: { id: existing.id } });
       revalidatePath("/listings");
-      revalidatePath("/dashboard/favoritos");
+      revalidatePath("/mis-cosas/favoritos");
       return { ok: true, favorited: false };
     }
 
@@ -46,7 +46,7 @@ export async function toggleListingFavorite(
       data: { userId: session.user.id, listingId },
     });
     revalidatePath("/listings");
-    revalidatePath("/dashboard/favoritos");
+    revalidatePath("/mis-cosas/favoritos");
     return { ok: true, favorited: true };
   } catch (e) {
     console.error("[toggleListingFavorite]", e);

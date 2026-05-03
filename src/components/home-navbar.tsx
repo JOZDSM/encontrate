@@ -27,7 +27,6 @@ export function HomeNavbar() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const showPanel = status === "authenticated" && session?.user;
-  const isAdmin = Boolean(session?.user?.isAdmin);
   const designPreview = Boolean(session?.user?.designPreview);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -87,47 +86,21 @@ export function HomeNavbar() {
                 Cargá habitación
               </Link>
               {showPanel ? (
-                <>
-                  <Link
-                    href="/host/listings"
-                    className="whitespace-nowrap hover:underline hover:underline-offset-4"
-                  >
-                    Mis anuncios
-                  </Link>
-                  <Link
-                    href="/dashboard/favoritos"
-                    className="whitespace-nowrap hover:underline hover:underline-offset-4"
-                  >
-                    Mis favoritos
-                  </Link>
-                  <Link
-                    href="/host/bookings"
-                    className="whitespace-nowrap hover:underline hover:underline-offset-4"
-                  >
-                    Solicitudes
-                  </Link>
-                  {isAdmin ? (
-                    <Link
-                      href="/admin"
-                      className="whitespace-nowrap hover:underline hover:underline-offset-4"
-                    >
-                      Admin
-                    </Link>
-                  ) : null}
-                </>
+                <Link
+                  href="/mis-cosas/mensajes"
+                  className="whitespace-nowrap hover:underline hover:underline-offset-4"
+                >
+                  Mis cosas
+                </Link>
               ) : null}
             </nav>
 
             <div className="flex flex-wrap items-center justify-end gap-2">
-              {showPanel ? (
-                <Button asChild size="default" variant="secondary" className="rounded-full shadow-xs">
-                  <Link href="/dashboard">Mi panel</Link>
-                </Button>
-              ) : (
+              {!showPanel ? (
                 <Button asChild size="default" variant="secondary" className="rounded-full shadow-xs">
                   <Link href="/login">Iniciá sesión / Registrate</Link>
                 </Button>
-              )}
+              ) : null}
 
               {showPanel ? (
                 designPreview ? (
@@ -174,9 +147,9 @@ export function HomeNavbar() {
               asChild
             >
               <Link
-                href={showPanel ? "/dashboard" : "/login"}
+                href={showPanel ? "/mis-cosas/mensajes" : "/login"}
                 aria-label={
-                  showPanel ? "Ir al panel" : "Iniciar sesión o registro"
+                  showPanel ? "Ir a mensajes" : "Iniciar sesión o registro"
                 }
               >
                 <Bell className="size-6" strokeWidth={2} />
@@ -219,45 +192,13 @@ export function HomeNavbar() {
             </Link>
             <div className="my-2 h-px bg-border" />
             {showPanel ? (
-              <>
-                <Link
-                  href="/dashboard"
-                  className="rounded-lg px-3 py-3 text-base font-semibold hover:bg-muted"
-                  onClick={closeMenu}
-                >
-                  Mi panel
-                </Link>
-                <Link
-                  href="/host/listings"
-                  className="rounded-lg px-3 py-3 text-base font-semibold hover:bg-muted"
-                  onClick={closeMenu}
-                >
-                  Mis anuncios
-                </Link>
-                <Link
-                  href="/dashboard/favoritos"
-                  className="rounded-lg px-3 py-3 text-base font-semibold hover:bg-muted"
-                  onClick={closeMenu}
-                >
-                  Mis favoritos
-                </Link>
-                <Link
-                  href="/host/bookings"
-                  className="rounded-lg px-3 py-3 text-base font-semibold hover:bg-muted"
-                  onClick={closeMenu}
-                >
-                  Solicitudes
-                </Link>
-                {isAdmin ? (
-                  <Link
-                    href="/admin"
-                    className="rounded-lg px-3 py-3 text-base font-semibold hover:bg-muted"
-                    onClick={closeMenu}
-                  >
-                    Admin
-                  </Link>
-                ) : null}
-              </>
+              <Link
+                href="/mis-cosas/mensajes"
+                className="rounded-lg px-3 py-3 text-base font-semibold hover:bg-muted"
+                onClick={closeMenu}
+              >
+                Mis cosas
+              </Link>
             ) : (
               <Link
                 href="/login"

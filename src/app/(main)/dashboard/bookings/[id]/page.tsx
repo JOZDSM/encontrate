@@ -52,8 +52,8 @@ export default async function BookingDetailPage({
       <Card className="border border-border bg-card shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
         <CardContent className="space-y-8 p-6 text-card-foreground">
           <div>
-            <Link href="/dashboard" className="text-sm text-muted-foreground underline">
-              ← Mis reservas
+            <Link href="/mis-cosas/mensajes" className="text-sm text-muted-foreground underline">
+              ← Mensajes
             </Link>
             <h1 className="mt-2 text-2xl font-semibold">{booking.listing.title}</h1>
             <p className="text-sm text-muted-foreground">

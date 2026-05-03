@@ -28,7 +28,7 @@ export function BookingRequestForm({ listingId }: { listingId: string }) {
       setMsg(res.error);
       return;
     }
-    router.push("/dashboard");
+    router.push("/mis-cosas/mensajes");
     router.refresh();
   }
 

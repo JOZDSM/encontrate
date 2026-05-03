@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { isUserApproved } from "@/lib/approval";
@@ -87,6 +88,10 @@ export async function sendHostInquiry(
     `;
     await sendEmail({ to: recipientEmail, subject, html }).catch(() => {});
   }
+
+  revalidatePath("/mis-cosas/mensajes");
+  revalidatePath(`/mis-cosas/mensajes/inquiry/${listing.id}/${session.user.id}`);
+  revalidatePath(`/mis-cosas/mensajes/inquiry/${listing.id}/${listing.hostId}`);
 
   return { ok: true };
 }

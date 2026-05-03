@@ -10,7 +10,7 @@ import { parseListingSort } from "@/lib/listing-sort";
 import { getPublicListings, type AvailabilityRange } from "@/lib/listing-queries";
 import { isUserApproved } from "@/lib/approval";
 import { isUserProfileComplete } from "@/lib/profile";
-import { prisma } from "@/lib/db";
+import { listFavoriteListingIdsForUser } from "@/lib/favorite-listings-db";
 import { cn } from "@/lib/utils";
 import { addDays } from "date-fns";
 
@@ -149,14 +149,10 @@ export default async function ListingsPage({
 
   const listings = await getPublicListings(publicListingOpts);
 
-  const favoriteRows =
+  const favoriteListingIds =
     session?.user?.id != null
-      ? await prisma.favoriteListing.findMany({
-          where: { userId: session.user.id },
-          select: { listingId: true },
-        })
+      ? await listFavoriteListingIdsForUser(session.user.id)
       : [];
-  const favoriteListingIds = favoriteRows.map((r) => r.listingId);
 
   const listingCards: ListingSearchResult[] = listings.map((l) => ({
     id: l.id,

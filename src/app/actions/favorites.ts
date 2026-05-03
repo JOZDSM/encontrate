@@ -28,23 +28,31 @@ export async function toggleListingFavorite(
   });
   if (!listing) return { ok: false, error: "Anuncio no encontrado." };
 
-  const existing = await prisma.favoriteListing.findUnique({
-    where: {
-      userId_listingId: { userId: session.user.id, listingId },
-    },
-  });
+  try {
+    const existing = await prisma.favoriteListing.findUnique({
+      where: {
+        userId_listingId: { userId: session.user.id, listingId },
+      },
+    });
 
-  if (existing) {
-    await prisma.favoriteListing.delete({ where: { id: existing.id } });
+    if (existing) {
+      await prisma.favoriteListing.delete({ where: { id: existing.id } });
+      revalidatePath("/listings");
+      revalidatePath("/dashboard/favoritos");
+      return { ok: true, favorited: false };
+    }
+
+    await prisma.favoriteListing.create({
+      data: { userId: session.user.id, listingId },
+    });
     revalidatePath("/listings");
     revalidatePath("/dashboard/favoritos");
-    return { ok: true, favorited: false };
+    return { ok: true, favorited: true };
+  } catch {
+    return {
+      ok: false,
+      error:
+        "No se pudo guardar el favorito. Si acabás de desplegar, ejecutá las migraciones de base de datos en este entorno (`prisma migrate deploy`).",
+    };
   }
-
-  await prisma.favoriteListing.create({
-    data: { userId: session.user.id, listingId },
-  });
-  revalidatePath("/listings");
-  revalidatePath("/dashboard/favoritos");
-  return { ok: true, favorited: true };
 }

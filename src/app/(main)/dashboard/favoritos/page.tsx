@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { isUserApproved } from "@/lib/approval";
 import { isUserProfileComplete } from "@/lib/profile";
 import type { ListingWindowValue } from "@/lib/listing-window-options";
-import { prisma } from "@/lib/db";
+import { listFavoriteRowsWithListings } from "@/lib/favorite-listings-db";
 
 export default async function MisFavoritosPage() {
   const session = await auth();
@@ -15,15 +15,7 @@ export default async function MisFavoritosPage() {
   if (!isUserProfileComplete(session)) redirect("/onboarding");
   if (!isUserApproved(session)) redirect("/pending");
 
-  const favorites = await prisma.favoriteListing.findMany({
-    where: { userId: session.user.id },
-    orderBy: { createdAt: "desc" },
-    include: {
-      listing: {
-        include: { photos: { orderBy: { sortOrder: "asc" } } },
-      },
-    },
-  });
+  const favorites = await listFavoriteRowsWithListings(session.user.id);
 
   const listingCards: ListingSearchResult[] = favorites.map((f) => {
     const l = f.listing;

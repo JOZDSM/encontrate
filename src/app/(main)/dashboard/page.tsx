@@ -34,7 +34,15 @@ export default async function DashboardPage() {
     <div className="mx-auto w-full max-w-5xl px-4 py-10">
       <Card className="border border-border bg-card shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
         <CardContent className="space-y-6 p-6 text-card-foreground">
-          <h1 className="text-2xl font-semibold">Mis reservas</h1>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h1 className="text-2xl font-semibold">Mis reservas</h1>
+            <Link
+              href="/dashboard/favoritos"
+              className="text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground"
+            >
+              Mis favoritos
+            </Link>
+          </div>
           {bookings.length === 0 ? (
             <p className="text-muted-foreground">
               Aún no tienes solicitudes.{" "}

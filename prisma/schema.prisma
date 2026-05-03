@@ -42,6 +42,7 @@ model User {
   listings Listing[] @relation("HostListings")
   bookings Booking[] @relation("GuestBookings")
   messages Message[]
+  favoriteListings FavoriteListing[]
 }
 
 model SignupProfile {
@@ -125,8 +126,22 @@ model Listing {
   blocks   AvailabilityBlock[]
   bookings Booking[]
   messages Message[]
+  favoritedBy FavoriteListing[]
 
   @@index([city, country])
+}
+
+model FavoriteListing {
+  id        String   @id @default(cuid())
+  userId    String
+  listingId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, listingId])
+  @@index([userId])
+  @@index([listingId])
 }
 
 model ListingPhoto {

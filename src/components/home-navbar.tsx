@@ -95,6 +95,12 @@ export function HomeNavbar() {
                     Mis anuncios
                   </Link>
                   <Link
+                    href="/dashboard/favoritos"
+                    className="whitespace-nowrap hover:underline hover:underline-offset-4"
+                  >
+                    Mis favoritos
+                  </Link>
+                  <Link
                     href="/host/bookings"
                     className="whitespace-nowrap hover:underline hover:underline-offset-4"
                   >
@@ -227,6 +233,13 @@ export function HomeNavbar() {
                   onClick={closeMenu}
                 >
                   Mis anuncios
+                </Link>
+                <Link
+                  href="/dashboard/favoritos"
+                  className="rounded-lg px-3 py-3 text-base font-semibold hover:bg-muted"
+                  onClick={closeMenu}
+                >
+                  Mis favoritos
                 </Link>
                 <Link
                   href="/host/bookings"

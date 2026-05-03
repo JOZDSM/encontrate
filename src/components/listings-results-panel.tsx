@@ -24,9 +24,15 @@ function SortFallback() {
 export function ListingsResultsPanel({
   listings,
   sort,
+  favoriteListingIds = [],
+  canSaveFavorite = false,
 }: {
   listings: ListingSearchResult[];
   sort: PublicListingSort;
+  /** Listing ids the current user has saved (for heart state). */
+  favoriteListingIds?: string[];
+  /** Logged-in guest: allow toggling favorites (listings page sets true). */
+  canSaveFavorite?: boolean;
 }) {
   return (
     <Card className="bg-card text-card-foreground flex min-h-0 flex-1 flex-col gap-0 overflow-hidden rounded-md py-0">
@@ -44,7 +50,11 @@ export function ListingsResultsPanel({
           <ul className="flex flex-col gap-4">
             {listings.map((l) => (
               <li key={l.id}>
-                <ListingSearchResultCard listing={l} />
+                <ListingSearchResultCard
+                  listing={l}
+                  initialFavorite={favoriteListingIds.includes(l.id)}
+                  canSaveFavorite={canSaveFavorite}
+                />
               </li>
             ))}
           </ul>

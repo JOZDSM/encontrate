@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import type { ListingSearchResult } from "@/components/listing-search-result-card";
+import type { ListingWindowValue } from "@/lib/listing-window-options";
 import { ListingsFilterPanel } from "@/components/listings-filter-panel";
 import { ListingsResultsPanel } from "@/components/listings-results-panel";
 import { parseBarcelonaZonesParam } from "@/lib/barcelona-zones";
@@ -9,6 +10,7 @@ import { parseListingSort } from "@/lib/listing-sort";
 import { getPublicListings, type AvailabilityRange } from "@/lib/listing-queries";
 import { isUserApproved } from "@/lib/approval";
 import { isUserProfileComplete } from "@/lib/profile";
+import { prisma } from "@/lib/db";
 import { cn } from "@/lib/utils";
 import { addDays } from "date-fns";
 
@@ -147,6 +149,15 @@ export default async function ListingsPage({
 
   const listings = await getPublicListings(publicListingOpts);
 
+  const favoriteRows =
+    session?.user?.id != null
+      ? await prisma.favoriteListing.findMany({
+          where: { userId: session.user.id },
+          select: { listingId: true },
+        })
+      : [];
+  const favoriteListingIds = favoriteRows.map((r) => r.listingId);
+
   const listingCards: ListingSearchResult[] = listings.map((l) => ({
     id: l.id,
     title: l.title,
@@ -154,6 +165,9 @@ export default async function ListingsPage({
     neighborhood: l.neighborhood,
     city: l.city,
     priceNote: l.priceNote ?? null,
+    bedSize: l.bedSize,
+    roomSizeSqm: l.roomSizeSqm,
+    windowTypes: l.windowTypes as ListingWindowValue[],
     photos: l.photos.map((p) => ({ url: p.url })),
   }));
 
@@ -187,7 +201,12 @@ export default async function ListingsPage({
           </aside>
 
           <section className="text-card-foreground flex min-h-[min(50vh,400px)] min-w-0 flex-1 flex-col md:min-h-0">
-            <ListingsResultsPanel listings={listingCards} sort={sort} />
+            <ListingsResultsPanel
+              listings={listingCards}
+              sort={sort}
+              favoriteListingIds={favoriteListingIds}
+              canSaveFavorite={Boolean(session?.user?.id)}
+            />
           </section>
         </div>
       </div>

@@ -63,6 +63,11 @@ import {
 } from "@/lib/listing-window-options";
 import { createListing } from "@/app/actions/listings";
 import { BARCELONA_ZONE_LABELS } from "@/lib/barcelona-zones";
+import {
+  LISTING_PHOTO_SIZE_HELPER_ES,
+  LISTING_PHOTO_TOO_LARGE_MESSAGE,
+  MAX_LISTING_PHOTO_BYTES,
+} from "@/lib/listing-photo-upload";
 
 const TOTAL_STEPS = 6;
 
@@ -338,8 +343,7 @@ export function HostListingWizard() {
         if (res.status === 401) message = "Tenés que iniciar sesión.";
         else if (res.status === 403)
           message = "Tu cuenta está pendiente de aprobación.";
-        else if (res.status === 413)
-          message = "La imagen es demasiado grande (máx. 4 MB).";
+        else if (res.status === 413) message = LISTING_PHOTO_TOO_LARGE_MESSAGE;
       }
       throw new Error(message);
     }
@@ -356,6 +360,16 @@ export function HostListingWizard() {
     if (picked.length === 0) {
       setPhotoUploadError(
         "No encontramos imágenes válidas (JPEG, PNG, WebP, GIF…).",
+      );
+      return;
+    }
+
+    const oversize = picked.filter((f) => f.size > MAX_LISTING_PHOTO_BYTES);
+    if (oversize.length > 0) {
+      setPhotoUploadError(
+        oversize.length === 1
+          ? LISTING_PHOTO_TOO_LARGE_MESSAGE
+          : `${oversize.length} fotos superan el máximo de 4 MB cada una. Comprimilas o elegí otras.`,
       );
       return;
     }
@@ -379,6 +393,10 @@ export function HostListingWizard() {
       setPhotoUploadError(
         "Elegí un archivo de imagen (JPEG, PNG, WebP, GIF…).",
       );
+      return;
+    }
+    if (file.size > MAX_LISTING_PHOTO_BYTES) {
+      setPhotoUploadError(LISTING_PHOTO_TOO_LARGE_MESSAGE);
       return;
     }
     setPhotoUploadError(null);
@@ -663,6 +681,9 @@ export function HostListingWizard() {
                         ni galería en la página pública. Podés sumar hasta 5 fotos (y editarlas
                         después).
                       </p>
+                      <p className="text-sm leading-5 text-muted-foreground">
+                        {LISTING_PHOTO_SIZE_HELPER_ES}
+                      </p>
                     </>
                   ) : (
                     <>
@@ -674,6 +695,9 @@ export function HostListingWizard() {
                           <p className="text-sm leading-5 text-muted-foreground">
                             Podés cambiar el orden de tus fotos arrastrándolas a donde
                             prefieras.
+                          </p>
+                          <p className="text-sm leading-5 text-muted-foreground">
+                            {LISTING_PHOTO_SIZE_HELPER_ES}
                           </p>
                         </div>
                         {photos.length < 5 ? (

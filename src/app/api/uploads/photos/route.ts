@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { auth } from "@/auth";
 import { isUserApproved } from "@/lib/approval";
+import {
+  LISTING_PHOTO_TOO_LARGE_MESSAGE,
+  MAX_LISTING_PHOTO_BYTES,
+} from "@/lib/listing-photo-upload";
 
 export const runtime = "nodejs";
-
-/** Vercel server uploads are capped (~4.5MB); stay under that. */
-const maxBytes = 4 * 1024 * 1024;
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -43,9 +44,9 @@ export async function POST(req: Request) {
     );
   }
 
-  if (raw.size > maxBytes) {
+  if (raw.size > MAX_LISTING_PHOTO_BYTES) {
     return NextResponse.json(
-      { error: "La imagen es demasiado grande (máx. 4 MB)." },
+      { error: LISTING_PHOTO_TOO_LARGE_MESSAGE },
       { status: 413 },
     );
   }

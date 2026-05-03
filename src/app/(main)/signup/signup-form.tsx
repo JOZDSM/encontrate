@@ -58,7 +58,7 @@ export function SignupForm() {
     const res = await signIn("resend", {
       email,
       redirect: false,
-      callbackUrl: "/listings",
+      callbackUrl: "/mis-cosas",
     });
 
     setLoading(false);
@@ -86,7 +86,7 @@ export function SignupForm() {
       return;
     }
     // Google sign-in will pick up the stored SignupProfile on signIn event.
-    await signIn("google", { callbackUrl: "/listings" });
+    await signIn("google", { callbackUrl: "/mis-cosas" });
     setLoading(false);
   }
 

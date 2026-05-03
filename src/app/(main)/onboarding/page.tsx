@@ -11,7 +11,7 @@ export default async function OnboardingPage() {
 
   if (isUserProfileComplete(session)) {
     // If profile is complete, send them where they belong.
-    redirect(isUserApproved(session) ? "/listings" : "/pending");
+    redirect(isUserApproved(session) ? "/mis-cosas" : "/pending");
   }
 
   return (
@@ -31,7 +31,7 @@ export default async function OnboardingPage() {
             <OnboardingForm
               defaultName={session.user.name ?? ""}
               defaultWhatsappNumber={session.user.whatsappNumber ?? ""}
-              afterUrl={isUserApproved(session) ? "/listings" : "/pending"}
+              afterUrl={isUserApproved(session) ? "/mis-cosas" : "/pending"}
             />
           </div>
         </Card>

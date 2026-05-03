@@ -24,7 +24,7 @@ export function LoginForm() {
     const res = await signIn("resend", {
       email,
       redirect: false,
-      callbackUrl: "/listings",
+      callbackUrl: "/mis-cosas",
     });
     setLoading(false);
     if (res?.error) {
@@ -94,7 +94,7 @@ export function LoginForm() {
               variant="secondary"
               size="sm"
               className="w-full rounded-full font-medium shadow-xs"
-              onClick={() => signIn("google", { callbackUrl: "/listings" })}
+              onClick={() => signIn("google", { callbackUrl: "/mis-cosas" })}
             >
               Continuar con Google
             </Button>

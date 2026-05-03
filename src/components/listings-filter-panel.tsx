@@ -583,7 +583,7 @@ export function ListingsFilterPanel({
         </CardHeader>
 
         <CardContent className="flex min-h-0 flex-1 flex-col px-6 pb-0">
-          <div className="-mx-6 min-h-0 flex-1 overflow-y-auto px-6">
+          <div className="-mx-6 min-h-0 flex-1 px-6 md:overflow-y-auto">
             <div className="flex flex-col gap-2 pb-6">
             <FilterSection title={whereTitle}>
               <BarcelonaZonePicker

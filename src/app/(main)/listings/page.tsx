@@ -162,8 +162,8 @@ export default async function ListingsPage({
       <div className="flex min-h-0 flex-1 flex-col px-4">
         <div
           className={cn(
-            "mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 flex-col gap-4 overflow-y-auto py-6",
-            "md:flex-row md:gap-6 md:min-h-0 md:py-6",
+            "mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 flex-col gap-4 py-6",
+            "md:flex-row md:gap-6 md:min-h-0 md:overflow-y-auto md:py-6",
           )}
         >
           <aside className="flex min-h-[min(42vh,340px)] w-full shrink-0 flex-col md:min-h-0 md:w-[min(460px,38vw)] md:max-w-[460px] md:flex-none">

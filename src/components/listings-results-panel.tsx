@@ -35,7 +35,7 @@ export function ListingsResultsPanel({
           <ListingsSortSelect defaultSort={sort} />
         </Suspense>
       </CardHeader>
-      <CardContent className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 py-5">
+      <CardContent className="flex min-h-0 flex-1 flex-col px-6 py-5 md:overflow-y-auto">
         {listings.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No hay habitaciones con esos criterios.

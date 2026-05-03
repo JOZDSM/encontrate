@@ -8,8 +8,7 @@ import { stripHtmlForSnippet } from "@/lib/listing-description-html";
 import { formatListingCardSpecLine } from "@/lib/listing-card-preview";
 import type { ListingWindowValue } from "@/lib/listing-window-options";
 import { ListingFavoriteButton } from "@/components/listing-favorite-button";
-
-const THUMB_PX = 162;
+import { cn } from "@/lib/utils";
 
 /** Minimal plain shape from the server — avoids RSC/flight dropping nested Prisma relations. */
 export type ListingSearchResult = {
@@ -25,14 +24,23 @@ export type ListingSearchResult = {
   photos: { url: string }[];
 };
 
-function ListingCoverThumb({ url }: { url: string }) {
+function ListingCoverThumb({
+  url,
+  className,
+}: {
+  url: string;
+  className?: string;
+}) {
   const [loadFailed, setLoadFailed] = useState(false);
   const showImg = url.length > 0 && !loadFailed;
 
   return (
     <div
-      className="relative shrink-0 overflow-hidden bg-muted"
-      style={{ width: THUMB_PX, height: THUMB_PX }}
+      className={cn(
+        "relative shrink-0 overflow-hidden bg-muted",
+        "aspect-[16/10] w-full md:aspect-auto md:h-[162px] md:w-[162px]",
+        className,
+      )}
     >
       {showImg ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -75,15 +83,15 @@ export function ListingSearchResultCard({
   const plainDescription = stripHtmlForSnippet(listing.description);
 
   return (
-    <Card className="relative flex flex-row items-stretch gap-0 overflow-hidden py-0 transition-colors hover:bg-muted/15">
-      <div className="flex min-h-[162px] min-w-0 flex-1 flex-row items-stretch gap-6">
+    <Card className="relative flex flex-col gap-0 overflow-hidden py-0 transition-colors hover:bg-muted/15 md:flex-row md:items-stretch">
+      <div className="relative flex min-w-0 flex-1 flex-col md:flex-row md:items-stretch">
         <Link
           href={`/listings/${listing.id}`}
-          className="text-card-foreground flex min-w-0 flex-1 flex-row items-stretch no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="text-card-foreground flex min-w-0 flex-1 flex-col no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:flex-row md:items-stretch"
         >
           <ListingCoverThumb key={coverUrl || "none"} url={coverUrl} />
 
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col py-4 pl-6">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col px-4 pb-4 pt-3 md:min-h-[162px] md:px-0 md:py-4 md:pl-6 md:pr-6">
             <h3 className="text-pretty m-0 text-sm leading-snug font-semibold sm:text-base">
               {listing.title}
             </h3>
@@ -95,19 +103,21 @@ export function ListingSearchResultCard({
                 {locality.join(" · ")}
               </p>
             ) : null}
-            <p className="mt-6 line-clamp-3 text-xs leading-snug text-muted-foreground sm:text-sm">
+            <p className="mt-3 line-clamp-3 text-xs leading-snug text-muted-foreground sm:mt-6 sm:text-sm">
               {plainDescription}
             </p>
           </div>
         </Link>
 
-        <div className="flex shrink-0 flex-col items-start pr-6 pt-4">
-          <ListingFavoriteButton
-            key={`${listing.id}-${initialFavorite}`}
-            listingId={listing.id}
-            initialFavorite={initialFavorite}
-            canSave={canSaveFavorite}
-          />
+        <div className="pointer-events-none absolute left-0 top-0 z-10 flex w-full justify-end p-2 md:w-[162px] md:max-w-[162px] md:p-2">
+          <div className="pointer-events-auto rounded-md bg-background/80 shadow-sm backdrop-blur-sm">
+            <ListingFavoriteButton
+              key={`${listing.id}-${initialFavorite}`}
+              listingId={listing.id}
+              initialFavorite={initialFavorite}
+              canSave={canSaveFavorite}
+            />
+          </div>
         </div>
       </div>
     </Card>

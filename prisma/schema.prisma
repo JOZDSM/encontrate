@@ -43,6 +43,21 @@ model User {
   bookings Booking[] @relation("GuestBookings")
   messages Message[]
   favoriteListings FavoriteListing[]
+
+  emailChangeRequests EmailChangeRequest[]
+}
+
+/// Pending email change: user must open link sent to `newEmail` before it applies.
+model EmailChangeRequest {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  newEmail  String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model SignupProfile {

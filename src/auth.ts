@@ -78,11 +78,12 @@ export async function auth(): Promise<Session | null> {
       where: { id: session.user.id },
       select: { isAdmin: true, isApproved: true, whatsappNumber: true },
     });
-    if (fresh) {
-      session.user.isAdmin = session.user.isAdmin || fresh.isAdmin;
-      session.user.isApproved = fresh.isApproved;
-      session.user.whatsappNumber = fresh.whatsappNumber;
+    if (!fresh) {
+      return null;
     }
+    session.user.isAdmin = session.user.isAdmin || fresh.isAdmin;
+    session.user.isApproved = fresh.isApproved;
+    session.user.whatsappNumber = fresh.whatsappNumber;
   } catch {
     // If the DB is temporarily unavailable/misconfigured, don't crash every page render.
     // Pages/actions that truly require DB access will fail in a more specific place.

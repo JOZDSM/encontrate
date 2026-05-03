@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { normalizeWhatsappE164 } from "@/lib/whatsapp-e164";
 
 const SignupProfileInputSchema = z.object({
   email: z.string().trim().email(),
@@ -14,19 +14,17 @@ const SignupProfileInputSchema = z.object({
     .max(40)
     .transform((raw) => raw.replace(/\s+/g, " "))
     .superRefine((raw, ctx) => {
-      const digitsOnly = raw.replace(/[^\d+]/g, "");
-      const phone = parsePhoneNumberFromString(digitsOnly);
-      if (!phone || !phone.isValid()) {
+      const r = normalizeWhatsappE164(raw);
+      if (!r.ok) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Número de WhatsApp inválido. Usá formato internacional (E.164), ej: +34600111222.",
+          message: r.message,
         });
       }
     })
     .transform((raw) => {
-      const digitsOnly = raw.replace(/[^\d+]/g, "");
-      const phone = parsePhoneNumberFromString(digitsOnly);
-      return phone ? phone.number : raw;
+      const r = normalizeWhatsappE164(raw);
+      return r.ok ? r.value : raw;
     }),
 });
 

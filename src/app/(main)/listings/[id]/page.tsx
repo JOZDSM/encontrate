@@ -9,6 +9,8 @@ import { prisma } from "@/lib/db";
 import { isUserApproved } from "@/lib/approval";
 import { isUserProfileComplete } from "@/lib/profile";
 import { canSeeFullAddress } from "@/lib/listing-visibility";
+import { canEditListingAsOwnerOrAdmin } from "@/lib/listing-edit-permissions";
+import { isPlatformAdmin } from "@/lib/admin";
 import { ListingHostContact } from "@/components/listing-host-contact";
 import {
   Bath,
@@ -72,6 +74,7 @@ export default async function ListingDetailPage({
 
   const showAddress = await canSeeFullAddress(session, listing);
   const isHost = session?.user?.id === listing.hostId;
+  const canEdit = canEditListingAsOwnerOrAdmin(session, listing.hostId);
   const monthlyPrice = formatMonthlyPriceEur(listing.priceMonthlyEur);
   const hostName = listing.host.name?.trim() || "Anfitrión";
 
@@ -100,7 +103,7 @@ export default async function ListingDetailPage({
               <span className="text-muted-foreground">{monthlyPrice}</span>
             ) : null}
           </div>
-          {isHost ? (
+          {canEdit ? (
             <div className="pt-1">
               <Button variant="outline" size="sm" asChild>
                 <Link href={`/host/listings/${listing.id}/edit`}>Editar anuncio</Link>
@@ -158,7 +161,7 @@ export default async function ListingDetailPage({
         ) : (
           <section className="rounded-2xl border border-dashed border-border bg-muted/15 px-4 py-10 text-center text-sm text-muted-foreground">
             <p>Este anuncio no tiene fotos cargadas.</p>
-            {isHost ? (
+            {canEdit ? (
               <p className="mt-2">
                 <Button
                   variant="link"
@@ -294,7 +297,7 @@ export default async function ListingDetailPage({
 
         <Separator className="my-8" />
 
-        {!isHost ? (
+        {!isHost && !isPlatformAdmin(session) ? (
           session?.user ? (
             <section>
               <BookingRequestForm listingId={listing.id} />

@@ -3,10 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/auth";
-import {
-  designPreviewAllowsEditAnyListing,
-  designPreviewWriteBlockedMessage,
-} from "@/lib/design-preview";
+import { designPreviewWriteBlockedMessage } from "@/lib/design-preview";
 import { BARCELONA_ZONE_LABELS } from "@/lib/barcelona-zones";
 import { isUserApproved } from "@/lib/approval";
 import { prisma } from "@/lib/db";
@@ -14,6 +11,7 @@ import {
   listingDescriptionPlainTextLength,
   sanitizeListingDescriptionHtml,
 } from "@/lib/listing-description-html";
+import { canEditListingAsOwnerOrAdmin } from "@/lib/listing-edit-permissions";
 
 const allowedNeighborhoodLabels = new Set(
   Object.values(BARCELONA_ZONE_LABELS).map((s) => s.trim()),
@@ -154,12 +152,7 @@ export async function updateListing(
   if (previewBlock) return { ok: false, error: previewBlock };
 
   const listing = await prisma.listing.findUnique({ where: { id } });
-  const allowAnyPreview =
-    designPreviewAllowsEditAnyListing() && Boolean(session.user.designPreview);
-  if (
-    !listing ||
-    (!allowAnyPreview && listing.hostId !== session.user.id)
-  ) {
+  if (!listing || !canEditListingAsOwnerOrAdmin(session, listing.hostId)) {
     return { ok: false, error: "No autorizado." };
   }
 

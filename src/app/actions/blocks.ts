@@ -3,12 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/auth";
-import {
-  designPreviewAllowsEditAnyListing,
-  designPreviewWriteBlockedMessage,
-} from "@/lib/design-preview";
+import { designPreviewWriteBlockedMessage } from "@/lib/design-preview";
 import { isUserApproved } from "@/lib/approval";
 import { prisma } from "@/lib/db";
+import { canEditListingAsOwnerOrAdmin } from "@/lib/listing-edit-permissions";
 import { parseDateOnly } from "@/lib/dates";
 
 const blockSchema = z.object({
@@ -35,12 +33,7 @@ export async function createAvailabilityBlock(
   const listing = await prisma.listing.findUnique({
     where: { id: parsed.data.listingId },
   });
-  const allowAnyPreview =
-    designPreviewAllowsEditAnyListing() && Boolean(session.user.designPreview);
-  if (
-    !listing ||
-    (!allowAnyPreview && listing.hostId !== session.user.id)
-  ) {
+  if (!listing || !canEditListingAsOwnerOrAdmin(session, listing.hostId)) {
     return { ok: false, error: "No autorizado." };
   }
 
@@ -81,11 +74,9 @@ export async function deleteAvailabilityBlock(
     where: { id: blockId },
     include: { listing: true },
   });
-  const allowAnyPreview =
-    designPreviewAllowsEditAnyListing() && Boolean(session.user.designPreview);
   if (
     !block ||
-    (!allowAnyPreview && block.listing.hostId !== session.user.id)
+    !canEditListingAsOwnerOrAdmin(session, block.listing.hostId)
   ) {
     return { ok: false, error: "No autorizado." };
   }

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AvailabilityBlockForm } from "@/components/availability-block-form";
-import { designPreviewAllowsEditAnyListing } from "@/lib/design-preview";
+import { canEditListingAsOwnerOrAdmin } from "@/lib/listing-edit-permissions";
 import { DeleteBlockButton } from "@/components/delete-block-button";
 import { HostListingForm } from "@/components/host-listing-form";
 import { ListingAvailabilityCalendar } from "@/components/listing-availability-calendar";
@@ -35,9 +35,7 @@ export default async function EditListingPage({
       },
     },
   });
-  const allowAnyPreview =
-    Boolean(session.user.designPreview) && designPreviewAllowsEditAnyListing();
-  if (!listing || (!allowAnyPreview && listing.hostId !== session.user.id)) {
+  if (!listing || !canEditListingAsOwnerOrAdmin(session, listing.hostId)) {
     notFound();
   }
 

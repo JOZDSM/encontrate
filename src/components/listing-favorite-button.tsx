@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { toggleListingFavorite } from "@/app/actions/favorites";
 import { cn } from "@/lib/utils";
@@ -15,12 +16,9 @@ export function ListingFavoriteButton({
   /** When false, click sends the user to login (listings flow). */
   canSave: boolean;
 }) {
+  const router = useRouter();
   const [favorited, setFavorited] = useState(initialFavorite);
-  const [pending, startTransition] = useTransition();
-
-  useEffect(() => {
-    setFavorited(initialFavorite);
-  }, [initialFavorite, listingId]);
+  const [pending, setPending] = useState(false);
 
   return (
     <button
@@ -34,7 +32,7 @@ export function ListingFavoriteButton({
           ? "text-red-500"
           : "text-muted-foreground hover:text-card-foreground",
       )}
-      onClick={(e) => {
+      onClick={async (e) => {
         e.preventDefault();
         e.stopPropagation();
         if (!canSave) {
@@ -47,14 +45,18 @@ export function ListingFavoriteButton({
         }
         const was = favorited;
         setFavorited(!was);
-        startTransition(async () => {
+        setPending(true);
+        try {
           const res = await toggleListingFavorite(listingId);
           if (!res.ok) {
             setFavorited(was);
-          } else {
-            setFavorited(res.favorited);
+            return;
           }
-        });
+          setFavorited(res.favorited);
+          router.refresh();
+        } finally {
+          setPending(false);
+        }
       }}
     >
       <Heart

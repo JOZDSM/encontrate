@@ -76,33 +76,34 @@ export function ListingSearchResultCard({
 
   return (
     <Card className="relative flex flex-row items-stretch gap-0 overflow-hidden py-0 transition-colors hover:bg-muted/15">
-      <div className="flex min-h-[162px] min-w-0 flex-1 flex-row items-stretch">
+      <div className="flex min-h-[162px] min-w-0 flex-1 flex-row items-stretch gap-6">
         <Link
           href={`/listings/${listing.id}`}
-          className="text-card-foreground flex min-w-0 flex-1 flex-row items-start gap-4 py-4 pl-4 no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="text-card-foreground flex min-w-0 flex-1 flex-row items-stretch no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           <ListingCoverThumb key={coverUrl || "none"} url={coverUrl} />
 
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-1.5 pr-2">
-            <h3 className="text-pretty text-sm leading-snug font-semibold sm:text-base">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col py-4 pl-6">
+            <h3 className="text-pretty m-0 text-sm leading-snug font-semibold sm:text-base">
               {listing.title}
             </h3>
-            <p className="text-xs leading-snug text-muted-foreground sm:text-sm">
+            <p className="m-0 text-xs leading-snug text-muted-foreground sm:text-sm">
               {specLine}
             </p>
             {locality.length > 0 ? (
-              <p className="text-xs text-muted-foreground sm:text-sm">
+              <p className="m-0 text-xs leading-snug text-muted-foreground sm:text-sm">
                 {locality.join(" · ")}
               </p>
             ) : null}
-            <p className="line-clamp-3 text-xs leading-snug text-muted-foreground sm:text-sm">
+            <p className="mt-6 line-clamp-3 text-xs leading-snug text-muted-foreground sm:text-sm">
               {plainDescription}
             </p>
           </div>
         </Link>
 
-        <div className="flex shrink-0 flex-col items-center pt-4 pr-3">
+        <div className="flex shrink-0 flex-col items-start pr-6 pt-4">
           <ListingFavoriteButton
+            key={`${listing.id}-${initialFavorite}`}
             listingId={listing.id}
             initialFavorite={initialFavorite}
             canSave={canSaveFavorite}

@@ -45,12 +45,12 @@ export default async function RootLayout({
           <SiteChrome>
             <main className="flex min-h-0 flex-1 flex-col overflow-visible pt-20 md:overflow-hidden md:pt-28">
               <div className="flex min-h-0 flex-1 flex-col overflow-visible md:overflow-y-auto md:overscroll-y-contain md:pb-4">
-                {children}
-                <div className="md:hidden">
+                <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+                <div className="shrink-0 md:hidden">
                   <SiteFooter />
                 </div>
               </div>
-              <div className="hidden md:block">
+              <div className="hidden shrink-0 md:block">
                 <SiteFooter />
               </div>
             </main>

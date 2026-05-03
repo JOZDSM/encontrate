@@ -48,11 +48,21 @@ export async function toggleListingFavorite(
     revalidatePath("/listings");
     revalidatePath("/dashboard/favoritos");
     return { ok: true, favorited: true };
-  } catch {
+  } catch (e) {
+    console.error("[toggleListingFavorite]", e);
+    const hint =
+      e instanceof Error &&
+      (e.message.includes("does not exist") ||
+        e.message.includes("FavoriteListing") ||
+        e.message.includes("P2021"))
+        ? " La tabla de favoritos no existe en esta base: ejecutá `npx prisma migrate deploy` con el DATABASE_URL de producción."
+        : "";
     return {
       ok: false,
       error:
-        "No se pudo guardar el favorito. Si acabás de desplegar, ejecutá las migraciones de base de datos en este entorno (`prisma migrate deploy`).",
+        "No se pudo guardar el favorito." +
+        hint +
+        (hint ? "" : " Revisá los logs del servidor o probá de nuevo."),
     };
   }
 }

@@ -23,6 +23,22 @@ const logo = Poppins({
   subsets: ["latin"],
 });
 
+function isBuscarHabitacionPath(p: string | null): boolean {
+  return Boolean(p && (p === "/listings" || p.startsWith("/listings/")));
+}
+
+function isCargaHabitacionPath(p: string | null): boolean {
+  return Boolean(
+    p &&
+      (p === "/host/listings/new" ||
+        /^\/host\/listings\/[^/]+\/edit$/.test(p)),
+  );
+}
+
+function isMisCosasPath(p: string | null): boolean {
+  return Boolean(p && p.startsWith("/mis-cosas"));
+}
+
 export function HomeNavbar() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
@@ -32,6 +48,22 @@ export function HomeNavbar() {
 
   const closeMenu = () => setMenuOpen(false);
   const plainBackground = isPublicListingDetailPath(pathname);
+
+  const buscarActive = isBuscarHabitacionPath(pathname);
+  const cargarActive = isCargaHabitacionPath(pathname);
+  const misCosasActive = isMisCosasPath(pathname);
+
+  const desktopNavItem = (active: boolean) =>
+    cn(
+      "whitespace-nowrap underline-offset-4 hover:underline hover:underline-offset-4",
+      active && "underline",
+    );
+
+  const mobileNavItem = (active: boolean) =>
+    cn(
+      "rounded-lg px-3 py-3 text-base font-semibold hover:bg-muted",
+      active && "bg-muted",
+    );
 
   return (
     <>
@@ -75,20 +107,23 @@ export function HomeNavbar() {
             >
               <Link
                 href="/listings"
-                className="whitespace-nowrap hover:underline hover:underline-offset-4"
+                className={desktopNavItem(buscarActive)}
+                aria-current={buscarActive ? "page" : undefined}
               >
                 Buscá habitación
               </Link>
               <Link
                 href="/host/listings/new"
-                className="whitespace-nowrap hover:underline hover:underline-offset-4"
+                className={desktopNavItem(cargarActive)}
+                aria-current={cargarActive ? "page" : undefined}
               >
                 Cargá habitación
               </Link>
               {showPanel ? (
                 <Link
                   href="/mis-cosas/mensajes"
-                  className="whitespace-nowrap hover:underline hover:underline-offset-4"
+                  className={desktopNavItem(misCosasActive)}
+                  aria-current={misCosasActive ? "page" : undefined}
                 >
                   Mis cosas
                 </Link>
@@ -178,14 +213,16 @@ export function HomeNavbar() {
           <nav className="flex flex-col gap-1">
             <Link
               href="/listings"
-              className="rounded-lg px-3 py-3 text-base font-semibold hover:bg-muted"
+              className={mobileNavItem(buscarActive)}
+              aria-current={buscarActive ? "page" : undefined}
               onClick={closeMenu}
             >
               Buscá habitación
             </Link>
             <Link
               href="/host/listings/new"
-              className="rounded-lg px-3 py-3 text-base font-semibold hover:bg-muted"
+              className={mobileNavItem(cargarActive)}
+              aria-current={cargarActive ? "page" : undefined}
               onClick={closeMenu}
             >
               Cargá habitación
@@ -194,7 +231,8 @@ export function HomeNavbar() {
             {showPanel ? (
               <Link
                 href="/mis-cosas/mensajes"
-                className="rounded-lg px-3 py-3 text-base font-semibold hover:bg-muted"
+                className={mobileNavItem(misCosasActive)}
+                aria-current={misCosasActive ? "page" : undefined}
                 onClick={closeMenu}
               >
                 Mis cosas

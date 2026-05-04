@@ -22,6 +22,7 @@ export function OnboardingForm({
   const [whatsappNumber, setWhatsappNumber] = useState(defaultWhatsappNumber);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const phoneState = useMemo(() => {
     const trimmed = whatsappNumber.trim();
@@ -39,20 +40,23 @@ export function OnboardingForm({
       className="flex flex-col gap-5"
       onSubmit={async (e) => {
         e.preventDefault();
-        if (!canSubmit) return;
+        if (!canSubmit || loading) return;
         setLoading(true);
         setError(null);
+        setSuccess(null);
         const res = await updateMyProfileAction({
           name,
           whatsappNumber: phoneState.normalized || whatsappNumber,
         });
-        setLoading(false);
         if (!res.ok) {
+          setLoading(false);
           setError(res.error);
           return;
         }
-        router.push(afterUrl);
-        router.refresh();
+        setSuccess("Perfil guardado. Redirigiendo…");
+        // Replace is more robust here than push+refresh; it avoids getting stuck on
+        // the onboarding route if a refresh races the navigation.
+        router.replace(afterUrl);
       }}
     >
       <div className="flex flex-col gap-2">
@@ -83,6 +87,11 @@ export function OnboardingForm({
       {error ? (
         <p className="text-sm text-destructive" role="alert">
           {error}
+        </p>
+      ) : null}
+      {success ? (
+        <p className="text-sm text-foreground" role="status">
+          {success}
         </p>
       ) : null}
 

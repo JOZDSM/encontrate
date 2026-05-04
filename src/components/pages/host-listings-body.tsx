@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ListingDeleteButton } from "@/components/listing-delete-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { prisma } from "@/lib/db";
@@ -40,13 +41,14 @@ export async function HostListingsBody({ hostId }: { hostId: string }) {
                     {l.neighborhood}, {l.city}
                   </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button variant="outline" size="sm" asChild>
                     <Link href={`/listings/${l.id}`}>Ver</Link>
                   </Button>
                   <Button size="sm" asChild>
                     <Link href={`/host/listings/${l.id}/edit`}>Editar</Link>
                   </Button>
+                  <ListingDeleteButton listingId={l.id} />
                 </div>
               </li>
             ))}

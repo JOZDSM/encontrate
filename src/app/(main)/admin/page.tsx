@@ -18,6 +18,7 @@ import { approveUserAction } from "@/app/actions/admin-users";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AdminUserActions } from "@/components/admin-user-actions";
+import { ListingDeleteButton } from "@/components/listing-delete-button";
 
 export default async function AdminPage() {
   const session = await auth();
@@ -165,6 +166,7 @@ export default async function AdminPage() {
                   <TableHead>Ciudad</TableHead>
                   <TableHead>Anfitrión</TableHead>
                   <TableHead>Creado</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -177,6 +179,16 @@ export default async function AdminPage() {
                     </TableCell>
                     <TableCell className="text-sm whitespace-nowrap">
                       {formatDateUTC(l.createdAt)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <Button variant="outline" size="sm" asChild>
+                          <Link href={`/host/listings/${l.id}/edit`}>
+                            Editar
+                          </Link>
+                        </Button>
+                        <ListingDeleteButton listingId={l.id} />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

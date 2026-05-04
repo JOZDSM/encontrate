@@ -6,6 +6,7 @@ import { auth } from "@/auth";
 import { designPreviewWriteBlockedMessage } from "@/lib/design-preview";
 import { BARCELONA_ZONE_LABELS } from "@/lib/barcelona-zones";
 import { isUserApproved } from "@/lib/approval";
+import { BookingStatus } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/db";
 import {
   listingDescriptionPlainTextLength,
@@ -196,5 +197,46 @@ export async function updateListing(
   revalidatePath("/host/listings");
   revalidatePath("/mis-cosas/anuncios");
   revalidatePath(`/host/listings/${id}/edit`);
+  return { ok: true };
+}
+
+export async function deleteListing(
+  id: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const session = await auth();
+  if (!session?.user?.id) return { ok: false, error: "Inicia sesión." };
+  if (!isUserApproved(session)) {
+    return { ok: false, error: "Tu cuenta está pendiente de aprobación." };
+  }
+  const previewBlock = designPreviewWriteBlockedMessage(session);
+  if (previewBlock) return { ok: false, error: previewBlock };
+
+  const listing = await prisma.listing.findUnique({ where: { id } });
+  if (!listing || !canEditListingAsOwnerOrAdmin(session, listing.hostId)) {
+    return { ok: false, error: "No autorizado." };
+  }
+
+  const activeBookings = await prisma.booking.count({
+    where: {
+      listingId: id,
+      status: { in: [BookingStatus.PENDING, BookingStatus.CONFIRMED] },
+    },
+  });
+  if (activeBookings > 0) {
+    return {
+      ok: false,
+      error:
+        "No podés eliminar el anuncio mientras tenga reservas pendientes o confirmadas.",
+    };
+  }
+
+  await prisma.listing.delete({ where: { id } });
+
+  revalidatePath("/listings");
+  revalidatePath(`/listings/${id}`);
+  revalidatePath("/host/listings");
+  revalidatePath("/mis-cosas/anuncios");
+  revalidatePath(`/host/listings/${id}/edit`);
+  revalidatePath("/admin");
   return { ok: true };
 }

@@ -89,6 +89,9 @@ const listingSchema = z.object({
   apartmentBaths: z.number().int().min(1).max(20),
   apartmentSizeSqm: z.number().int().min(10).max(500),
   wifi: z.boolean(),
+
+  showWhatsappOnListing: z.boolean(),
+  showEmailOnListing: z.boolean(),
 });
 
 export async function createListing(
@@ -128,6 +131,8 @@ export async function createListing(
       apartmentBaths: data.apartmentBaths,
       apartmentSizeSqm: data.apartmentSizeSqm,
       wifi: data.wifi,
+      showWhatsappOnListing: data.showWhatsappOnListing,
+      showEmailOnListing: data.showEmailOnListing,
       photos: {
         create: data.photoUrls.map((url, i) => ({ url, sortOrder: i })),
       },
@@ -185,6 +190,8 @@ export async function updateListing(
         apartmentBaths: data.apartmentBaths,
         apartmentSizeSqm: data.apartmentSizeSqm,
         wifi: data.wifi,
+        showWhatsappOnListing: data.showWhatsappOnListing,
+        showEmailOnListing: data.showEmailOnListing,
         photos: {
           create: data.photoUrls.map((url, i) => ({ url, sortOrder: i })),
         },

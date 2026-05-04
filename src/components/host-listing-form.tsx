@@ -48,6 +48,8 @@ type Defaults = {
   apartmentBaths: number;
   apartmentSizeSqm: number;
   wifi: boolean;
+  showWhatsappOnListing: boolean;
+  showEmailOnListing: boolean;
 };
 
 const empty: Defaults = {
@@ -70,6 +72,8 @@ const empty: Defaults = {
   apartmentBaths: 1,
   apartmentSizeSqm: 80,
   wifi: true,
+  showWhatsappOnListing: true,
+  showEmailOnListing: true,
 };
 
 export type FrozenListingFields = {
@@ -117,6 +121,12 @@ export function HostListingForm({
   const [apartmentBaths, setApartmentBaths] = useState(d.apartmentBaths);
   const [apartmentSizeSqm, setApartmentSizeSqm] = useState(d.apartmentSizeSqm);
   const [wifi, setWifi] = useState(d.wifi);
+  const [showWhatsappOnListing, setShowWhatsappOnListing] = useState(
+    d.showWhatsappOnListing ?? true,
+  );
+  const [showEmailOnListing, setShowEmailOnListing] = useState(
+    d.showEmailOnListing ?? true,
+  );
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -211,6 +221,8 @@ export function HostListingForm({
       apartmentBaths,
       apartmentSizeSqm,
       wifi,
+      showWhatsappOnListing,
+      showEmailOnListing,
     };
     const res = listingId
       ? await updateListing(listingId, payload)
@@ -414,6 +426,48 @@ export function HostListingForm({
           />
         </div>
       )}
+
+      <div className="space-y-4 rounded-lg border border-border p-4">
+        <p className="text-sm font-medium">Contacto en la ficha pública</p>
+        <p className="text-xs text-muted-foreground">
+          En el anuncio hay botones para ver tu WhatsApp y tu email. Desmarcá lo que no
+          quieras mostrar. &quot;Enviar solicitud&quot; sigue disponible para mensajes por la
+          plataforma.
+        </p>
+        <label className="flex cursor-pointer gap-3 rounded-2xl border border-border bg-muted/5 p-4 transition-colors hover:bg-muted/15">
+          <Checkbox
+            checked={showWhatsappOnListing}
+            onCheckedChange={(v) => setShowWhatsappOnListing(v === true)}
+            className="mt-1 shrink-0"
+            id="host-form-show-wa"
+          />
+          <div className="min-w-0 space-y-1">
+            <span className="block text-sm font-semibold text-foreground">
+              Mostrar mi número de WhatsApp / teléfono
+            </span>
+            <span className="block text-sm leading-5 text-muted-foreground">
+              Si lo desmarcás, el botón &quot;Teléfono&quot; queda deshabilitado para quien ve el
+              anuncio.
+            </span>
+          </div>
+        </label>
+        <label className="flex cursor-pointer gap-3 rounded-2xl border border-border bg-muted/5 p-4 transition-colors hover:bg-muted/15">
+          <Checkbox
+            checked={showEmailOnListing}
+            onCheckedChange={(v) => setShowEmailOnListing(v === true)}
+            className="mt-1 shrink-0"
+            id="host-form-show-email"
+          />
+          <div className="min-w-0 space-y-1">
+            <span className="block text-sm font-semibold text-foreground">
+              Mostrar mi email
+            </span>
+            <span className="block text-sm leading-5 text-muted-foreground">
+              Si lo desmarcás, el botón &quot;Email&quot; queda deshabilitado en la ficha.
+            </span>
+          </div>
+        </label>
+      </div>
 
       <div className="space-y-3 rounded-lg border border-border p-4">
         <p className="text-sm font-medium">Características de la habitación</p>

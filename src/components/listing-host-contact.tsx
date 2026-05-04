@@ -16,14 +16,16 @@ import { Textarea } from "@/components/ui/textarea";
 
 export function ListingHostContact({
   listingId,
-  hostName,
   hostEmail,
   hostWhatsappNumber,
+  showWhatsappOnListing,
+  showEmailOnListing,
 }: {
   listingId: string;
-  hostName: string;
   hostEmail: string | null;
   hostWhatsappNumber: string | null;
+  showWhatsappOnListing: boolean;
+  showEmailOnListing: boolean;
 }) {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -32,63 +34,93 @@ export function ListingHostContact({
 
   const canSubmit = useMemo(() => message.trim().length >= 5, [message]);
 
+  const phoneDisabled =
+    !showWhatsappOnListing || !hostWhatsappNumber?.trim();
+  const emailDisabled = !showEmailOnListing || !hostEmail?.trim();
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
-          <Dialog>
-            <DialogTrigger
-              render={
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-12 rounded-2xl px-5"
-                >
-                  <Phone className="mr-3 size-6" aria-hidden />
-                  <span className="text-base font-semibold">Teléfono</span>
-                </Button>
+          {phoneDisabled ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="h-12 rounded-2xl px-5"
+              disabled
+              title={
+                !showWhatsappOnListing
+                  ? "El anfitrión eligió no mostrar el teléfono en esta ficha."
+                  : "El anfitrión no cargó teléfono."
               }
-            />
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Teléfono</DialogTitle>
-              </DialogHeader>
-              <div className="text-sm text-muted-foreground">
-                {hostWhatsappNumber ? (
+            >
+              <Phone className="mr-3 size-6" aria-hidden />
+              <span className="text-base font-semibold">Teléfono</span>
+            </Button>
+          ) : (
+            <Dialog>
+              <DialogTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-12 rounded-2xl px-5"
+                  >
+                    <Phone className="mr-3 size-6" aria-hidden />
+                    <span className="text-base font-semibold">Teléfono</span>
+                  </Button>
+                }
+              />
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Teléfono</DialogTitle>
+                </DialogHeader>
+                <div className="text-sm text-muted-foreground">
                   <p className="text-foreground">{hostWhatsappNumber}</p>
-                ) : (
-                  <p>El anfitrión no cargó teléfono.</p>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
 
-          <Dialog>
-            <DialogTrigger
-              render={
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-12 rounded-2xl px-5"
-                >
-                  <Mail className="mr-3 size-6" aria-hidden />
-                  <span className="text-base font-semibold">Email</span>
-                </Button>
+          {emailDisabled ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="h-12 rounded-2xl px-5"
+              disabled
+              title={
+                !showEmailOnListing
+                  ? "El anfitrión eligió no mostrar el email en esta ficha."
+                  : "El anfitrión no cargó email."
               }
-            />
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Email</DialogTitle>
-              </DialogHeader>
-              <div className="text-sm text-muted-foreground">
-                {hostEmail ? (
+            >
+              <Mail className="mr-3 size-6" aria-hidden />
+              <span className="text-base font-semibold">Email</span>
+            </Button>
+          ) : (
+            <Dialog>
+              <DialogTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-12 rounded-2xl px-5"
+                  >
+                    <Mail className="mr-3 size-6" aria-hidden />
+                    <span className="text-base font-semibold">Email</span>
+                  </Button>
+                }
+              />
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Email</DialogTitle>
+                </DialogHeader>
+                <div className="text-sm text-muted-foreground">
                   <p className="text-foreground">{hostEmail}</p>
-                ) : (
-                  <p>El anfitrión no cargó email.</p>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
 
           <Dialog
             onOpenChange={() => {
@@ -170,4 +202,3 @@ export function ListingHostContact({
     </div>
   );
 }
-

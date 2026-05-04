@@ -69,7 +69,7 @@ import {
   MAX_LISTING_PHOTO_BYTES,
 } from "@/lib/listing-photo-upload";
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7;
 
 const ROOM_SIZE_STEPS = [5, 10, 15, 20, 21] as const;
 
@@ -268,6 +268,8 @@ export function HostListingWizard() {
     APARTMENT_SIZE_STEPS[0],
   );
   const [wifi, setWifi] = useState(true);
+  const [showWhatsappOnListing, setShowWhatsappOnListing] = useState(true);
+  const [showEmailOnListing, setShowEmailOnListing] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -481,6 +483,8 @@ export function HostListingWizard() {
       apartmentBaths,
       apartmentSizeSqm,
       wifi,
+      showWhatsappOnListing,
+      showEmailOnListing,
     });
     setSubmitting(false);
     if (!res.ok) {
@@ -1219,6 +1223,69 @@ export function HostListingWizard() {
                       </label>
                     </RadioGroup>
                   </section>
+                </div>
+              </div>
+            ) : stepIndex === 6 ? (
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-y-contain">
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <h1 className="text-[36px] leading-[40px] font-extrabold">
+                        ¿Qué querés mostrar en tu anuncio?
+                      </h1>
+                      <p className="text-sm leading-5 text-muted-foreground">
+                        En la ficha pública aparecen botones para ver tu WhatsApp y tu email.
+                        Podés ocultar cualquiera de los dos. La opción{" "}
+                        <span className="font-medium text-foreground">
+                          Enviar solicitud
+                        </span>{" "}
+                        sigue disponible para que te escriban por la plataforma.
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <label className="flex cursor-pointer gap-3 rounded-2xl border border-border bg-muted/5 p-4 transition-colors hover:bg-muted/15">
+                        <Checkbox
+                          checked={showWhatsappOnListing}
+                          onCheckedChange={(v) =>
+                            setShowWhatsappOnListing(v === true)
+                          }
+                          className="mt-1 shrink-0"
+                          id="wizard-show-wa"
+                        />
+                        <div className="min-w-0 space-y-1">
+                          <span
+                            className="block text-sm font-semibold text-foreground"
+                            id="wizard-show-wa-label"
+                          >
+                            Mostrar mi número de WhatsApp / teléfono
+                          </span>
+                          <span className="block text-sm leading-5 text-muted-foreground">
+                            Si lo desmarcás, el botón &quot;Teléfono&quot; queda deshabilitado
+                            para quien mira el anuncio.
+                          </span>
+                        </div>
+                      </label>
+
+                      <label className="flex cursor-pointer gap-3 rounded-2xl border border-border bg-muted/5 p-4 transition-colors hover:bg-muted/15">
+                        <Checkbox
+                          checked={showEmailOnListing}
+                          onCheckedChange={(v) => setShowEmailOnListing(v === true)}
+                          className="mt-1 shrink-0"
+                          id="wizard-show-email"
+                        />
+                        <div className="min-w-0 space-y-1">
+                          <span className="block text-sm font-semibold text-foreground">
+                            Mostrar mi email
+                          </span>
+                          <span className="block text-sm leading-5 text-muted-foreground">
+                            Si lo desmarcás, el botón &quot;Email&quot; queda deshabilitado en la
+                            ficha.
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : null}

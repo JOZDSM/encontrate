@@ -134,6 +134,11 @@ model Listing {
   apartmentSizeSqm Int     @default(80)
   wifi            Boolean  @default(true)
 
+  /// Guest can tap “Teléfono” on the public listing to reveal WhatsApp; if false, button is disabled.
+  showWhatsappOnListing Boolean @default(true)
+  /// Guest can tap “Email” on the public listing to reveal it; if false, button is disabled.
+  showEmailOnListing Boolean @default(true)
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

@@ -76,6 +76,8 @@ export default async function EditListingPage({
               apartmentBaths: listing.apartmentBaths,
               apartmentSizeSqm: listing.apartmentSizeSqm,
               wifi: listing.wifi,
+              showWhatsappOnListing: listing.showWhatsappOnListing,
+              showEmailOnListing: listing.showEmailOnListing,
             }}
           />
 

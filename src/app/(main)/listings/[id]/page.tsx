@@ -76,8 +76,6 @@ export default async function ListingDetailPage({
   const isHost = session?.user?.id === listing.hostId;
   const canEdit = canEditListingAsOwnerOrAdmin(session, listing.hostId);
   const monthlyPrice = formatMonthlyPriceEur(listing.priceMonthlyEur);
-  const hostName = listing.host.name?.trim() || "Anfitrión";
-
   return (
     <div className="bg-background">
       <div className="mx-auto w-full max-w-5xl px-4 pt-8 pb-12 text-foreground">
@@ -186,9 +184,10 @@ export default async function ListingDetailPage({
           </h2>
           <ListingHostContact
             listingId={listing.id}
-            hostName={hostName}
             hostEmail={listing.host.email ?? null}
             hostWhatsappNumber={listing.host.whatsappNumber ?? null}
+            showWhatsappOnListing={listing.showWhatsappOnListing}
+            showEmailOnListing={listing.showEmailOnListing}
           />
         </section>
 

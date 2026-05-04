@@ -517,9 +517,9 @@ export function HostListingWizard() {
   const isLastStep = stepIndex === TOTAL_STEPS - 1;
 
   return (
-    <div className="mx-auto flex h-full max-h-full min-h-0 w-full max-w-[1440px] flex-1 flex-col overflow-hidden px-4 pt-4 pb-2 md:pt-6 md:pb-3">
-      <Card className="mx-auto flex h-full max-h-full min-h-0 w-full max-w-[1220px] flex-1 flex-col overflow-hidden border border-border bg-card pt-6 pb-3 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
-        <CardContent className="flex min-h-0 flex-1 flex-col gap-8 overflow-hidden px-6 pt-6 pb-0 text-card-foreground">
+    <div className="mx-auto flex h-full min-h-0 w-full max-w-[1440px] flex-1 flex-col overflow-visible px-4 pt-4 pb-8 md:max-h-full md:overflow-hidden md:pt-6 md:pb-3">
+      <Card className="mx-auto flex h-full min-h-0 w-full max-w-[1220px] flex-1 flex-col overflow-visible border border-border bg-card pt-6 pb-3 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] md:max-h-full md:overflow-hidden">
+        <CardContent className="flex min-h-0 flex-1 flex-col gap-8 overflow-visible px-6 pt-6 pb-0 text-card-foreground md:overflow-hidden">
           <div
             className={cn(
               "mx-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden",
@@ -528,7 +528,7 @@ export function HostListingWizard() {
           >
             {stepIndex === 0 ? (
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-y-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
+                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain">
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
@@ -555,7 +555,7 @@ export function HostListingWizard() {
               </div>
             ) : stepIndex === 1 ? (
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-y-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
+                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain">
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
@@ -632,7 +632,7 @@ export function HostListingWizard() {
               </div>
             ) : stepIndex === 2 ? (
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-y-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
+                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain">
                   <div className="space-y-10">
                     <div className="text-center">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
@@ -725,7 +725,7 @@ export function HostListingWizard() {
                   ) : null}
                 </div>
 
-                <div className="mt-6 min-h-0 flex-1 overflow-y-auto overscroll-y-contain pr-1 touch-pan-y [-webkit-overflow-scrolling:touch]">
+                <div className="mt-6 min-h-0 flex-1 overflow-visible md:overflow-y-auto md:overscroll-y-contain md:pr-1">
                   {photos.length === 0 ? (
                     <label
                       className={cn(
@@ -844,7 +844,7 @@ export function HostListingWizard() {
                   </p>
                 </div>
 
-                <div className="mt-6 min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-y-contain pr-1 touch-pan-y [-webkit-overflow-scrolling:touch]">
+                <div className="mt-6 min-h-0 flex-1 space-y-6 overflow-visible md:overflow-y-auto md:overscroll-y-contain md:pr-1">
                   <section className="space-y-3">
                     <p className="text-sm font-medium">Tamaño de cama</p>
                     <RadioGroup
@@ -1030,7 +1030,7 @@ export function HostListingWizard() {
                   </p>
                 </div>
 
-                <div className="mt-6 min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-y-contain pr-1 touch-pan-y [-webkit-overflow-scrolling:touch]">
+                <div className="mt-6 min-h-0 flex-1 space-y-6 overflow-visible md:overflow-y-auto md:overscroll-y-contain md:pr-1">
                   <section className="space-y-3">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="space-y-1">
@@ -1214,7 +1214,7 @@ export function HostListingWizard() {
               </div>
             ) : stepIndex === 6 ? (
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-y-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
+                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain">
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">

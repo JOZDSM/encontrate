@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Bold,
@@ -246,6 +246,7 @@ export function HostListingWizard() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [publishWithoutPhotosOpen, setPublishWithoutPhotosOpen] =
     useState(false);
+  const topRef = useRef<HTMLDivElement | null>(null);
 
   // Step 1: listing title only for now.
   const [title, setTitle] = useState("");
@@ -324,6 +325,16 @@ export function HostListingWizard() {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
   );
+
+  useEffect(() => {
+    // Ensure each step starts at the top (mobile uses page scroll; desktop uses internal scroll areas).
+    topRef.current?.scrollIntoView({ block: "start" });
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    const els = document.querySelectorAll<HTMLElement>("[data-wizard-scroll]");
+    els.forEach((el) => {
+      el.scrollTop = 0;
+    });
+  }, [stepIndex]);
 
   async function uploadOne(file: File): Promise<string> {
     const next = await compressListingPhotoIfNeeded(file);
@@ -518,6 +529,7 @@ export function HostListingWizard() {
 
   return (
     <div className="no-ios-zoom mx-auto flex h-full min-h-0 w-full max-w-[1440px] flex-1 flex-col overflow-visible px-4 pt-4 pb-8 md:max-h-full md:overflow-hidden md:pt-6 md:pb-3">
+      <div ref={topRef} />
       <Card className="mx-auto flex h-full min-h-0 w-full max-w-[1220px] flex-1 flex-col overflow-visible border border-border bg-card pt-6 pb-3 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] md:max-h-full md:overflow-hidden">
         <CardContent className="flex min-h-0 flex-1 flex-col gap-8 overflow-visible px-6 pt-6 pb-0 text-card-foreground md:overflow-hidden">
           <div
@@ -528,7 +540,10 @@ export function HostListingWizard() {
           >
             {stepIndex === 0 ? (
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain">
+                <div
+                  className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain"
+                  data-wizard-scroll
+                >
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
@@ -555,7 +570,10 @@ export function HostListingWizard() {
               </div>
             ) : stepIndex === 1 ? (
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain">
+                <div
+                  className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain"
+                  data-wizard-scroll
+                >
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
@@ -632,7 +650,10 @@ export function HostListingWizard() {
               </div>
             ) : stepIndex === 2 ? (
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain">
+                <div
+                  className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain"
+                  data-wizard-scroll
+                >
                   <div className="space-y-10">
                     <div className="text-center">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
@@ -725,7 +746,10 @@ export function HostListingWizard() {
                   ) : null}
                 </div>
 
-                <div className="mt-6 min-h-0 flex-1 overflow-visible md:overflow-y-auto md:overscroll-y-contain md:pr-1">
+                <div
+                  className="mt-6 min-h-0 flex-1 overflow-visible md:overflow-y-auto md:overscroll-y-contain md:pr-1"
+                  data-wizard-scroll
+                >
                   {photos.length === 0 ? (
                     <label
                       className={cn(
@@ -844,7 +868,10 @@ export function HostListingWizard() {
                   </p>
                 </div>
 
-                <div className="mt-6 min-h-0 flex-1 space-y-6 overflow-visible md:overflow-y-auto md:overscroll-y-contain md:pr-1">
+                <div
+                  className="mt-6 min-h-0 flex-1 space-y-6 overflow-visible md:overflow-y-auto md:overscroll-y-contain md:pr-1"
+                  data-wizard-scroll
+                >
                   <section className="space-y-3">
                     <p className="text-sm font-medium">Tamaño de cama</p>
                     <RadioGroup
@@ -1030,7 +1057,10 @@ export function HostListingWizard() {
                   </p>
                 </div>
 
-                <div className="mt-6 min-h-0 flex-1 space-y-6 overflow-visible md:overflow-y-auto md:overscroll-y-contain md:pr-1">
+                <div
+                  className="mt-6 min-h-0 flex-1 space-y-6 overflow-visible md:overflow-y-auto md:overscroll-y-contain md:pr-1"
+                  data-wizard-scroll
+                >
                   <section className="space-y-3">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="space-y-1">
@@ -1214,7 +1244,10 @@ export function HostListingWizard() {
               </div>
             ) : stepIndex === 6 ? (
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain">
+                <div
+                  className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain"
+                  data-wizard-scroll
+                >
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">

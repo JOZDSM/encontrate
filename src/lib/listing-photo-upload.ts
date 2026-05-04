@@ -5,4 +5,4 @@ export const LISTING_PHOTO_TOO_LARGE_MESSAGE =
   "La imagen es demasiado grande (máx. 4 MB por archivo).";
 
 export const LISTING_PHOTO_SIZE_HELPER_ES =
-  "Cada foto puede pesar como máximo 4 MB. Si falla la subida, probá comprimir o achicar la imagen antes de volver a intentar.";
+  "Cada foto puede pesar como máximo 4 MB. Si una imagen pesa más, la vamos a comprimir automáticamente al subirla.";

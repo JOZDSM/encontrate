@@ -35,8 +35,8 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   LISTING_PHOTO_SIZE_HELPER_ES,
   LISTING_PHOTO_TOO_LARGE_MESSAGE,
-  MAX_LISTING_PHOTO_BYTES,
 } from "@/lib/listing-photo-upload";
+import { compressListingPhotoIfNeeded } from "@/lib/listing-photo-compress";
 
 const MAX_PHOTOS = 12;
 
@@ -196,7 +196,9 @@ export function HostListingPhotoEditor({
   const [uploading, setUploading] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const photosRef = useRef(photos);
-  photosRef.current = photos;
+  useEffect(() => {
+    photosRef.current = photos;
+  }, [photos]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -206,14 +208,16 @@ export function HostListingPhotoEditor({
 
   useEffect(() => {
     const next = urlsToItems(initialUrls);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync from server when the listing refreshes
     setPhotos(next);
     onChange(next.map((p) => p.url));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-sync when URLs from server change
   }, [urlsFingerprint]);
 
   async function uploadOne(file: File): Promise<string> {
+    const next = await compressListingPhotoIfNeeded(file);
     const fd = new FormData();
-    fd.set("file", file);
+    fd.set("file", next);
     const res = await fetch("/api/uploads/photos", {
       method: "POST",
       body: fd,
@@ -251,15 +255,6 @@ export function HostListingPhotoEditor({
       );
       return;
     }
-    const oversize = picked.filter((f) => f.size > MAX_LISTING_PHOTO_BYTES);
-    if (oversize.length > 0) {
-      setError(
-        oversize.length === 1
-          ? LISTING_PHOTO_TOO_LARGE_MESSAGE
-          : `${oversize.length} fotos superan el máximo de 4 MB cada una.`,
-      );
-      return;
-    }
     setUploading((n) => n + picked.length);
     try {
       const urls = await Promise.all(picked.map((f) => uploadOne(f)));
@@ -281,10 +276,6 @@ export function HostListingPhotoEditor({
   async function replacePhoto(photoId: string, file: File) {
     if (!looksLikeImageFile(file)) {
       setError("Elegí un archivo de imagen (JPEG, PNG, WebP, GIF…).");
-      return;
-    }
-    if (file.size > MAX_LISTING_PHOTO_BYTES) {
-      setError(LISTING_PHOTO_TOO_LARGE_MESSAGE);
       return;
     }
     setError(null);

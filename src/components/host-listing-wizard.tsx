@@ -66,8 +66,8 @@ import { BARCELONA_ZONE_LABELS } from "@/lib/barcelona-zones";
 import {
   LISTING_PHOTO_SIZE_HELPER_ES,
   LISTING_PHOTO_TOO_LARGE_MESSAGE,
-  MAX_LISTING_PHOTO_BYTES,
 } from "@/lib/listing-photo-upload";
+import { compressListingPhotoIfNeeded } from "@/lib/listing-photo-compress";
 
 const TOTAL_STEPS = 7;
 
@@ -326,8 +326,9 @@ export function HostListingWizard() {
   );
 
   async function uploadOne(file: File): Promise<string> {
+    const next = await compressListingPhotoIfNeeded(file);
     const fd = new FormData();
-    fd.set("file", file);
+    fd.set("file", next);
     const res = await fetch("/api/uploads/photos", {
       method: "POST",
       body: fd,
@@ -366,16 +367,6 @@ export function HostListingWizard() {
       return;
     }
 
-    const oversize = picked.filter((f) => f.size > MAX_LISTING_PHOTO_BYTES);
-    if (oversize.length > 0) {
-      setPhotoUploadError(
-        oversize.length === 1
-          ? LISTING_PHOTO_TOO_LARGE_MESSAGE
-          : `${oversize.length} fotos superan el máximo de 4 MB cada una. Comprimilas o elegí otras.`,
-      );
-      return;
-    }
-
     setPhotoUploadingCount((n) => n + picked.length);
     try {
       const urls = await Promise.all(picked.map((f) => uploadOne(f)));
@@ -395,10 +386,6 @@ export function HostListingWizard() {
       setPhotoUploadError(
         "Elegí un archivo de imagen (JPEG, PNG, WebP, GIF…).",
       );
-      return;
-    }
-    if (file.size > MAX_LISTING_PHOTO_BYTES) {
-      setPhotoUploadError(LISTING_PHOTO_TOO_LARGE_MESSAGE);
       return;
     }
     setPhotoUploadError(null);

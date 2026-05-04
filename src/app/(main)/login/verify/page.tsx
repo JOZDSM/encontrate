@@ -10,7 +10,7 @@ export default function VerifyRequestPage() {
         </CardHeader>
         <CardContent className="space-y-4 text-sm text-muted-foreground">
           <p>
-            Te enviamos un enlace para entrar a tu cuenta. Puede tardar un minuto. También reivá tu spam!
+            Te enviamos un enlace para entrar a tu cuenta. Puede tardar un minuto. También revisá tu spam!
           </p>
           <Link href="/login" className="text-card-foreground underline underline-offset-4">
             Pedir un nuevo link

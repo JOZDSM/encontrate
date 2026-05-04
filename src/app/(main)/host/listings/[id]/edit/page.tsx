@@ -39,8 +39,6 @@ export default async function EditListingPage({
     notFound();
   }
 
-  const photoUrlsText = listing.photos.map((p) => p.url).join("\n");
-
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-10">
       <Card className="border border-border bg-card shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
@@ -56,17 +54,19 @@ export default async function EditListingPage({
           </div>
           <HostListingForm
             listingId={listing.id}
+            frozenListingFields={{
+              city: listing.city,
+              country: listing.country,
+              addressDetail: listing.addressDetail,
+              priceMonthlyEur: listing.priceMonthlyEur,
+              priceNote: listing.priceNote,
+              timeZone: listing.timeZone,
+              photoUrls: listing.photos.map((p) => p.url),
+            }}
             defaults={{
               title: listing.title,
               description: listing.description,
-              city: listing.city,
-              country: listing.country,
               neighborhood: listing.neighborhood,
-              addressDetail: listing.addressDetail ?? "",
-              priceNote: listing.priceNote ?? "",
-              priceMonthlyEur: listing.priceMonthlyEur ?? null,
-              timeZone: listing.timeZone,
-              photoUrlsText,
 
               bedSize: listing.bedSize,
               windowTypes: listing.windowTypes,

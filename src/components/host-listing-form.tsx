@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createListing, updateListing } from "@/app/actions/listings";
 import posthog from "posthog-js";
@@ -21,6 +21,7 @@ import {
   LISTING_WINDOW_OPTIONS,
   type ListingWindowValue,
 } from "@/lib/listing-window-options";
+import { HostListingPhotoEditor } from "@/components/host-listing-photo-editor";
 import { cn } from "@/lib/utils";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -71,12 +72,25 @@ const empty: Defaults = {
   wifi: true,
 };
 
+export type FrozenListingFields = {
+  city: string;
+  country: string;
+  addressDetail: string | null;
+  priceMonthlyEur: number | null;
+  priceNote: string | null;
+  timeZone: string;
+  photoUrls: string[];
+};
+
 export function HostListingForm({
   listingId,
   defaults,
+  frozenListingFields,
 }: {
   listingId?: string;
   defaults?: Partial<Defaults>;
+  /** When set (edit flow), hide wizard-fixed fields and use these values on save. */
+  frozenListingFields?: FrozenListingFields;
 }) {
   const router = useRouter();
   const d = { ...empty, ...defaults };
@@ -106,6 +120,22 @@ export function HostListingForm({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const editPhotoUrlsRef = useRef<string[]>(
+    frozenListingFields?.photoUrls ?? [],
+  );
+  const frozenPhotosFingerprint =
+    frozenListingFields?.photoUrls.join("\0") ?? "";
+  useEffect(() => {
+    if (!frozenListingFields) return;
+    editPhotoUrlsRef.current = [...frozenListingFields.photoUrls];
+    // Intentionally keyed by listing + photo set fingerprint, not `frozenListingFields` identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listingId, frozenPhotosFingerprint]);
+
+  const onEditPhotoUrlsChange = useCallback((urls: string[]) => {
+    editPhotoUrlsRef.current = urls;
+  }, []);
 
   const editor = useEditor({
     extensions: [
@@ -149,20 +179,28 @@ export function HostListingForm({
     setLoading(true);
     setError(null);
     setSuccess(null);
-    const photoUrls = photoUrlsText
-      .split("\n")
-      .map((l) => l.trim())
-      .filter(Boolean);
+    const photoUrls = frozenListingFields
+      ? editPhotoUrlsRef.current
+      : photoUrlsText
+          .split("\n")
+          .map((l) => l.trim())
+          .filter(Boolean);
     const payload = {
       title,
       description: (editor?.getHTML() ?? description).trim(),
-      city,
-      country,
+      city: frozenListingFields?.city ?? city,
+      country: frozenListingFields?.country ?? country,
       neighborhood,
-      addressDetail: addressDetail || null,
-      priceMonthlyEur,
-      priceNote: priceNote || null,
-      timeZone,
+      addressDetail: frozenListingFields
+        ? frozenListingFields.addressDetail
+        : addressDetail || null,
+      priceMonthlyEur: frozenListingFields
+        ? frozenListingFields.priceMonthlyEur
+        : priceMonthlyEur,
+      priceNote: frozenListingFields
+        ? frozenListingFields.priceNote
+        : priceNote || null,
+      timeZone: frozenListingFields?.timeZone ?? timeZone,
       photoUrls,
 
       bedSize,
@@ -265,26 +303,28 @@ export function HostListingForm({
           </div>
         </div>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="city">Ciudad</Label>
-          <Input
-            id="city"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            required
-          />
+      {!frozenListingFields ? (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="city">Ciudad</Label>
+            <Input
+              id="city"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="country">País</Label>
+            <Input
+              id="country"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              required
+            />
+          </div>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="country">País</Label>
-          <Input
-            id="country"
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-            required
-          />
-        </div>
-      </div>
+      ) : null}
       <div className="space-y-2">
         <Label>Barrio (público)</Label>
         <Select
@@ -303,64 +343,77 @@ export function HostListingForm({
           </SelectContent>
         </Select>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="addressDetail">Dirección completa (solo tras confirmar)</Label>
-        <Textarea
-          id="addressDetail"
-          value={addressDetail}
-          onChange={(e) => setAddressDetail(e.target.value)}
-          rows={2}
-          placeholder="Opcional. Visible al huésped con reserva confirmada."
-        />
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      {!frozenListingFields ? (
         <div className="space-y-2">
-          <Label htmlFor="priceMonthlyEur">Precio mensual (EUR)</Label>
-          <Input
-            id="priceMonthlyEur"
-            type="number"
-            inputMode="numeric"
-            min={0}
-            step={1}
-            value={priceMonthlyEur ?? ""}
-            onChange={(e) => {
-              const v = e.target.value;
-              setPriceMonthlyEur(v.trim() === "" ? null : Number(v));
-            }}
-            placeholder="Ej. 650"
-          />
-          <p className="text-xs text-muted-foreground">
-            Usado para ordenar por precio. No se cobra dentro de encontrate.
-          </p>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="priceNote">Precio orientativo (texto)</Label>
-          <Input
-            id="priceNote"
-            value={priceNote}
-            onChange={(e) => setPriceNote(e.target.value)}
-            placeholder="Ej. 650 €/mes o 40 €/noche"
+          <Label htmlFor="addressDetail">Dirección completa (solo tras confirmar)</Label>
+          <Textarea
+            id="addressDetail"
+            value={addressDetail}
+            onChange={(e) => setAddressDetail(e.target.value)}
+            rows={2}
+            placeholder="Opcional. Visible al huésped con reserva confirmada."
           />
         </div>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="timeZone">Zona horaria IANA</Label>
-        <Input
-          id="timeZone"
-          value={timeZone}
-          onChange={(e) => setTimeZone(e.target.value)}
+      ) : null}
+      {!frozenListingFields ? (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="priceMonthlyEur">Precio mensual (EUR)</Label>
+            <Input
+              id="priceMonthlyEur"
+              type="number"
+              inputMode="numeric"
+              min={0}
+              step={1}
+              value={priceMonthlyEur ?? ""}
+              onChange={(e) => {
+                const v = e.target.value;
+                setPriceMonthlyEur(v.trim() === "" ? null : Number(v));
+              }}
+              placeholder="Ej. 650"
+            />
+            <p className="text-xs text-muted-foreground">
+              Usado para ordenar por precio. No se cobra dentro de encontrate.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="priceNote">Precio orientativo (texto)</Label>
+            <Input
+              id="priceNote"
+              value={priceNote}
+              onChange={(e) => setPriceNote(e.target.value)}
+              placeholder="Ej. 650 €/mes o 40 €/noche"
+            />
+          </div>
+        </div>
+      ) : null}
+      {!frozenListingFields ? (
+        <div className="space-y-2">
+          <Label htmlFor="timeZone">Zona horaria IANA</Label>
+          <Input
+            id="timeZone"
+            value={timeZone}
+            onChange={(e) => setTimeZone(e.target.value)}
+          />
+        </div>
+      ) : null}
+      {frozenListingFields ? (
+        <HostListingPhotoEditor
+          initialUrls={frozenListingFields.photoUrls}
+          onChange={onEditPhotoUrlsChange}
         />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="photos">URLs de fotos (una por línea, https…)</Label>
-        <Textarea
-          id="photos"
-          value={photoUrlsText}
-          onChange={(e) => setPhotoUrlsText(e.target.value)}
-          rows={4}
-          placeholder="https://…"
-        />
-      </div>
+      ) : (
+        <div className="space-y-2">
+          <Label htmlFor="photos">URLs de fotos (una por línea, https…)</Label>
+          <Textarea
+            id="photos"
+            value={photoUrlsText}
+            onChange={(e) => setPhotoUrlsText(e.target.value)}
+            rows={4}
+            placeholder="https://…"
+          />
+        </div>
+      )}
 
       <div className="space-y-3 rounded-lg border border-border p-4">
         <p className="text-sm font-medium">Características de la habitación</p>

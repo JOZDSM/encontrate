@@ -15,5 +15,9 @@ export function useIsMobile() {
     return () => mql.removeEventListener("change", onChange)
   }, [])
 
-  return !!isMobile
+  // Before the viewport is measured, `!!undefined` was false — phones were treated as
+  // desktop for one paint, breaking the shadcn sidebar (`peer` + `hidden md:*`) layout.
+  // Mobile-first until we know the width avoids a broken shell on login / OAuth return.
+  if (isMobile === undefined) return true
+  return isMobile
 }

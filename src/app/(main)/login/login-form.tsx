@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import posthog from "posthog-js";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,8 +30,10 @@ export function LoginForm() {
     setLoading(false);
     if (res?.error) {
       setError("No se pudo enviar el link. Revisá tu email y RESEND_API_KEY.");
+      posthog.capture("login_magic_link_error");
       return;
     }
+    posthog.capture("login_magic_link_sent");
     window.location.href = "/login/verify";
   }
 
@@ -94,7 +97,10 @@ export function LoginForm() {
               variant="secondary"
               size="sm"
               className="w-full rounded-full font-medium shadow-xs"
-              onClick={() => signIn("google", { callbackUrl: "/mis-cosas" })}
+              onClick={() => {
+                posthog.capture("login_google_clicked");
+                void signIn("google", { callbackUrl: "/mis-cosas" });
+              }}
             >
               Continuar con Google
             </Button>

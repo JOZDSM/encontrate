@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createListing, updateListing } from "@/app/actions/listings";
+import posthog from "posthog-js";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -179,12 +180,15 @@ export function HostListingForm({
     setLoading(false);
     if (!res.ok) {
       setError(res.error);
+      posthog.capture(listingId ? "listing_update_error" : "listing_create_error");
       return;
     }
     if (listingId) {
       router.refresh();
       setSuccess("Cambios guardados.");
+      posthog.capture("listing_updated");
     } else if ("id" in res) {
+      posthog.capture("listing_created");
       router.push(`/host/listings/${res.id}/edit`);
     }
   }

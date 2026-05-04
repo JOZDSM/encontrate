@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBookingRequest } from "@/app/actions/bookings";
+import posthog from "posthog-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,8 +27,10 @@ export function BookingRequestForm({ listingId }: { listingId: string }) {
     setLoading(false);
     if (!res.ok) {
       setMsg(res.error);
+      posthog.capture("booking_request_error");
       return;
     }
+    posthog.capture("booking_request_submitted");
     router.push("/mis-cosas/mensajes");
     router.refresh();
   }

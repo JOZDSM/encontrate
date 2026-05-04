@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { signIn } from "next-auth/react";
+import posthog from "posthog-js";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -47,11 +48,13 @@ export function SignupForm() {
         name,
         whatsappNumber: phoneState.normalized || whatsappNumber,
       });
+      posthog.capture("signup_profile_submitted");
     } catch {
       setLoading(false);
       setError(
         "Revisá los campos: nombre, email y número de WhatsApp (formato internacional, ej: +34600111222).",
       );
+      posthog.capture("signup_profile_error");
       return;
     }
 
@@ -64,8 +67,10 @@ export function SignupForm() {
     setLoading(false);
     if (res?.error) {
       setError("No se pudo enviar el link. Revisá tu email y RESEND_API_KEY.");
+      posthog.capture("signup_magic_link_error");
       return;
     }
+    posthog.capture("signup_magic_link_sent");
     window.location.href = "/login/verify";
   }
 
@@ -78,11 +83,13 @@ export function SignupForm() {
         name,
         whatsappNumber: phoneState.normalized || whatsappNumber,
       });
+      posthog.capture("signup_google_clicked");
     } catch {
       setLoading(false);
       setError(
         "Revisá los campos: nombre, email y número de WhatsApp (formato internacional, ej: +34600111222).",
       );
+      posthog.capture("signup_profile_error");
       return;
     }
     // Google sign-in will pick up the stored SignupProfile on signIn event.

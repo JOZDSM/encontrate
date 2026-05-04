@@ -18,7 +18,7 @@ export default async function PendingApprovalPage() {
               ? `Tu cuenta (${session.user.email}) fue creada con éxito, pero aún no fue aprobada por el administrador.`
               : "Tu cuenta fue creada con éxito, pero aún no fue aprobada por el administrador."}
           </p>
-          <p>Volvé a intentar más tarde.</p>
+          <p>Te va a llegar un mensaje apenas podamos revisar tu cuenta.</p>
         </CardContent>
       </Card>
     </div>

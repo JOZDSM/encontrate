@@ -15,12 +15,41 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(
+      /\/$/,
+      "",
+    ),
+  ),
   title: {
     default: "Encontrate",
     template: "%s · Encontrate",
   },
   description:
     "Coordina estancias en habitaciones en Barcelona: anuncios, solicitudes y mensajes. Sin pagos en la plataforma.",
+  openGraph: {
+    type: "website",
+    locale: "es_ES",
+    siteName: "Encontrate",
+    title: "Encontrate",
+    description:
+      "Coordina estancias en habitaciones en Barcelona: anuncios, solicitudes y mensajes. Sin pagos en la plataforma.",
+    images: [
+      {
+        url: "/open-graph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Encontrate",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Encontrate",
+    description:
+      "Coordina estancias en habitaciones en Barcelona: anuncios, solicitudes y mensajes. Sin pagos en la plataforma.",
+    images: ["/open-graph-image.png"],
+  },
 };
 
 export default async function RootLayout({

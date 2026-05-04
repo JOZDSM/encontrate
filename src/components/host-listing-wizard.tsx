@@ -528,7 +528,7 @@ export function HostListingWizard() {
           >
             {stepIndex === 0 ? (
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-y-contain">
+                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-y-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
@@ -555,7 +555,7 @@ export function HostListingWizard() {
               </div>
             ) : stepIndex === 1 ? (
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-y-contain">
+                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-y-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
@@ -632,7 +632,7 @@ export function HostListingWizard() {
               </div>
             ) : stepIndex === 2 ? (
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-y-contain">
+                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-y-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
                   <div className="space-y-10">
                     <div className="text-center">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
@@ -725,7 +725,7 @@ export function HostListingWizard() {
                   ) : null}
                 </div>
 
-                <div className="mt-6 min-h-0 flex-1 overflow-y-auto overscroll-y-contain pr-1">
+                <div className="mt-6 min-h-0 flex-1 overflow-y-auto overscroll-y-contain pr-1 touch-pan-y [-webkit-overflow-scrolling:touch]">
                   {photos.length === 0 ? (
                     <label
                       className={cn(
@@ -844,7 +844,7 @@ export function HostListingWizard() {
                   </p>
                 </div>
 
-                <div className="mt-6 min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-y-contain pr-1">
+                <div className="mt-6 min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-y-contain pr-1 touch-pan-y [-webkit-overflow-scrolling:touch]">
                   <section className="space-y-3">
                     <p className="text-sm font-medium">Tamaño de cama</p>
                     <RadioGroup
@@ -1030,7 +1030,7 @@ export function HostListingWizard() {
                   </p>
                 </div>
 
-                <div className="mt-6 min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-y-contain pr-1">
+                <div className="mt-6 min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-y-contain pr-1 touch-pan-y [-webkit-overflow-scrolling:touch]">
                   <section className="space-y-3">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="space-y-1">
@@ -1214,7 +1214,7 @@ export function HostListingWizard() {
               </div>
             ) : stepIndex === 6 ? (
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-y-contain">
+                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-y-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">

@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { auth } from "@/auth";
+import { notifyAdminsIfPendingUserAddedFirstWhatsapp } from "@/lib/admin-pending-user-email";
 import { prisma } from "@/lib/db";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 
@@ -40,12 +41,35 @@ export async function updateMyProfileAction(input: {
   const parsed = UpdateProfileSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Revisa los campos." };
 
+  const before = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      name: true,
+      email: true,
+      whatsappNumber: true,
+      isApproved: true,
+    },
+  });
+  if (!before) return { ok: false, error: "Usuario no encontrado." };
+
+  const hadWhatsapp = Boolean(before.whatsappNumber?.trim());
+
   await prisma.user.update({
     where: { id: session.user.id },
     data: {
       name: parsed.data.name,
       whatsappNumber: parsed.data.whatsappNumber,
     },
+  });
+
+  const email = before.email?.trim() || session.user.email?.trim() || "";
+  void notifyAdminsIfPendingUserAddedFirstWhatsapp({
+    userId: session.user.id,
+    hadWhatsappBefore: hadWhatsapp,
+    wasApprovedBefore: before.isApproved,
+    email,
+    displayName: parsed.data.name.trim(),
+    whatsapp: parsed.data.whatsappNumber.trim(),
   });
 
   return { ok: true };

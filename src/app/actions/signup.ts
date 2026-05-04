@@ -33,7 +33,8 @@ export async function upsertSignupProfileAction(input: {
   name: string;
   whatsappNumber: string;
 }) {
-  const data = SignupProfileInputSchema.parse(input);
+  const parsed = SignupProfileInputSchema.parse(input);
+  const data = { ...parsed, email: parsed.email.trim().toLowerCase() };
 
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 

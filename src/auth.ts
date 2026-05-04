@@ -3,18 +3,8 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { Session } from "next-auth";
 import authConfig from "@/auth.config";
 import { getDesignPreviewSession, isDesignPreviewActive } from "@/lib/design-preview";
-import { parseAdminEmails } from "@/lib/admin";
+import { notifyAdminsPendingUser } from "@/lib/admin-pending-user-email";
 import { prisma } from "@/lib/db";
-import { sendEmail } from "@/lib/email";
-
-function escapeHtml(raw: string): string {
-  return raw
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
 
 async function findSignupProfileByEmail(email: string) {
   const normalized = email.trim().toLowerCase();
@@ -31,6 +21,7 @@ const nextAuth = NextAuth({
       const email = user.email?.trim();
       if (!email) return;
 
+      let signupWhatsappForEmail: string | null = null;
       const pending = await findSignupProfileByEmail(email);
       if (pending) {
         if (pending.expiresAt.getTime() < Date.now()) {
@@ -38,10 +29,9 @@ const nextAuth = NextAuth({
             .delete({ where: { email: pending.email } })
             .catch(() => {});
         } else {
+          signupWhatsappForEmail = pending.whatsappNumber?.trim() || null;
           const nextName = pending.name?.trim() ? pending.name.trim() : undefined;
-          const nextWhatsapp = pending.whatsappNumber?.trim()
-            ? pending.whatsappNumber.trim()
-            : undefined;
+          const nextWhatsapp = signupWhatsappForEmail ?? undefined;
 
           await prisma.user.update({
             where: { id: user.id },
@@ -65,46 +55,20 @@ const nextAuth = NextAuth({
       });
 
       const displayName = fresh?.name?.trim() || user.name?.trim() || "—";
-      const displayWhatsapp = fresh?.whatsappNumber?.trim() || "—";
+      const displayWhatsapp =
+        fresh?.whatsappNumber?.trim() || signupWhatsappForEmail || "—";
       const provider = account?.provider ?? "unknown";
       const providerAccountId = account?.providerAccountId ?? "—";
 
-      const adminEmails = parseAdminEmails();
-      if (adminEmails.length === 0) {
-        console.warn("[admin notify skipped] ADMIN_EMAILS is empty", {
-          newUserEmail: email,
-          provider,
-        });
-        return;
-      }
-
-      const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "https://www.encontrate.es").replace(
-        /\/$/,
-        "",
-      );
-      const subject = "Nuevo usuario registrado (pendiente de aprobación)";
-      const html = `
-        <p>Se registró un nuevo usuario en <strong>encontrate</strong> y está pendiente de aprobación.</p>
-        <ul>
-          <li><strong>Nombre</strong>: ${escapeHtml(displayName)}</li>
-          <li><strong>Email</strong>: ${escapeHtml(email)}</li>
-          <li><strong>WhatsApp</strong>: ${escapeHtml(displayWhatsapp)}</li>
-          <li><strong>Proveedor</strong>: ${escapeHtml(provider)}</li>
-          <li><strong>Provider account id</strong>: ${escapeHtml(providerAccountId)}</li>
-          <li><strong>Aprobado</strong>: ${fresh?.isApproved ? "sí" : "no"}</li>
-        </ul>
-        <p><a href="${escapeHtml(appUrl)}/admin">Abrir panel de admin</a></p>
-      `;
-
-      await Promise.all(
-        adminEmails.map(async (to) => {
-          try {
-            await sendEmail({ to, subject, html });
-          } catch (err) {
-            console.error("[admin notify failed]", { to, subject, err });
-          }
-        }),
-      );
+      await notifyAdminsPendingUser({
+        displayName,
+        email,
+        displayWhatsapp,
+        provider,
+        providerAccountId,
+        isApproved: Boolean(fresh?.isApproved),
+        variant: "initial",
+      });
     },
   },
 });

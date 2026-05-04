@@ -5,6 +5,7 @@ import { z } from "zod";
 import { auth, signOut } from "@/auth";
 import { designPreviewWriteBlockedMessage } from "@/lib/design-preview";
 import { sendEmail } from "@/lib/email";
+import { notifyAdminsIfPendingUserAddedFirstWhatsapp } from "@/lib/admin-pending-user-email";
 import { prisma } from "@/lib/db";
 import { normalizeWhatsappE164 } from "@/lib/whatsapp-e164";
 
@@ -147,9 +148,32 @@ export async function updateWhatsappAction(
   const phone = normalizeWhatsappE164(raw);
   if (!phone.ok) return { ok: false, error: phone.message };
 
+  const before = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      name: true,
+      email: true,
+      whatsappNumber: true,
+      isApproved: true,
+    },
+  });
+  if (!before) return { ok: false, error: "Usuario no encontrado." };
+
+  const hadWhatsapp = Boolean(before.whatsappNumber?.trim());
+
   await prisma.user.update({
     where: { id: session.user.id },
     data: { whatsappNumber: phone.value },
+  });
+
+  const email = before.email?.trim() || session.user.email?.trim() || "";
+  void notifyAdminsIfPendingUserAddedFirstWhatsapp({
+    userId: session.user.id,
+    hadWhatsappBefore: hadWhatsapp,
+    wasApprovedBefore: before.isApproved,
+    email,
+    displayName: before.name?.trim() || session.user.name?.trim() || "—",
+    whatsapp: phone.value,
   });
 
   return { ok: true };

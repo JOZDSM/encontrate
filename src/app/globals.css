@@ -200,3 +200,13 @@
     animation: none;
   }
 }
+
+/* Prevent iOS Safari from zooming on focus (inputs/contenteditable < 16px). */
+@media (max-width: 767px) {
+  .no-ios-zoom input,
+  .no-ios-zoom textarea,
+  .no-ios-zoom select,
+  .no-ios-zoom [contenteditable="true"] {
+    font-size: 16px;
+  }
+}

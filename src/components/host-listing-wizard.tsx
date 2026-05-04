@@ -517,7 +517,7 @@ export function HostListingWizard() {
   const isLastStep = stepIndex === TOTAL_STEPS - 1;
 
   return (
-    <div className="mx-auto flex h-full min-h-0 w-full max-w-[1440px] flex-1 flex-col overflow-visible px-4 pt-4 pb-8 md:max-h-full md:overflow-hidden md:pt-6 md:pb-3">
+    <div className="no-ios-zoom mx-auto flex h-full min-h-0 w-full max-w-[1440px] flex-1 flex-col overflow-visible px-4 pt-4 pb-8 md:max-h-full md:overflow-hidden md:pt-6 md:pb-3">
       <Card className="mx-auto flex h-full min-h-0 w-full max-w-[1220px] flex-1 flex-col overflow-visible border border-border bg-card pt-6 pb-3 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] md:max-h-full md:overflow-hidden">
         <CardContent className="flex min-h-0 flex-1 flex-col gap-8 overflow-visible px-6 pt-6 pb-0 text-card-foreground md:overflow-hidden">
           <div

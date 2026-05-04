@@ -17,16 +17,23 @@ import { prisma } from "@/lib/db";
 import { approveUserAction } from "@/app/actions/admin-users";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { AdminUserActions } from "@/components/admin-user-actions";
 
 export default async function AdminPage() {
   const session = await auth();
   if (!isPlatformAdmin(session)) redirect("/");
 
-  const [pendingUsers, listings, bookings] = await Promise.all([
+  const [pendingUsers, approvedUsers, listings, bookings] = await Promise.all([
     prisma.user.findMany({
       where: { isApproved: false },
       orderBy: { email: "asc" },
-      select: { id: true, email: true, name: true },
+      select: { id: true, email: true, name: true, isAdmin: true },
+    }),
+    prisma.user.findMany({
+      where: { isApproved: true },
+      orderBy: { email: "asc" },
+      take: 200,
+      select: { id: true, email: true, name: true, isAdmin: true },
     }),
     prisma.listing.findMany({
       orderBy: { createdAt: "desc" },
@@ -85,16 +92,62 @@ export default async function AdminPage() {
                       </TableCell>
                       <TableCell className="text-sm">{u.name ?? "—"}</TableCell>
                       <TableCell className="text-right">
-                        <form
-                          action={async () => {
-                            "use server";
-                            await approveUserAction(u.id);
-                          }}
-                        >
-                          <Button type="submit" size="sm">
-                            Aprobar
-                          </Button>
-                        </form>
+                        <div className="flex justify-end gap-2">
+                          <form
+                            action={async () => {
+                              "use server";
+                              await approveUserAction(u.id);
+                            }}
+                          >
+                            <Button type="submit" size="sm">
+                              Aprobar
+                            </Button>
+                          </form>
+                          {u.isAdmin ? null : (
+                            <AdminUserActions userId={u.id} mode="deny" />
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-medium">Usuarios aprobados</h2>
+            {approvedUsers.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No hay usuarios aprobados.
+              </p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead className="text-right">Acción</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {approvedUsers.map((u) => (
+                    <TableRow key={u.id}>
+                      <TableCell className="font-medium">
+                        {u.email ?? "—"}
+                        {u.isAdmin ? (
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            (admin)
+                          </span>
+                        ) : null}
+                      </TableCell>
+                      <TableCell className="text-sm">{u.name ?? "—"}</TableCell>
+                      <TableCell className="text-right">
+                        {u.isAdmin ? null : (
+                          <div className="flex justify-end">
+                            <AdminUserActions userId={u.id} mode="delete" />
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

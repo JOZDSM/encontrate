@@ -8,6 +8,8 @@ import { PrismaClient } from "@/generated/prisma/client";
 const SHEET_ID = process.env.GOOGLE_SHEET_ID?.trim();
 const SHEET_TAB = (process.env.GOOGLE_SHEET_TAB ?? "Users").trim();
 
+const CONTACTED_OPTIONS = ["Yes", "No", "Completed"] as const;
+
 const REQUIRED_HEADERS = [
   "userId",
   "username",
@@ -50,6 +52,19 @@ async function main() {
 
   const { prisma, pool } = await getPrisma();
   try {
+    const spreadsheet = await sheets.spreadsheets.get({
+      spreadsheetId: SHEET_ID,
+      fields: "sheets(properties(sheetId,title))",
+    });
+    const sheetId = spreadsheet.data.sheets?.find(
+      (s) => s.properties?.title === SHEET_TAB,
+    )?.properties?.sheetId;
+    if (typeof sheetId !== "number") {
+      throw new Error(
+        `Sheet tab "${SHEET_TAB}" not found. Create a tab with that exact name.`,
+      );
+    }
+
     const [users, listingCounts] = await Promise.all([
       prisma.user.findMany({
         select: {
@@ -157,6 +172,35 @@ async function main() {
         },
       });
     }
+
+    // Ensure `contacted` is a dropdown: Yes / No / Completed (E2:E).
+    // We set a large row range so it applies as the sheet grows.
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId: SHEET_ID,
+      requestBody: {
+        requests: [
+          {
+            setDataValidation: {
+              range: {
+                sheetId,
+                startRowIndex: 1,
+                endRowIndex: 10000,
+                startColumnIndex: 4,
+                endColumnIndex: 5,
+              },
+              rule: {
+                condition: {
+                  type: "ONE_OF_LIST",
+                  values: CONTACTED_OPTIONS.map((v) => ({ userEnteredValue: v })),
+                },
+                strict: true,
+                showCustomUi: true,
+              },
+            },
+          },
+        ],
+      },
+    });
 
     console.log(
       JSON.stringify(

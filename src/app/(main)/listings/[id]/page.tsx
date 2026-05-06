@@ -12,6 +12,7 @@ import { canSeeFullAddress } from "@/lib/listing-visibility";
 import { canEditListingAsOwnerOrAdmin } from "@/lib/listing-edit-permissions";
 import { isPlatformAdmin } from "@/lib/admin";
 import { ListingHostContact } from "@/components/listing-host-contact";
+import { ListingPhotoGallery } from "@/components/listing-photo-gallery";
 import {
   Bath,
   BedDouble,
@@ -111,51 +112,7 @@ export default async function ListingDetailPage({
         </header>
 
         {listing.photos.length > 0 ? (
-          <section className="overflow-hidden rounded-2xl border border-border bg-muted/10">
-            {listing.photos.length === 1 ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={listing.photos[0]?.url}
-                alt=""
-                className="aspect-[16/10] w-full object-cover sm:aspect-[2/1]"
-              />
-            ) : (
-              <div className="grid gap-1 sm:gap-2 md:grid-cols-4 md:grid-rows-2">
-                {/* Hero */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={listing.photos[0]?.url}
-                  alt=""
-                  className="aspect-[16/10] w-full object-cover md:col-span-2 md:row-span-2 md:aspect-auto"
-                />
-                {listing.photos.slice(1, 5).map((p, idx) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={p.id}
-                    src={p.url}
-                    alt=""
-                    className="hidden aspect-[16/10] w-full object-cover md:block"
-                    style={{
-                      gridColumnStart: 3 + (idx % 2),
-                      gridRowStart: 1 + Math.floor(idx / 2),
-                    }}
-                  />
-                ))}
-                {/* Mobile strip */}
-                <div className="flex gap-2 overflow-x-auto px-3 py-3 md:hidden">
-                  {listing.photos.map((p) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      key={p.id}
-                      src={p.url}
-                      alt=""
-                      className="h-20 w-28 shrink-0 rounded-lg object-cover"
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </section>
+          <ListingPhotoGallery photos={listing.photos} />
         ) : (
           <section className="rounded-2xl border border-dashed border-border bg-muted/15 px-4 py-10 text-center text-sm text-muted-foreground">
             <p>Este anuncio no tiene fotos cargadas.</p>

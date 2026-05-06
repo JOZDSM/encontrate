@@ -23,6 +23,16 @@ const REQUIRED_HEADERS = [
 
 type Row = Record<(typeof REQUIRED_HEADERS)[number], string>;
 
+function normalizeContacted(raw: string): (typeof CONTACTED_OPTIONS)[number] | "" {
+  const v = raw.replace(/\s+/g, " ").trim();
+  if (!v) return "";
+  const lower = v.toLowerCase();
+  if (lower === "yes") return "Yes";
+  if (lower === "no") return "No";
+  if (lower === "completed" || lower === "complete" || lower === "done") return "Completed";
+  return "";
+}
+
 function yesNo(v: boolean): "Yes" | "No" {
   return v ? "Yes" : "No";
 }
@@ -116,15 +126,23 @@ async function main() {
     const userIdToRowIndex = new Map<string, number>(); // 1-based row number in sheet
     const userIdToContacted = new Map<string, string>();
     const blankContactedRowIndices: number[] = [];
+    const invalidContactedFixes: Array<{ rowIndex: number; value: string }> = [];
 
     for (let i = 1; i < values.length; i++) {
       const row = values[i] ?? [];
       const userId = row[0]?.trim();
       if (!userId) continue;
       userIdToRowIndex.set(userId, i + 1);
-      const contacted = (row[4] ?? "").trim();
-      if (contacted) userIdToContacted.set(userId, contacted);
-      else blankContactedRowIndices.push(i + 1);
+      const contactedRaw = String(row[4] ?? "");
+      const normalized = normalizeContacted(contactedRaw);
+      if (!normalized) {
+        blankContactedRowIndices.push(i + 1);
+      } else {
+        userIdToContacted.set(userId, normalized);
+        if (normalized !== contactedRaw.trim()) {
+          invalidContactedFixes.push({ rowIndex: i + 1, value: normalized });
+        }
+      }
     }
 
     const toAppend: string[][] = [];
@@ -189,6 +207,20 @@ async function main() {
       });
     }
 
+    // Fix any non-canonical spellings/casing/whitespace so data validation doesn't flag them.
+    if (invalidContactedFixes.length > 0) {
+      await sheets.spreadsheets.values.batchUpdate({
+        spreadsheetId: SHEET_ID,
+        requestBody: {
+          valueInputOption: "RAW",
+          data: invalidContactedFixes.map((f) => ({
+            range: `${SHEET_TAB}!E${f.rowIndex}`,
+            values: [[f.value]],
+          })),
+        },
+      });
+    }
+
     // Ensure `contacted` is a dropdown: Yes / No / Completed (E2:E).
     // We set a large row range so it applies as the sheet grows.
     await sheets.spreadsheets.batchUpdate({
@@ -209,7 +241,9 @@ async function main() {
                   type: "ONE_OF_LIST",
                   values: CONTACTED_OPTIONS.map((v) => ({ userEnteredValue: v })),
                 },
-                strict: true,
+                // Some Sheets "Tables" UI variants can still show warnings for values that look
+                // identical; we normalize values above and keep the dropdown UI enabled here.
+                strict: false,
                 showCustomUi: true,
               },
             },

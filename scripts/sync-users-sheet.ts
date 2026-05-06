@@ -33,6 +33,15 @@ function normalizeContacted(raw: string): (typeof CONTACTED_OPTIONS)[number] | "
   return "";
 }
 
+function normalizeEmail(raw: string | null | undefined): string {
+  const v = String(raw ?? "").trim();
+  if (!v) return "";
+  // Keep this intentionally simple: if it's not an obvious email, leave blank
+  // so Google Sheets Table typed columns don't mark it as invalid.
+  const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  return ok ? v.toLowerCase() : "";
+}
+
 function yesNo(v: boolean): "Yes" | "No" {
   return v ? "Yes" : "No";
 }
@@ -154,7 +163,7 @@ async function main() {
         // In Google Sheets "Tables", columns may have strict types (email/phone).
         // Use blank for missing values so the Table doesn't show "Invalid".
         username: u.name?.trim() || "",
-        email: u.email?.trim() || "",
+        email: normalizeEmail(u.email),
         phoneNumber: u.whatsappNumber?.trim() || "",
         contacted: userIdToContacted.get(u.id) || "No",
         hasListing: yesNo(Boolean(hostHasListing.get(u.id))),

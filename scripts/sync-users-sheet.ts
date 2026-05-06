@@ -151,9 +151,11 @@ async function main() {
     for (const u of users) {
       const row: Row = {
         userId: u.id,
-        username: u.name?.trim() || "—",
-        email: u.email?.trim() || "—",
-        phoneNumber: u.whatsappNumber?.trim() || "—",
+        // In Google Sheets "Tables", columns may have strict types (email/phone).
+        // Use blank for missing values so the Table doesn't show "Invalid".
+        username: u.name?.trim() || "",
+        email: u.email?.trim() || "",
+        phoneNumber: u.whatsappNumber?.trim() || "",
         contacted: userIdToContacted.get(u.id) || "No",
         hasListing: yesNo(Boolean(hostHasListing.get(u.id))),
         createdAt: iso(u.createdAt),

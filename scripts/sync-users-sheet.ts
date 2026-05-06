@@ -115,6 +115,7 @@ async function main() {
     // Build index by userId from existing rows.
     const userIdToRowIndex = new Map<string, number>(); // 1-based row number in sheet
     const userIdToContacted = new Map<string, string>();
+    const blankContactedRowIndices: number[] = [];
 
     for (let i = 1; i < values.length; i++) {
       const row = values[i] ?? [];
@@ -123,6 +124,7 @@ async function main() {
       userIdToRowIndex.set(userId, i + 1);
       const contacted = (row[4] ?? "").trim();
       if (contacted) userIdToContacted.set(userId, contacted);
+      else blankContactedRowIndices.push(i + 1);
     }
 
     const toAppend: string[][] = [];
@@ -168,6 +170,20 @@ async function main() {
           data: updates.map((u) => ({
             range: `${SHEET_TAB}!A${u.rowIndex}:H${u.rowIndex}`,
             values: [REQUIRED_HEADERS.map((h) => u.row[h])],
+          })),
+        },
+      });
+    }
+
+    // Default `contacted` to "No" for any existing blank cells (don't overwrite real values).
+    if (blankContactedRowIndices.length > 0) {
+      await sheets.spreadsheets.values.batchUpdate({
+        spreadsheetId: SHEET_ID,
+        requestBody: {
+          valueInputOption: "RAW",
+          data: blankContactedRowIndices.map((rowIndex) => ({
+            range: `${SHEET_TAB}!E${rowIndex}`,
+            values: [["No"]],
           })),
         },
       });

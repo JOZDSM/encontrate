@@ -225,34 +225,47 @@ async function main() {
 
     // Ensure `contacted` is a dropdown: Yes / No / Completed (E2:E).
     // We set a large row range so it applies as the sheet grows.
-    await sheets.spreadsheets.batchUpdate({
-      spreadsheetId: SHEET_ID,
-      requestBody: {
-        requests: [
-          {
-            setDataValidation: {
-              range: {
-                sheetId,
-                startRowIndex: 1,
-                endRowIndex: 10000,
-                startColumnIndex: 4,
-                endColumnIndex: 5,
-              },
-              rule: {
-                condition: {
-                  type: "ONE_OF_LIST",
-                  values: CONTACTED_OPTIONS.map((v) => ({ userEnteredValue: v })),
+    try {
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId: SHEET_ID,
+        requestBody: {
+          requests: [
+            {
+              setDataValidation: {
+                range: {
+                  sheetId,
+                  startRowIndex: 1,
+                  endRowIndex: 10000,
+                  startColumnIndex: 4,
+                  endColumnIndex: 5,
                 },
-                // Some Sheets "Tables" UI variants can still show warnings for values that look
-                // identical; we normalize values above and keep the dropdown UI enabled here.
-                strict: false,
-                showCustomUi: true,
+                rule: {
+                  condition: {
+                    type: "ONE_OF_LIST",
+                    values: CONTACTED_OPTIONS.map((v) => ({ userEnteredValue: v })),
+                  },
+                  // Some Sheets "Tables" UI variants can still show warnings for values that look
+                  // identical; we normalize values above and keep the dropdown UI enabled here.
+                  strict: false,
+                  showCustomUi: true,
+                },
               },
             },
-          },
-        ],
-      },
-    });
+          ],
+        },
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      // Google Sheets "Tables" (typed columns) reject setDataValidation calls on those cells.
+      // Syncing values is still valid; the dropdown UI must be configured via the Table UI.
+      if (msg.includes("not allowed on cells in typed columns")) {
+        console.warn(
+          `Skipping data validation (typed Table columns). Configure the 'contacted' column type as a dropdown in Sheets UI instead.`,
+        );
+      } else {
+        throw err;
+      }
+    }
 
     console.log(
       JSON.stringify(

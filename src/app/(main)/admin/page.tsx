@@ -28,13 +28,13 @@ export default async function AdminPage() {
     prisma.user.findMany({
       where: { isApproved: false },
       orderBy: { email: "asc" },
-      select: { id: true, email: true, name: true, isAdmin: true },
+      select: { id: true, email: true, name: true, whatsappNumber: true, isAdmin: true },
     }),
     prisma.user.findMany({
       where: { isApproved: true },
       orderBy: { email: "asc" },
       take: 200,
-      select: { id: true, email: true, name: true, isAdmin: true },
+      select: { id: true, email: true, name: true, whatsappNumber: true, isAdmin: true },
     }),
     prisma.listing.findMany({
       orderBy: { createdAt: "desc" },
@@ -82,6 +82,7 @@ export default async function AdminPage() {
                   <TableRow>
                     <TableHead>Email</TableHead>
                     <TableHead>Nombre</TableHead>
+                    <TableHead>WhatsApp</TableHead>
                     <TableHead className="text-right">Acción</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -92,6 +93,9 @@ export default async function AdminPage() {
                         {u.email ?? "—"}
                       </TableCell>
                       <TableCell className="text-sm">{u.name ?? "—"}</TableCell>
+                      <TableCell className="text-sm whitespace-nowrap">
+                        {u.whatsappNumber ?? "—"}
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <form
@@ -128,6 +132,7 @@ export default async function AdminPage() {
                   <TableRow>
                     <TableHead>Email</TableHead>
                     <TableHead>Nombre</TableHead>
+                    <TableHead>WhatsApp</TableHead>
                     <TableHead className="text-right">Acción</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -143,6 +148,9 @@ export default async function AdminPage() {
                         ) : null}
                       </TableCell>
                       <TableCell className="text-sm">{u.name ?? "—"}</TableCell>
+                      <TableCell className="text-sm whitespace-nowrap">
+                        {u.whatsappNumber ?? "—"}
+                      </TableCell>
                       <TableCell className="text-right">
                         {u.isAdmin ? null : (
                           <div className="flex justify-end">

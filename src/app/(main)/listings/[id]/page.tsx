@@ -130,27 +130,29 @@ export default async function ListingDetailPage({
           ) : null}
         </header>
 
-        {listing.photos.length > 0 ? (
-          <ListingPhotoGallery photos={listing.photos} />
-        ) : (
-          <section className="rounded-2xl border border-dashed border-border bg-muted/15 px-4 py-10 text-center text-sm text-muted-foreground">
-            <p>Este anuncio no tiene fotos cargadas.</p>
-            {canEdit ? (
-              <p className="mt-2">
-                <Button
-                  variant="link"
-                  className="h-auto p-0"
-                  asChild
-                >
-                  <Link href={`/host/listings/${listing.id}/edit`}>
-                    Subí fotos desde editar anuncio
-                  </Link>
-                </Button>{" "}
-                para que aparezcan acá y en los resultados de búsqueda.
-              </p>
-            ) : null}
-          </section>
-        )}
+        <div className="mt-6">
+          {listing.photos.length > 0 ? (
+            <ListingPhotoGallery photos={listing.photos} />
+          ) : (
+            <section className="rounded-2xl border border-dashed border-border bg-muted/15 px-4 py-10 text-center text-sm text-muted-foreground">
+              <p>Este anuncio no tiene fotos cargadas.</p>
+              {canEdit ? (
+                <p className="mt-2">
+                  <Button
+                    variant="link"
+                    className="h-auto p-0"
+                    asChild
+                  >
+                    <Link href={`/host/listings/${listing.id}/edit`}>
+                      Subí fotos desde editar anuncio
+                    </Link>
+                  </Button>{" "}
+                  para que aparezcan acá y en los resultados de búsqueda.
+                </p>
+              ) : null}
+            </section>
+          )}
+        </div>
 
         <Separator className="my-8" />
 

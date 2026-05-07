@@ -45,8 +45,7 @@ export function ListingHostContact({
           {phoneDisabled ? (
             <Button
               type="button"
-              variant="outline"
-              className="h-12 rounded-2xl px-5"
+              className="rounded-full"
               disabled
               title={
                 !showWhatsappOnListing
@@ -54,20 +53,16 @@ export function ListingHostContact({
                   : "El anfitrión no cargó teléfono."
               }
             >
-              <Phone className="mr-3 size-6" aria-hidden />
-              <span className="text-base font-semibold">Teléfono</span>
+              <Phone className="size-4" aria-hidden />
+              Teléfono
             </Button>
           ) : (
             <Dialog>
               <DialogTrigger
                 render={
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-12 rounded-2xl px-5"
-                  >
-                    <Phone className="mr-3 size-6" aria-hidden />
-                    <span className="text-base font-semibold">Teléfono</span>
+                  <Button type="button" className="rounded-full">
+                    <Phone className="size-4" aria-hidden />
+                    Teléfono
                   </Button>
                 }
               />
@@ -85,8 +80,7 @@ export function ListingHostContact({
           {emailDisabled ? (
             <Button
               type="button"
-              variant="outline"
-              className="h-12 rounded-2xl px-5"
+              className="rounded-full"
               disabled
               title={
                 !showEmailOnListing
@@ -94,20 +88,16 @@ export function ListingHostContact({
                   : "El anfitrión no cargó email."
               }
             >
-              <Mail className="mr-3 size-6" aria-hidden />
-              <span className="text-base font-semibold">Email</span>
+              <Mail className="size-4" aria-hidden />
+              Email
             </Button>
           ) : (
             <Dialog>
               <DialogTrigger
                 render={
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-12 rounded-2xl px-5"
-                  >
-                    <Mail className="mr-3 size-6" aria-hidden />
-                    <span className="text-base font-semibold">Email</span>
+                  <Button type="button" className="rounded-full">
+                    <Mail className="size-4" aria-hidden />
+                    Email
                   </Button>
                 }
               />
@@ -130,10 +120,7 @@ export function ListingHostContact({
           >
             <DialogTrigger
               render={
-                <Button
-                  type="button"
-                  className="h-12 rounded-2xl px-5 text-base font-semibold"
-                >
+                <Button type="button" className="rounded-full">
                   Enviar solicitud
                 </Button>
               }

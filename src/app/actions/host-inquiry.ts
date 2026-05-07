@@ -12,6 +12,8 @@ import { sendEmail } from "@/lib/email";
 const inquirySchema = z.object({
   listingId: z.string().min(1),
   message: z.string().trim().min(5).max(4000),
+  shareWhatsapp: z.boolean().optional().default(false),
+  shareEmail: z.boolean().optional().default(false),
 });
 
 export async function sendHostInquiry(
@@ -68,19 +70,41 @@ export async function sendHostInquiry(
   const recipientEmail = listing.host.email?.trim();
   if (recipientEmail) {
     const name = session.user.name?.trim() || "—";
-    const email = session.user.email?.trim() || "—";
-    const whatsapp =
-      (session.user as { whatsappNumber?: string }).whatsappNumber?.trim() ||
-      "—";
+    // Guest-controlled disclosure: only forward the contact channels the
+    // sender explicitly opted into. Defaults are off, so a checkbox-less
+    // submission shares no out-of-platform contact info.
+    const sharedEmail =
+      parsed.data.shareEmail ? session.user.email?.trim() || "" : "";
+    const sharedWhatsapp = parsed.data.shareWhatsapp
+      ? (session.user as { whatsappNumber?: string }).whatsappNumber?.trim() ||
+        ""
+      : "";
+
+    const contactLines: string[] = [
+      `<li><strong>Nombre</strong>: ${escapeHtml(name)}</li>`,
+    ];
+    if (sharedEmail) {
+      contactLines.push(
+        `<li><strong>Email</strong>: ${escapeHtml(sharedEmail)}</li>`,
+      );
+    }
+    if (sharedWhatsapp) {
+      contactLines.push(
+        `<li><strong>WhatsApp</strong>: ${escapeHtml(sharedWhatsapp)}</li>`,
+      );
+    }
+    const noContactNote =
+      !sharedEmail && !sharedWhatsapp
+        ? `<p style="color:#666;font-size:13px;">El huésped eligió no compartir email ni WhatsApp. Respondé desde la plataforma.</p>`
+        : "";
 
     const subject = `Nueva solicitud: ${listing.title}`;
     const html = `
       <p><strong>Nueva solicitud</strong> para <strong>${escapeHtml(listing.title)}</strong>.</p>
       <ul>
-        <li><strong>Nombre</strong>: ${escapeHtml(name)}</li>
-        <li><strong>Email</strong>: ${escapeHtml(email)}</li>
-        <li><strong>WhatsApp</strong>: ${escapeHtml(whatsapp)}</li>
+        ${contactLines.join("\n        ")}
       </ul>
+      ${noContactNote}
       <p><strong>Mensaje</strong>:</p>
       <pre style="white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;line-height:1.4;margin:0;">${escapeHtml(
         parsed.data.message,

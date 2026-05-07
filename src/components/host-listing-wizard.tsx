@@ -3,18 +3,26 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  Bath,
+  BedDouble,
   Bold,
+  ChevronDown,
+  ChevronUp,
+  DoorOpen,
+  Grid2X2,
+  Home,
+  ImagePlus,
   Italic,
   List,
   Minus,
   MoreHorizontal,
   Plus,
-  Upload,
-  ImagePlus,
-  Trash2,
   RefreshCcw,
-  ChevronUp,
-  ChevronDown,
+  Ruler,
+  Sofa,
+  Trash2,
+  Upload,
+  Wifi,
 } from "lucide-react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -873,7 +881,10 @@ export function HostListingWizard() {
                   data-wizard-scroll
                 >
                   <section className="space-y-3">
-                    <p className="text-sm font-medium">Tamaño de cama</p>
+                    <p className="flex items-center gap-2 text-sm font-medium">
+                      <BedDouble className="size-4 text-foreground" aria-hidden />
+                      Tamaño de cama
+                    </p>
                     <RadioGroup
                       value={bedSize}
                       onValueChange={(v) =>
@@ -908,7 +919,10 @@ export function HostListingWizard() {
                   <Separator />
 
                   <section className="space-y-3">
-                    <p className="text-sm font-medium">Ventana</p>
+                    <p className="flex items-center gap-2 text-sm font-medium">
+                      <Grid2X2 className="size-4 text-foreground" aria-hidden />
+                      Ventana
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       Podés marcar más de una si aplica.
                     </p>
@@ -963,7 +977,8 @@ export function HostListingWizard() {
                   <section className="space-y-3">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="space-y-1">
-                        <p className="text-sm font-medium">
+                        <p className="flex items-center gap-2 text-sm font-medium">
+                          <Ruler className="size-4 text-foreground" aria-hidden />
                           Tamaño aproximado de la habitación (m2)
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -1018,7 +1033,10 @@ export function HostListingWizard() {
                   <Separator />
 
                   <section className="space-y-3">
-                    <p className="text-sm font-medium">Habitación amueblada</p>
+                    <p className="flex items-center gap-2 text-sm font-medium">
+                      <Sofa className="size-4 text-foreground" aria-hidden />
+                      Habitación amueblada
+                    </p>
                     <RadioGroup
                       value={furnished ? "si" : "no"}
                       onValueChange={(v) => setFurnished(v === "si")}
@@ -1064,7 +1082,8 @@ export function HostListingWizard() {
                   <section className="space-y-3">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="space-y-1">
-                        <p className="text-sm font-medium">
+                        <p className="flex items-center gap-2 text-sm font-medium">
+                          <DoorOpen className="size-4 text-foreground" aria-hidden />
                           Número de habitaciones
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -1110,7 +1129,10 @@ export function HostListingWizard() {
                   <section className="space-y-3">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="space-y-1">
-                        <p className="text-sm font-medium">Número de baños</p>
+                        <p className="flex items-center gap-2 text-sm font-medium">
+                          <Bath className="size-4 text-foreground" aria-hidden />
+                          Número de baños
+                        </p>
                         <p className="text-sm text-muted-foreground">
                           Importante.
                         </p>
@@ -1154,7 +1176,8 @@ export function HostListingWizard() {
                   <section className="space-y-3">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="space-y-1">
-                        <p className="text-sm font-medium">
+                        <p className="flex items-center gap-2 text-sm font-medium">
+                          <Home className="size-4 text-foreground" aria-hidden />
                           Tamaño aproximado del piso (m2)
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -1214,7 +1237,10 @@ export function HostListingWizard() {
                   <Separator />
 
                   <section className="space-y-3">
-                    <p className="text-sm font-medium">WIFI</p>
+                    <p className="flex items-center gap-2 text-sm font-medium">
+                      <Wifi className="size-4 text-foreground" aria-hidden />
+                      WIFI
+                    </p>
                     <RadioGroup
                       value={wifi ? "si" : "no"}
                       onValueChange={(v) => setWifi(v === "si")}

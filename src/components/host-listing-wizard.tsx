@@ -71,6 +71,7 @@ import {
 } from "@/lib/listing-window-options";
 import { createListing } from "@/app/actions/listings";
 import { BARCELONA_ZONE_LABELS } from "@/lib/barcelona-zones";
+import { SupportEncontrateDialog } from "@/components/support-encontrate-dialog";
 import {
   LISTING_PHOTO_SIZE_HELPER_ES,
   LISTING_PHOTO_TOO_LARGE_MESSAGE,
@@ -281,6 +282,11 @@ export function HostListingWizard() {
   const [showEmailOnListing, setShowEmailOnListing] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // Holds the new listing id while the post-publish "support encontrate"
+  // dialog is open. Closing the dialog runs the redirect to the edit page.
+  const [publishedListingId, setPublishedListingId] = useState<string | null>(
+    null,
+  );
 
   const editor = useEditor({
     extensions: [
@@ -497,7 +503,7 @@ export function HostListingWizard() {
       setSubmitError(res.error);
       return;
     }
-    router.push(`/host/listings/${res.id}/edit`);
+    setPublishedListingId(res.id);
   }
 
   function tryFinishWizard() {
@@ -1435,6 +1441,16 @@ export function HostListingWizard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <SupportEncontrateDialog
+        open={publishedListingId !== null}
+        reason="listing_published"
+        onClose={() => {
+          const id = publishedListingId;
+          setPublishedListingId(null);
+          if (id) router.push(`/host/listings/${id}/edit`);
+        }}
+      />
 
       <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
         <DialogContent className="gap-4 border-border sm:max-w-md">

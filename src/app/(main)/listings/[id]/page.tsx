@@ -288,18 +288,23 @@ export default async function ListingDetailPage({
         <section className="space-y-3">
           <h2 className="text-lg font-semibold tracking-tight">Disponibilidad</h2>
           {unavailability.length > 0 ? (
-            <ul className="space-y-2 text-sm">
-              {unavailability.map((u) => (
-                <li
-                  key={u.key}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded border border-border bg-muted/20 px-3 py-2"
-                >
-                  <span>
-                    {formatDateLongES(u.startDate)} → {formatDateLongES(u.endDate)}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <>
+              <p className="text-sm text-muted-foreground">
+                La habitación no está disponible:
+              </p>
+              <ul className="space-y-2 text-sm">
+                {unavailability.map((u) => (
+                  <li
+                    key={u.key}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded border border-border bg-muted/20 px-3 py-2"
+                  >
+                    <span>
+                      {formatDateLongES(u.startDate)} → {formatDateLongES(u.endDate)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
           ) : (
             <p className="text-sm text-muted-foreground">
               Sin fechas bloqueadas próximamente.

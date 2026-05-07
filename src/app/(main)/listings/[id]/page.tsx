@@ -9,7 +9,6 @@ import { Separator } from "@/components/ui/separator";
 import { prisma } from "@/lib/db";
 import { isUserApproved } from "@/lib/approval";
 import { isUserProfileComplete } from "@/lib/profile";
-import { canSeeFullAddress } from "@/lib/listing-visibility";
 import { canEditListingAsOwnerOrAdmin } from "@/lib/listing-edit-permissions";
 import { isPlatformAdmin } from "@/lib/admin";
 import { ListingHostContact } from "@/components/listing-host-contact";
@@ -29,6 +28,7 @@ import {
   type ListingWindowValue,
 } from "@/lib/listing-window-options";
 import { listingDescriptionDisplayHtml } from "@/lib/listing-description-html";
+import { formatDateLongES } from "@/lib/format";
 
 function formatMonthlyPriceEur(priceMonthlyEur: number | null): string | null {
   if (typeof priceMonthlyEur !== "number") return null;
@@ -62,19 +62,49 @@ export default async function ListingDetailPage({
   if (!session?.user?.id) redirect("/login");
   if (!isUserProfileComplete(session)) redirect("/onboarding");
 
+  // Today, midnight UTC. Used to filter out past availability blocks/bookings —
+  // showing past unavailability on a guest-facing page is just noise.
+  const todayUtc = new Date();
+  todayUtc.setUTCHours(0, 0, 0, 0);
+
   const listing = await prisma.listing.findUnique({
     where: { id },
     include: {
       photos: { orderBy: { sortOrder: "asc" } },
       host: { select: { id: true, name: true, email: true, whatsappNumber: true } },
+      blocks: {
+        where: { endDate: { gte: todayUtc } },
+        orderBy: { startDate: "asc" },
+        select: { id: true, startDate: true, endDate: true },
+      },
+      bookings: {
+        where: { status: "CONFIRMED", endDate: { gte: todayUtc } },
+        orderBy: { startDate: "asc" },
+        select: { id: true, startDate: true, endDate: true },
+      },
     },
   });
   if (!listing) notFound();
 
+  // Merge host-set blocks + confirmed bookings into a single sorted list of
+  // unavailable date ranges. Both block the calendar from a guest's POV; we
+  // intentionally don't surface block reasons or booking IDs here.
+  const unavailability = [
+    ...listing.blocks.map((b) => ({
+      key: `block-${b.id}`,
+      startDate: b.startDate,
+      endDate: b.endDate,
+    })),
+    ...listing.bookings.map((b) => ({
+      key: `booking-${b.id}`,
+      startDate: b.startDate,
+      endDate: b.endDate,
+    })),
+  ].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+
   // Unapproved users can't browse/search listings yet.
   if (!isUserApproved(session)) redirect("/pending");
 
-  const showAddress = await canSeeFullAddress(session, listing);
   const isHost = session?.user?.id === listing.hostId;
   const canEdit = canEditListingAsOwnerOrAdmin(session, listing.hostId);
   const monthlyPrice = formatMonthlyPriceEur(listing.priceMonthlyEur);
@@ -255,21 +285,26 @@ export default async function ListingDetailPage({
 
         <Separator className="my-8" />
 
-        <section className="space-y-3 rounded-2xl border border-border bg-muted/20 p-4">
-          <h2 className="text-sm font-medium">Ubicación</h2>
-          <p className="text-sm text-muted-foreground">
-            {listing.neighborhood}, {listing.city}
-          </p>
-          {showAddress && listing.addressDetail ? (
-            <p className="text-sm">
-              <span className="font-medium">Dirección: </span>
-              {listing.addressDetail}
-            </p>
-          ) : !showAddress && listing.addressDetail ? (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold tracking-tight">Disponibilidad</h2>
+          {unavailability.length > 0 ? (
+            <ul className="space-y-2 text-sm">
+              {unavailability.map((u) => (
+                <li
+                  key={u.key}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded border border-border bg-muted/20 px-3 py-2"
+                >
+                  <span>
+                    {formatDateLongES(u.startDate)} → {formatDateLongES(u.endDate)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
             <p className="text-sm text-muted-foreground">
-              La dirección completa se muestra al huésped cuando la reserva está confirmada.
+              Sin fechas bloqueadas próximamente.
             </p>
-          ) : null}
+          )}
         </section>
 
         <Separator className="my-8" />

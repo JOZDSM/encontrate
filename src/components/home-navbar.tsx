@@ -39,7 +39,9 @@ function isMisCosasPath(p: string | null): boolean {
   return Boolean(p && p.startsWith("/mis-cosas"));
 }
 
-export function HomeNavbar() {
+type TopOffset = "none" | "banner";
+
+export function HomeNavbar({ topOffset = "none" }: { topOffset?: TopOffset } = {}) {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const showPanel = status === "authenticated" && session?.user;
@@ -69,8 +71,9 @@ export function HomeNavbar() {
     <>
       <header
         className={cn(
-          "fixed top-0 right-0 left-0 z-[100] flex h-20 flex-col items-center justify-center border-b border-border px-4 md:h-28",
-          "transition-[border-color] duration-300 ease-out",
+          "fixed right-0 left-0 z-[100] flex h-20 flex-col items-center justify-center border-b border-border px-4 md:h-28",
+          topOffset === "banner" ? "top-10 md:top-12" : "top-0",
+          "transition-[top,border-color] duration-300 ease-out",
           "md:border-transparent md:hover:border-border md:focus-within:border-border",
           plainBackground ? "bg-background text-foreground" : undefined,
         )}

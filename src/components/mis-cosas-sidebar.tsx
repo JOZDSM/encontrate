@@ -63,7 +63,7 @@ export function MisCosasSidebar({ isAdmin }: { isAdmin: boolean }) {
               size="lg"
               render={<Link href="/mis-cosas/mensajes" />}
             >
-              <span className="truncate font-semibold">Mis cosas</span>
+              <span className="truncate font-semibold">Panel</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

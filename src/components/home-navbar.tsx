@@ -128,7 +128,7 @@ export function HomeNavbar({ topOffset = "none" }: { topOffset?: TopOffset } = {
                   className={desktopNavItem(misCosasActive)}
                   aria-current={misCosasActive ? "page" : undefined}
                 >
-                  Mis cosas
+                  Panel
                 </Link>
               ) : null}
             </nav>
@@ -238,7 +238,7 @@ export function HomeNavbar({ topOffset = "none" }: { topOffset?: TopOffset } = {
                 aria-current={misCosasActive ? "page" : undefined}
                 onClick={closeMenu}
               >
-                Mis cosas
+                Panel
               </Link>
             ) : (
               <Link

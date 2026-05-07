@@ -1,5 +1,5 @@
 /**
- * Plain chrome (`bg-background`) on public listing detail pages and Mis cosas (sidebar).
+ * Plain chrome (`bg-background`) on public listing detail pages and Panel (sidebar).
  * `/listings` (search) keeps the same rotating background as other non-home routes (e.g. Cargá habitación).
  */
 export function isPublicListingDetailPath(

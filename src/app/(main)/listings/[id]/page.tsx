@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { after } from "next/server";
 import { auth } from "@/auth";
 import { BookingRequestForm } from "@/components/booking-request-form";
 import { Badge } from "@/components/ui/badge";
@@ -77,6 +78,24 @@ export default async function ListingDetailPage({
   const isHost = session?.user?.id === listing.hostId;
   const canEdit = canEditListingAsOwnerOrAdmin(session, listing.hostId);
   const monthlyPrice = formatMonthlyPriceEur(listing.priceMonthlyEur);
+
+  // Track unique-per-user visits (one row per listing+user). Skip the host viewing their
+  // own listing and platform admins so the metric reflects real guest interest.
+  const viewerId = session.user.id;
+  if (viewerId && !isHost && !isPlatformAdmin(session)) {
+    const listingId = listing.id;
+    after(async () => {
+      try {
+        await prisma.listingVisit.upsert({
+          where: { listingId_userId: { listingId, userId: viewerId } },
+          create: { listingId, userId: viewerId },
+          update: { lastVisitedAt: new Date() },
+        });
+      } catch (err) {
+        console.error("listingVisit upsert failed", err);
+      }
+    });
+  }
   return (
     <div className="bg-background">
       <div className="mx-auto w-full max-w-5xl px-4 pt-8 pb-12 text-foreground">

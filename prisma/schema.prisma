@@ -44,6 +44,7 @@ model User {
   bookings Booking[] @relation("GuestBookings")
   messages Message[]
   favoriteListings FavoriteListing[]
+  listingVisits   ListingVisit[]
 
   emailChangeRequests EmailChangeRequest[]
 }
@@ -148,8 +149,22 @@ model Listing {
   bookings Booking[]
   messages Message[]
   favoritedBy FavoriteListing[]
+  visits      ListingVisit[]
 
   @@index([city, country])
+}
+
+/// One row per (listing, user) — counts unique guest visits to a listing detail page.
+model ListingVisit {
+  listingId      String
+  userId         String
+  listing        Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstVisitedAt DateTime @default(now())
+  lastVisitedAt  DateTime @default(now())
+
+  @@id([listingId, userId])
+  @@index([listingId])
 }
 
 model FavoriteListing {

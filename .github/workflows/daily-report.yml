@@ -49,3 +49,11 @@ jobs:
           GOOGLE_SHEET_TAB: Users
         run: pnpm exec tsx scripts/sync-users-sheet.ts
 
+      - name: Sync Listings tab
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          GOOGLE_SHEET_TAB: Listings
+          PUBLIC_URL_BASE: ${{ secrets.PUBLIC_URL_BASE }}
+        run: pnpm exec tsx scripts/sync-listings-sheet.ts
+

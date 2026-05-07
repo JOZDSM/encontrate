@@ -5,16 +5,15 @@ export const BARCELONA_ZONE_LABELS: Record<string, string> = {
   gracia: "Gràcia",
   sarriasantgervasi: "Sarrià–Sant Gervasi",
   lescorts: "Les Corts",
+  // Combined: covers Sants, Poble Sec, and Montjuïc.
   sants: "Sants-Montjuïc",
   horta: "Horta-Guinardó",
   noubarris: "Nou Barris",
   santandreu: "Sant Andreu",
   santmarti: "Sant Martí",
-  poblesec: "Poble Sec",
-  montjuic: "Montjuïc",
 };
 
-/** Chip order: Figma-style list plus micro-zones from HTML map. */
+/** Chip order: matches the Figma map layout. */
 export const BARCELONA_ZONE_ORDER: string[] = [
   "lescorts",
   "sarriasantgervasi",
@@ -26,8 +25,6 @@ export const BARCELONA_ZONE_ORDER: string[] = [
   "ciutatvella",
   "eixample",
   "santmarti",
-  "poblesec",
-  "montjuic",
 ];
 
 /**
@@ -55,12 +52,19 @@ export const BARCELONA_ZONE_NEIGHBORHOOD_KEYWORDS: Record<string, string[]> = {
     "Vallvidrera",
   ],
   lescorts: ["Les Corts", "Pedralbes"],
+  // Folded keywords from the previously-separate `poblesec` and `montjuic` slugs;
+  // existing listings with neighborhoods like "Poble Sec" or "Montjuïc" continue
+  // to match this combined zone.
   sants: [
     "Sants",
     "Sants-Montjuïc",
     "Hostafrancs",
     "La Bordeta",
     "Zona Franca",
+    "Poble Sec",
+    "Poblesec",
+    "Montjuïc",
+    "Montjuic",
   ],
   horta: ["Horta", "Guinardó", "Guinardo", "Horta-Guinardó", "El Carmel"],
   noubarris: ["Nou Barris", "Torre Baró", "Trinitat", "Ciutat Meridiana"],
@@ -73,8 +77,6 @@ export const BARCELONA_ZONE_NEIGHBORHOOD_KEYWORDS: Record<string, string[]> = {
     "El Clot",
     "Verneda",
   ],
-  poblesec: ["Poble Sec", "Poblesec"],
-  montjuic: ["Montjuïc", "Montjuic"],
 };
 
 export function parseBarcelonaZonesParam(raw: string | undefined): string[] {

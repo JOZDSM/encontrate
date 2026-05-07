@@ -124,34 +124,47 @@
 }
 
 @layer components {
-  /* SVG polygons: theme vars + plain CSS so fills never fall back to default black. */
-  .barcelona-zone-polygon {
-    fill: var(--muted);
-    stroke: color-mix(in oklab, var(--foreground) 30%, transparent);
-    stroke-width: 2;
-    vector-effect: non-scaling-stroke;
+  /*
+   * Barcelona neighborhood map. Colors come straight from the Figma export
+   * (public/maps/barcelona-zones.svg): the user pre-styled `lescorts` as the
+   * "selected" template so the unselected/selected pair could be extracted in
+   * one shot. Inline fill/stroke is stripped from the SVG paths and labels at
+   * generation time (scripts/convert-barcelona-svg.mjs) so these rules can own
+   * the visual state without `!important` battles.
+   *
+   * Click target is the wrapping <g class="barcelona-zone-group">; CSS reaches
+   * the visible polygon via `> g > path` (the inner Vector_N group nests the
+   * mask + filled-paths) and the multi-tspan label via `> text`.
+   */
+  .barcelona-zone-group {
+    cursor: pointer;
+    outline: none;
   }
-  .barcelona-zone-polygon:hover {
-    fill: color-mix(in oklab, var(--muted) 70%, var(--card-foreground) 12%);
-  }
-  .barcelona-zone-polygon[data-selected="true"] {
-    fill: var(--primary);
-    stroke: color-mix(in oklab, var(--primary-foreground) 42%, transparent);
-  }
-  .barcelona-zone-label {
-    pointer-events: none;
-    font-size: 10px;
-    font-weight: 500;
-    fill: var(--foreground);
-    stroke: var(--background);
-    stroke-width: 3.25px;
+  .barcelona-zone-group > g path {
+    fill: #262626;
+    stroke: #404040;
     stroke-linejoin: round;
-    paint-order: stroke fill;
+    transition:
+      fill 150ms ease,
+      stroke 150ms ease;
   }
-  .barcelona-zone-label[data-selected="true"] {
-    fill: var(--primary-foreground);
-    stroke: var(--primary);
-    stroke-width: 2.75px;
+  .barcelona-zone-group:hover > g path,
+  .barcelona-zone-group[data-selected="true"] > g path {
+    fill: #e5e5e5;
+    stroke: #e5e5e5;
+  }
+  .barcelona-zone-group > text {
+    pointer-events: none;
+    fill: #e5e5e5;
+    transition: fill 150ms ease;
+  }
+  .barcelona-zone-group:hover > text,
+  .barcelona-zone-group[data-selected="true"] > text {
+    fill: #171717;
+  }
+  .barcelona-zone-group:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
 }
 

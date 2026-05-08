@@ -12,15 +12,15 @@ export type MisCosasNavItem = {
 
 export const MIS_COSAS_NAV: readonly MisCosasNavItem[] = [
   {
+    href: "/mis-cosas/mensajes",
+    label: "Mensajes",
+    match: (p) => p.startsWith("/mis-cosas/mensajes"),
+  },
+  {
     href: "/mis-cosas/anuncios",
     label: "Mis anuncios",
     match: (p) =>
       p === "/mis-cosas/anuncios" || p.startsWith("/mis-cosas/anuncios/"),
-  },
-  {
-    href: "/mis-cosas/mensajes",
-    label: "Mensajes",
-    match: (p) => p.startsWith("/mis-cosas/mensajes"),
   },
   {
     href: "/mis-cosas/favoritos",

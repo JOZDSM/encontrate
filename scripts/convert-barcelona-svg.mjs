@@ -74,7 +74,12 @@ function transformZoneInner(inner, slug) {
           return `<path${cleaned}/>`;
         })
         .replace(/<text([^>]*?)>/g, (_m, attrs) => {
-          const cleaned = attrs.replace(/\sfill="[^"]*"/g, "");
+          // Strip inline fill (CSS owns selection-driven label color) and the
+          // inline font-family so CSS can apply the Inter font loaded via
+          // next/font (var(--font-map-labels)).
+          const cleaned = attrs
+            .replace(/\sfill="[^"]*"/g, "")
+            .replace(/\sfont-family="[^"]*"/g, "");
           return `<text${cleaned}>`;
         });
     })

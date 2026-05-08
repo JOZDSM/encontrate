@@ -125,37 +125,46 @@
 
 @layer components {
   /*
-   * Barcelona neighborhood map. Colors come straight from the Figma export
-   * (public/maps/barcelona-zones.svg): the user pre-styled `lescorts` as the
-   * "selected" template so the unselected/selected pair could be extracted in
-   * one shot. Inline fill/stroke is stripped from the SVG paths and labels at
-   * generation time (scripts/convert-barcelona-svg.mjs) so these rules can own
-   * the visual state without `!important` battles.
+   * Barcelona neighborhood map. The Figma export (public/maps/barcelona-zones.svg)
+   * is converted to JSX by scripts/convert-barcelona-svg.mjs, which strips inline
+   * fill/stroke from the visible paths (and inline font-family from labels) so
+   * these rules can own the visual state without inline-attribute conflicts.
    *
-   * Click target is the wrapping <g class="barcelona-zone-group">; CSS reaches
-   * the visible polygon via `> g > path` (the inner Vector_N group nests the
-   * mask + filled-paths) and the multi-tspan label via `> text`.
+   * Selectors:
+   * - `> g > path` deliberately uses direct-child selectors so we never reach
+   *   <path> elements nested inside <mask>...</mask> (those keep their inline
+   *   fill="white" needed for masking).
+   * - `> g > path[mask]` targets ONLY the masked outline path that draws the
+   *   inside-aligned border. Multi-piece zones (sarrià, sants) export their
+   *   fill regions as separate non-masked paths; without this scope, each
+   *   disjoint piece would get its own outer stroke and look different.
    */
   .barcelona-zone-group {
     cursor: pointer;
     outline: none;
   }
-  .barcelona-zone-group > g path {
-    fill: #262626;
-    stroke: #404040;
-    stroke-linejoin: round;
+  .barcelona-zone-group > g > path {
+    fill: var(--foreground);
     transition:
       fill 150ms ease,
       stroke 150ms ease;
   }
-  .barcelona-zone-group:hover > g path,
-  .barcelona-zone-group[data-selected="true"] > g path {
+  .barcelona-zone-group > g > path[mask] {
+    stroke: var(--foreground);
+    stroke-linejoin: round;
+  }
+  .barcelona-zone-group:hover > g > path,
+  .barcelona-zone-group[data-selected="true"] > g > path {
     fill: #e5e5e5;
+  }
+  .barcelona-zone-group:hover > g > path[mask],
+  .barcelona-zone-group[data-selected="true"] > g > path[mask] {
     stroke: #e5e5e5;
   }
   .barcelona-zone-group > text {
     pointer-events: none;
-    fill: #e5e5e5;
+    fill: var(--foreground);
+    font-family: var(--font-map-labels), ui-sans-serif, system-ui, sans-serif;
     transition: fill 150ms ease;
   }
   .barcelona-zone-group:hover > text,

@@ -151,7 +151,7 @@ export function BarcelonaZonePicker({
           </div>
 
           <div
-            className="-mx-4 w-[calc(100%+2rem)] max-w-none rounded-md bg-muted/35 px-1 py-1 [&_svg]:max-h-none"
+            className="p-4 [&_svg]:max-h-none"
             role="group"
             aria-label="Mapa esquemático de barrios"
           >
@@ -207,7 +207,7 @@ export function BarcelonaZonePicker({
       ) : (
         <div className="grid items-center gap-10 md:grid-cols-[1fr_auto]">
           <div
-            className="mx-auto w-full max-w-[520px] rounded-md bg-muted/35 px-1 py-1 [&_svg]:max-h-none"
+            className="mx-auto w-full max-w-[520px] p-4 [&_svg]:max-h-none"
             role="group"
             aria-label="Mapa esquemático de barrios"
           >

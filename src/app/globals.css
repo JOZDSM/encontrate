@@ -144,7 +144,7 @@
     outline: none;
   }
   .barcelona-zone-group > g > path {
-    fill: var(--background);
+    fill: var(--secondary);
     transition:
       fill 150ms ease,
       stroke 150ms ease;

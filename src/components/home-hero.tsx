@@ -68,7 +68,7 @@ export function HomeHero() {
               variant="secondary"
               className="w-full rounded-full font-medium shadow-xs"
             >
-              <Link href={authed ? "/mis-cosas/mensajes" : "/login"}>
+              <Link href={authed ? "/mis-cosas" : "/login"}>
                 {authed ? "Panel" : "Iniciá sesión"}
               </Link>
             </Button>

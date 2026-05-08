@@ -74,7 +74,9 @@ export function HomeNavbar({ topOffset = "none" }: { topOffset?: TopOffset } = {
           "fixed right-0 left-0 z-[100] flex h-20 flex-col items-center justify-center border-b border-border px-4 md:h-28",
           topOffset === "banner" ? "top-10 md:top-12" : "top-0",
           "transition-[top,border-color] duration-300 ease-out",
-          "md:border-transparent md:hover:border-border md:focus-within:border-border",
+          misCosasActive
+            ? "md:border-transparent"
+            : "md:border-transparent md:hover:border-border md:focus-within:border-border",
           plainBackground ? "bg-background text-foreground" : undefined,
         )}
       >

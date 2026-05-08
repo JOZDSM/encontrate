@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 export function SiteFooter() {
   const pathname = usePathname();
   const plainBackground = isPublicListingDetailPath(pathname);
+  const isMisCosas = Boolean(pathname && pathname.startsWith("/mis-cosas"));
 
   return (
     <footer
@@ -17,7 +18,9 @@ export function SiteFooter() {
           ? "bg-background text-muted-foreground"
           : "text-primary-foreground/80 dark:text-foreground",
         "transition-[border-color] duration-300 ease-out",
-        "md:border-transparent md:hover:border-border md:focus-within:border-border",
+        isMisCosas
+          ? "md:border-transparent"
+          : "md:border-transparent md:hover:border-border md:focus-within:border-border",
       )}
     >
       <p className="px-4 leading-snug">

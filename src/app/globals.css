@@ -124,34 +124,56 @@
 }
 
 @layer components {
-  /* SVG polygons: theme vars + plain CSS so fills never fall back to default black. */
-  .barcelona-zone-polygon {
-    fill: var(--muted);
-    stroke: color-mix(in oklab, var(--foreground) 30%, transparent);
-    stroke-width: 2;
-    vector-effect: non-scaling-stroke;
+  /*
+   * Barcelona neighborhood map. The Figma export (public/maps/barcelona-zones.svg)
+   * is converted to JSX by scripts/convert-barcelona-svg.mjs, which strips inline
+   * fill/stroke from the visible paths (and inline font-family from labels) so
+   * these rules can own the visual state without inline-attribute conflicts.
+   *
+   * Selectors:
+   * - `> g > path` deliberately uses direct-child selectors so we never reach
+   *   <path> elements nested inside <mask>...</mask> (those keep their inline
+   *   fill="white" needed for masking).
+   * - `> g > path[mask]` targets ONLY the masked outline path that draws the
+   *   inside-aligned border. Multi-piece zones (sarrià, sants) export their
+   *   fill regions as separate non-masked paths; without this scope, each
+   *   disjoint piece would get its own outer stroke and look different.
+   */
+  .barcelona-zone-group {
+    cursor: pointer;
+    outline: none;
   }
-  .barcelona-zone-polygon:hover {
-    fill: color-mix(in oklab, var(--muted) 70%, var(--card-foreground) 12%);
+  .barcelona-zone-group > g > path {
+    fill: var(--secondary);
+    transition:
+      fill 150ms ease,
+      stroke 150ms ease;
   }
-  .barcelona-zone-polygon[data-selected="true"] {
-    fill: var(--primary);
-    stroke: color-mix(in oklab, var(--primary-foreground) 42%, transparent);
-  }
-  .barcelona-zone-label {
-    pointer-events: none;
-    font-size: 10px;
-    font-weight: 500;
-    fill: var(--foreground);
-    stroke: var(--background);
-    stroke-width: 3.25px;
+  .barcelona-zone-group > g > path[mask] {
+    stroke: var(--foreground);
     stroke-linejoin: round;
-    paint-order: stroke fill;
   }
-  .barcelona-zone-label[data-selected="true"] {
-    fill: var(--primary-foreground);
-    stroke: var(--primary);
-    stroke-width: 2.75px;
+  .barcelona-zone-group:hover > g > path,
+  .barcelona-zone-group[data-selected="true"] > g > path {
+    fill: var(--foreground);
+  }
+  .barcelona-zone-group:hover > g > path[mask],
+  .barcelona-zone-group[data-selected="true"] > g > path[mask] {
+    stroke: var(--foreground);
+  }
+  .barcelona-zone-group > text {
+    pointer-events: none;
+    fill: var(--foreground);
+    font-family: var(--font-map-labels), ui-sans-serif, system-ui, sans-serif;
+    transition: fill 150ms ease;
+  }
+  .barcelona-zone-group:hover > text,
+  .barcelona-zone-group[data-selected="true"] > text {
+    fill: var(--background);
+  }
+  .barcelona-zone-group:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
 }
 

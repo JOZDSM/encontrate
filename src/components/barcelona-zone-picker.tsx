@@ -2,6 +2,7 @@
 
 import { CircleCheck } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { BarcelonaZoneSvg } from "@/components/barcelona-zone-svg";
 import { badgeVariants } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
@@ -28,150 +29,6 @@ type Props = {
   variant?: "filters" | "wizard";
 };
 
-const ZONE_PATH_CLASS =
-  "barcelona-zone-polygon cursor-pointer transition-[fill,stroke] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
-
-function ZoneSvg({
-  selected,
-  toggle,
-}: {
-  selected: Set<string>;
-  toggle: (id: string) => void;
-}) {
-  const mapId = useId();
-
-  const poly = (id: string, points: string, lx: number, ly: number, label: string) => {
-    const isOn = selected.has(id);
-    return (
-      <g key={id}>
-        <polygon
-          role="button"
-          tabIndex={0}
-          aria-pressed={isOn}
-          aria-label={label}
-          data-selected={isOn ? "true" : undefined}
-          points={points}
-          className={ZONE_PATH_CLASS}
-          onClick={() => toggle(id)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              toggle(id);
-            }
-          }}
-        />
-        <text
-          x={lx}
-          y={ly}
-          textAnchor="middle"
-          className="barcelona-zone-label"
-          data-selected={isOn ? "true" : undefined}
-          style={{ fontFamily: "inherit" }}
-        >
-          {label}
-        </text>
-      </g>
-    );
-  };
-
-  return (
-    <svg
-      viewBox="52 48 270 222"
-      className="text-foreground block h-auto w-full max-w-full"
-      preserveAspectRatio="xMidYMid meet"
-      aria-labelledby={`${mapId}-title`}
-    >
-      <title id={`${mapId}-title`}>
-        Mapa esquemático de barrios de Barcelona
-      </title>
-      {poly(
-        "ciutatvella",
-        "170,180 185,170 200,168 210,175 205,192 188,198 172,194",
-        188,
-        176,
-        BARCELONA_ZONE_LABELS.ciutatvella,
-      )}
-      {poly(
-        "eixample",
-        "130,140 210,130 220,170 210,175 200,168 185,170 170,180 172,194 140,190 128,165",
-        172,
-        158,
-        BARCELONA_ZONE_LABELS.eixample,
-      )}
-      {poly(
-        "gracia",
-        "170,100 220,95 225,130 210,130 130,140 128,120",
-        178,
-        120,
-        BARCELONA_ZONE_LABELS.gracia,
-      )}
-      {poly(
-        "sarriasantgervasi",
-        "100,60 170,55 175,100 170,100 128,120 105,115 95,90",
-        133,
-        88,
-        "Sarrià-St.G.",
-      )}
-      {poly(
-        "lescorts",
-        "60,100 105,115 128,120 130,140 128,165 90,170 65,150 55,125",
-        90,
-        138,
-        BARCELONA_ZONE_LABELS.lescorts,
-      )}
-      {poly(
-        "sants",
-        "90,170 128,165 140,190 135,215 100,220 75,205 80,185",
-        107,
-        197,
-        "Sants",
-      )}
-      {poly(
-        "horta",
-        "170,55 255,50 260,95 225,100 225,95 220,95 170,100 175,100",
-        213,
-        78,
-        "Horta",
-      )}
-      {poly(
-        "noubarris",
-        "255,50 310,55 315,100 270,105 260,95",
-        284,
-        80,
-        BARCELONA_ZONE_LABELS.noubarris,
-      )}
-      {poly(
-        "santandreu",
-        "260,95 315,100 320,150 275,155 265,130 225,130 225,100",
-        280,
-        127,
-        BARCELONA_ZONE_LABELS.santandreu,
-      )}
-      {poly(
-        "santmarti",
-        "210,130 265,130 275,155 280,200 240,210 215,200 210,175",
-        247,
-        172,
-        BARCELONA_ZONE_LABELS.santmarti,
-      )}
-      {poly(
-        "poblesec",
-        "130,190 170,180 188,198 185,220 155,230 128,215 128,200",
-        158,
-        202,
-        BARCELONA_ZONE_LABELS.poblesec,
-      )}
-      {poly(
-        "montjuic",
-        "75,205 100,220 135,215 155,230 145,260 100,265 70,240",
-        108,
-        238,
-        BARCELONA_ZONE_LABELS.montjuic,
-      )}
-    </svg>
-  );
-}
-
 export function BarcelonaZonePicker({
   name = "zones",
   defaultZones = [],
@@ -184,6 +41,8 @@ export function BarcelonaZonePicker({
   subtitle,
   variant = "filters",
 }: Props) {
+  const titleId = useId();
+
   const [uncontrolledSelected, setUncontrolledSelected] = useState<Set<string>>(
     () => new Set(defaultZones.filter((z) => z in BARCELONA_ZONE_LABELS)),
   );
@@ -292,11 +151,15 @@ export function BarcelonaZonePicker({
           </div>
 
           <div
-            className="-mx-4 w-[calc(100%+2rem)] max-w-none rounded-md bg-muted/35 px-1 py-1 [&_svg]:max-h-none"
+            className="p-2 md:p-4 [&_svg]:max-h-none"
             role="group"
             aria-label="Mapa esquemático de barrios"
           >
-            <ZoneSvg selected={selected} toggle={toggle} />
+            <BarcelonaZoneSvg
+              selected={selected}
+              toggle={toggle}
+              titleId={titleId}
+            />
           </div>
 
           <div className="flex flex-col gap-2">
@@ -344,11 +207,15 @@ export function BarcelonaZonePicker({
       ) : (
         <div className="grid items-center gap-10 md:grid-cols-[1fr_auto]">
           <div
-            className="mx-auto w-full max-w-[520px] rounded-md bg-muted/35 px-1 py-1 [&_svg]:max-h-none"
+            className="mx-auto w-full max-w-[520px] p-2 md:p-4 [&_svg]:max-h-none"
             role="group"
             aria-label="Mapa esquemático de barrios"
           >
-            <ZoneSvg selected={selected} toggle={toggle} />
+            <BarcelonaZoneSvg
+              selected={selected}
+              toggle={toggle}
+              titleId={titleId}
+            />
           </div>
 
           <div className="flex items-center justify-center md:justify-end">

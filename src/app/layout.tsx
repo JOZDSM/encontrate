@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Figtree, Geist_Mono } from "next/font/google";
+import { Figtree, Geist_Mono, Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { SiteChrome } from "@/components/site-chrome";
 import { SiteFooter } from "@/components/site-footer";
@@ -12,6 +12,15 @@ const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" });
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Inter is used only for the Barcelona neighborhood map labels (matching the
+// Figma design). Adding it here makes `var(--font-map-labels)` available in
+// CSS without re-fetching the font on each render.
+const inter = Inter({
+  variable: "--font-map-labels",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const viewport: Viewport = {
@@ -73,6 +82,7 @@ export default async function RootLayout({
         "h-svh min-h-0 antialiased font-sans",
         figtree.variable,
         geistMono.variable,
+        inter.variable,
       )}
     >
       <body className="flex h-svh min-h-0 flex-col overflow-x-hidden overflow-y-auto bg-background md:overflow-y-hidden">

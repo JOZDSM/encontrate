@@ -144,7 +144,7 @@
     outline: none;
   }
   .barcelona-zone-group > g > path {
-    fill: var(--foreground);
+    fill: var(--background);
     transition:
       fill 150ms ease,
       stroke 150ms ease;
@@ -155,11 +155,11 @@
   }
   .barcelona-zone-group:hover > g > path,
   .barcelona-zone-group[data-selected="true"] > g > path {
-    fill: #e5e5e5;
+    fill: var(--foreground);
   }
   .barcelona-zone-group:hover > g > path[mask],
   .barcelona-zone-group[data-selected="true"] > g > path[mask] {
-    stroke: #e5e5e5;
+    stroke: var(--foreground);
   }
   .barcelona-zone-group > text {
     pointer-events: none;
@@ -169,7 +169,7 @@
   }
   .barcelona-zone-group:hover > text,
   .barcelona-zone-group[data-selected="true"] > text {
-    fill: #171717;
+    fill: var(--background);
   }
   .barcelona-zone-group:focus-visible {
     outline: 2px solid var(--ring);

@@ -28,7 +28,7 @@ export function MisCosasSidebar({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <aside className="hidden w-[255px] shrink-0 flex-col border-r border-sidebar-border bg-background md:flex">
-      <nav aria-label="Panel" className="flex flex-1 flex-col overflow-y-auto p-2 md:p-4">
+      <nav aria-label="Panel" className="flex flex-1 flex-col overflow-y-auto p-2 md:px-4 md:pt-6 md:pb-0">
         <ul className="flex flex-col gap-1">
           {MIS_COSAS_NAV.map((item) => {
             const Icon = ICONS[item.href];

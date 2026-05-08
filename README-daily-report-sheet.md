@@ -9,15 +9,20 @@ with two tabs:
 
 ### Users tab
 
-Columns (A→H):
+Columns (A→I):
 - `userId` (primary key for upserts)
 - `username`
 - `email`
 - `phoneNumber` (WhatsApp)
-- `contacted` (editable; preserved)
+- `contacted` (editable; preserved; dropdown: Yes / No / Completed)
 - `hasListing`
 - `createdAt`
 - `approved`
+- `country` (editable; preserved; dropdown of Latin America, Northern America
+  and Europe countries; defaults to `Unknown` for new and blank rows)
+
+Both `contacted` and `country` are sheet-only ops fields. The script defaults
+new and blank rows but never overwrites a value you've already set.
 
 ### Listings tab
 

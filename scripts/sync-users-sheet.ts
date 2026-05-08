@@ -10,6 +10,94 @@ const SHEET_TAB = (process.env.GOOGLE_SHEET_TAB ?? "Users").trim();
 
 const CONTACTED_OPTIONS = ["Yes", "No", "Completed"] as const;
 
+// Latin America (sovereign), Northern America, Europe (incl. Council of Europe
+// transcontinental states). Sorted alphabetically; "Unknown" is the default.
+const COUNTRY_OPTIONS = [
+  "Unknown",
+  // Latin America
+  "Argentina",
+  "Belize",
+  "Bolivia",
+  "Brazil",
+  "Chile",
+  "Colombia",
+  "Costa Rica",
+  "Cuba",
+  "Dominican Republic",
+  "Ecuador",
+  "El Salvador",
+  "Guatemala",
+  "Guyana",
+  "Haiti",
+  "Honduras",
+  "Mexico",
+  "Nicaragua",
+  "Panama",
+  "Paraguay",
+  "Peru",
+  "Suriname",
+  "Uruguay",
+  "Venezuela",
+  // Northern America
+  "Canada",
+  "United States",
+  // Europe
+  "Albania",
+  "Andorra",
+  "Armenia",
+  "Austria",
+  "Azerbaijan",
+  "Belarus",
+  "Belgium",
+  "Bosnia and Herzegovina",
+  "Bulgaria",
+  "Croatia",
+  "Cyprus",
+  "Czechia",
+  "Denmark",
+  "Estonia",
+  "Finland",
+  "France",
+  "Georgia",
+  "Germany",
+  "Greece",
+  "Hungary",
+  "Iceland",
+  "Ireland",
+  "Italy",
+  "Kosovo",
+  "Latvia",
+  "Liechtenstein",
+  "Lithuania",
+  "Luxembourg",
+  "Malta",
+  "Moldova",
+  "Monaco",
+  "Montenegro",
+  "Netherlands",
+  "North Macedonia",
+  "Norway",
+  "Poland",
+  "Portugal",
+  "Romania",
+  "Russia",
+  "San Marino",
+  "Serbia",
+  "Slovakia",
+  "Slovenia",
+  "Spain",
+  "Sweden",
+  "Switzerland",
+  "Turkey",
+  "Ukraine",
+  "United Kingdom",
+  "Vatican City",
+] as const;
+
+const COUNTRY_CANONICAL_BY_LOWER = new Map<string, string>(
+  COUNTRY_OPTIONS.map((c) => [c.toLowerCase(), c]),
+);
+
 const REQUIRED_HEADERS = [
   "userId",
   "username",
@@ -19,6 +107,7 @@ const REQUIRED_HEADERS = [
   "hasListing",
   "createdAt",
   "approved",
+  "country",
 ] as const;
 
 type Row = Record<(typeof REQUIRED_HEADERS)[number], string>;
@@ -31,6 +120,15 @@ function normalizeContacted(raw: string): (typeof CONTACTED_OPTIONS)[number] | "
   if (lower === "no") return "No";
   if (lower === "completed" || lower === "complete" || lower === "done") return "Completed";
   return "";
+}
+
+function normalizeCountry(raw: string): { value: string; isBlank: boolean } {
+  const v = raw.replace(/\s+/g, " ").trim();
+  if (!v) return { value: "", isBlank: true };
+  const canonical = COUNTRY_CANONICAL_BY_LOWER.get(v.toLowerCase());
+  // Preserve unknown free-text values as-is so we don't clobber manual entries;
+  // the dropdown is non-strict and will surface a soft warning instead.
+  return { value: canonical ?? v, isBlank: false };
 }
 
 function normalizeEmail(raw: string | null | undefined): string {
@@ -108,8 +206,8 @@ async function main() {
       hostHasListing.set(row.hostId, (row._count?._all ?? 0) > 0);
     }
 
-    // Read existing sheet A:H (we never overwrite beyond H so you can add columns later).
-    const range = `${SHEET_TAB}!A:H`;
+    // Read existing sheet A:I (we never overwrite beyond I so you can add columns later).
+    const range = `${SHEET_TAB}!A:I`;
     const existing = await sheets.spreadsheets.values.get({
       spreadsheetId: SHEET_ID,
       range,
@@ -122,10 +220,10 @@ async function main() {
       REQUIRED_HEADERS.every((h, i) => header[i] === h);
 
     if (!headerOk) {
-      // Initialize tab headers (and keep sheet simple). This overwrites A1:H1 only.
+      // Initialize tab headers (and keep sheet simple). This overwrites A1:I1 only.
       await sheets.spreadsheets.values.update({
         spreadsheetId: SHEET_ID,
-        range: `${SHEET_TAB}!A1:H1`,
+        range: `${SHEET_TAB}!A1:I1`,
         valueInputOption: "RAW",
         requestBody: { values: [Array.from(REQUIRED_HEADERS)] },
       });
@@ -134,8 +232,11 @@ async function main() {
     // Build index by userId from existing rows.
     const userIdToRowIndex = new Map<string, number>(); // 1-based row number in sheet
     const userIdToContacted = new Map<string, string>();
+    const userIdToCountry = new Map<string, string>();
     const blankContactedRowIndices: number[] = [];
+    const blankCountryRowIndices: number[] = [];
     const invalidContactedFixes: Array<{ rowIndex: number; value: string }> = [];
+    const countryCasingFixes: Array<{ rowIndex: number; value: string }> = [];
 
     for (let i = 1; i < values.length; i++) {
       const row = values[i] ?? [];
@@ -150,6 +251,17 @@ async function main() {
         userIdToContacted.set(userId, normalized);
         if (normalized !== contactedRaw.trim()) {
           invalidContactedFixes.push({ rowIndex: i + 1, value: normalized });
+        }
+      }
+
+      const countryRaw = String(row[8] ?? "");
+      const country = normalizeCountry(countryRaw);
+      if (country.isBlank) {
+        blankCountryRowIndices.push(i + 1);
+      } else {
+        userIdToCountry.set(userId, country.value);
+        if (country.value !== countryRaw.trim()) {
+          countryCasingFixes.push({ rowIndex: i + 1, value: country.value });
         }
       }
     }
@@ -169,6 +281,7 @@ async function main() {
         hasListing: yesNo(Boolean(hostHasListing.get(u.id))),
         createdAt: iso(u.createdAt),
         approved: yesNo(Boolean(u.isApproved)),
+        country: userIdToCountry.get(u.id) || "Unknown",
       };
 
       const existingRowIndex = userIdToRowIndex.get(u.id);
@@ -183,21 +296,21 @@ async function main() {
     if (toAppend.length > 0) {
       await sheets.spreadsheets.values.append({
         spreadsheetId: SHEET_ID,
-        range: `${SHEET_TAB}!A:H`,
+        range: `${SHEET_TAB}!A:I`,
         valueInputOption: "RAW",
         insertDataOption: "INSERT_ROWS",
         requestBody: { values: toAppend },
       });
     }
 
-    // Batch update existing rows (A:H only).
+    // Batch update existing rows (A:I only).
     if (updates.length > 0) {
       await sheets.spreadsheets.values.batchUpdate({
         spreadsheetId: SHEET_ID,
         requestBody: {
           valueInputOption: "RAW",
           data: updates.map((u) => ({
-            range: `${SHEET_TAB}!A${u.rowIndex}:H${u.rowIndex}`,
+            range: `${SHEET_TAB}!A${u.rowIndex}:I${u.rowIndex}`,
             values: [REQUIRED_HEADERS.map((h) => u.row[h])],
           })),
         },
@@ -232,7 +345,35 @@ async function main() {
       });
     }
 
-    // Ensure `contacted` is a dropdown: Yes / No / Completed (E2:E).
+    // Default `country` to "Unknown" for any existing blank cells.
+    if (blankCountryRowIndices.length > 0) {
+      await sheets.spreadsheets.values.batchUpdate({
+        spreadsheetId: SHEET_ID,
+        requestBody: {
+          valueInputOption: "RAW",
+          data: blankCountryRowIndices.map((rowIndex) => ({
+            range: `${SHEET_TAB}!I${rowIndex}`,
+            values: [["Unknown"]],
+          })),
+        },
+      });
+    }
+
+    // Normalize casing for any country cells that already match a known option.
+    if (countryCasingFixes.length > 0) {
+      await sheets.spreadsheets.values.batchUpdate({
+        spreadsheetId: SHEET_ID,
+        requestBody: {
+          valueInputOption: "RAW",
+          data: countryCasingFixes.map((f) => ({
+            range: `${SHEET_TAB}!I${f.rowIndex}`,
+            values: [[f.value]],
+          })),
+        },
+      });
+    }
+
+    // Ensure `contacted` (column E) and `country` (column I) are dropdowns.
     // We set a large row range so it applies as the sheet grows.
     try {
       await sheets.spreadsheets.batchUpdate({
@@ -260,6 +401,27 @@ async function main() {
                 },
               },
             },
+            {
+              setDataValidation: {
+                range: {
+                  sheetId,
+                  startRowIndex: 1,
+                  endRowIndex: 10000,
+                  startColumnIndex: 8,
+                  endColumnIndex: 9,
+                },
+                rule: {
+                  condition: {
+                    type: "ONE_OF_LIST",
+                    values: COUNTRY_OPTIONS.map((v) => ({ userEnteredValue: v })),
+                  },
+                  // Non-strict so manually-entered values that aren't in the list don't break;
+                  // they'll show a soft warning instead.
+                  strict: false,
+                  showCustomUi: true,
+                },
+              },
+            },
           ],
         },
       });
@@ -269,7 +431,7 @@ async function main() {
       // Syncing values is still valid; the dropdown UI must be configured via the Table UI.
       if (msg.includes("not allowed on cells in typed columns")) {
         console.warn(
-          `Skipping data validation (typed Table columns). Configure the 'contacted' column type as a dropdown in Sheets UI instead.`,
+          `Skipping data validation (typed Table columns). Configure the 'contacted' and 'country' column types as dropdowns in Sheets UI instead.`,
         );
       } else {
         throw err;

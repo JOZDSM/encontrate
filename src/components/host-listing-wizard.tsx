@@ -611,9 +611,9 @@ export function HostListingWizard() {
                             size="icon-xs"
                             aria-pressed={editor?.isActive("bold") ?? false}
                             className={cn(
-                              "rounded-lg hover:bg-foreground/10 hover:text-foreground",
+                              "rounded-lg hover:bg-foreground/15 hover:text-foreground",
                               editor?.isActive("bold") &&
-                                "bg-foreground/15 text-foreground hover:bg-foreground/20",
+                                "bg-foreground/15 text-foreground",
                             )}
                             onClick={() => editor?.chain().focus().toggleBold().run()}
                             aria-label="Negrita"
@@ -626,9 +626,9 @@ export function HostListingWizard() {
                             size="icon-xs"
                             aria-pressed={editor?.isActive("italic") ?? false}
                             className={cn(
-                              "rounded-lg hover:bg-foreground/10 hover:text-foreground",
+                              "rounded-lg hover:bg-foreground/15 hover:text-foreground",
                               editor?.isActive("italic") &&
-                                "bg-foreground/15 text-foreground hover:bg-foreground/20",
+                                "bg-foreground/15 text-foreground",
                             )}
                             onClick={() => editor?.chain().focus().toggleItalic().run()}
                             aria-label="Cursiva"
@@ -641,9 +641,9 @@ export function HostListingWizard() {
                             size="icon-xs"
                             aria-pressed={editor?.isActive("bulletList") ?? false}
                             className={cn(
-                              "rounded-lg hover:bg-foreground/10 hover:text-foreground",
+                              "rounded-lg hover:bg-foreground/15 hover:text-foreground",
                               editor?.isActive("bulletList") &&
-                                "bg-foreground/15 text-foreground hover:bg-foreground/20",
+                                "bg-foreground/15 text-foreground",
                             )}
                             onClick={() => editor?.chain().focus().toggleBulletList().run()}
                             aria-label="Lista con viñetas"

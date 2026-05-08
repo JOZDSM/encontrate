@@ -235,7 +235,7 @@ export function HomeNavbar({ topOffset = "none" }: { topOffset?: TopOffset } = {
             <div className="my-2 h-px bg-border" />
             {showPanel ? (
               <Link
-                href="/mis-cosas/mensajes"
+                href="/mis-cosas"
                 className={mobileNavItem(misCosasActive)}
                 aria-current={misCosasActive ? "page" : undefined}
                 onClick={closeMenu}

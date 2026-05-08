@@ -20,7 +20,7 @@ const ICONS: Record<MisCosasNavHref, typeof LayoutGrid> = {
 
 export function MisCosasMobileHub() {
   return (
-    <ul className="flex flex-col gap-4 px-4 py-4">
+    <ul className="flex flex-col gap-2 px-4 py-4">
       {MIS_COSAS_NAV.map((item) => {
         const Icon = ICONS[item.href];
         return (

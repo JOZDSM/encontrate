@@ -9,107 +9,60 @@ import {
   Settings2,
   Shield,
 } from "lucide-react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarRail,
-} from "@/components/ui/sidebar";
+import type { MisCosasNavHref } from "@/lib/mis-cosas-nav";
+import { MIS_COSAS_NAV } from "@/lib/mis-cosas-nav";
+import { cn } from "@/lib/utils";
 
-const nav = [
-  {
-    href: "/mis-cosas/anuncios",
-    label: "Mis anuncios",
-    icon: LayoutGrid,
-    match: (p: string) =>
-      p === "/mis-cosas/anuncios" || p.startsWith("/mis-cosas/anuncios/"),
-  },
-  {
-    href: "/mis-cosas/mensajes",
-    label: "Mensajes",
-    icon: MessageSquare,
-    match: (p: string) => p.startsWith("/mis-cosas/mensajes"),
-  },
-  {
-    href: "/mis-cosas/favoritos",
-    label: "Mis favoritos",
-    icon: Heart,
-    match: (p: string) => p === "/mis-cosas/favoritos",
-  },
-  {
-    href: "/mis-cosas/configuracion",
-    label: "Configuración",
-    icon: Settings2,
-    match: (p: string) => p.startsWith("/mis-cosas/configuracion"),
-  },
-] as const;
+const ICONS: Record<MisCosasNavHref, typeof LayoutGrid> = {
+  "/mis-cosas/anuncios": LayoutGrid,
+  "/mis-cosas/mensajes": MessageSquare,
+  "/mis-cosas/favoritos": Heart,
+  "/mis-cosas/configuracion": Settings2,
+};
+
+const itemClass =
+  "flex h-9 items-center gap-2 rounded-md px-2 text-sm font-medium text-foreground transition-colors hover:bg-foreground/10";
 
 export function MisCosasSidebar({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname() ?? "";
 
   return (
-    <Sidebar collapsible="icon" variant="inset">
-      <SidebarHeader className="border-b border-sidebar-border">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              render={<Link href="/mis-cosas/mensajes" />}
-            >
-              <span className="truncate font-semibold">Panel</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Cuenta</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {nav.map((item) => {
-                const Icon = item.icon;
-                const active = item.match(pathname);
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      isActive={active}
-                      tooltip={item.label}
-                      render={<Link href={item.href} />}
-                    >
-                      <Icon className="size-4 shrink-0" />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-      <SidebarFooter className="border-t border-sidebar-border">
-        <SidebarMenu>
-          {isAdmin ? (
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                isActive={pathname.startsWith("/admin")}
-                tooltip="Administración"
-                render={<Link href="/admin" />}
-              >
-                <Shield className="size-4 shrink-0" />
-                <span>Administración</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ) : null}
-        </SidebarMenu>
-      </SidebarFooter>
-      <SidebarRail />
-    </Sidebar>
+    <aside className="hidden w-[255px] shrink-0 flex-col border-r border-sidebar-border bg-background md:flex">
+      <nav aria-label="Panel" className="flex flex-1 flex-col overflow-y-auto p-2 md:px-4 md:pt-6 md:pb-0">
+        <ul className="flex flex-col gap-1">
+          {MIS_COSAS_NAV.map((item) => {
+            const Icon = ICONS[item.href];
+            const active = item.match(pathname);
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(itemClass, active && "bg-foreground/10")}
+                >
+                  <Icon className="size-4 shrink-0" aria-hidden />
+                  <span className="truncate">{item.label}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+      {isAdmin ? (
+        <div className="border-t border-sidebar-border p-2">
+          <Link
+            href="/admin"
+            aria-current={pathname.startsWith("/admin") ? "page" : undefined}
+            className={cn(
+              itemClass,
+              pathname.startsWith("/admin") && "bg-foreground/10",
+            )}
+          >
+            <Shield className="size-4 shrink-0" aria-hidden />
+            <span className="truncate">Administración</span>
+          </Link>
+        </div>
+      ) : null}
+    </aside>
   );
 }

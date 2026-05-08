@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useLayoutEffect, useState } from "react";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { EncontrateMark } from "@/components/encontrate-mark";
 import { ANIMATIONS } from "@/lib/animations";
@@ -62,26 +62,16 @@ export function HomeHero() {
           </h1>
 
           <div className="pointer-events-auto w-full pt-4 sm:hidden">
-            {authed ? (
-              <Button
-                type="button"
-                size="default"
-                variant="secondary"
-                className="w-full rounded-full font-medium shadow-xs"
-                onClick={() => signOut({ callbackUrl: "/" })}
-              >
-                Cerrar sesión
-              </Button>
-            ) : (
-              <Button
-                asChild
-                size="default"
-                variant="secondary"
-                className="w-full rounded-full font-medium shadow-xs"
-              >
-                <Link href="/login">Iniciá sesión</Link>
-              </Button>
-            )}
+            <Button
+              asChild
+              size="default"
+              variant="secondary"
+              className="w-full rounded-full font-medium shadow-xs"
+            >
+              <Link href={authed ? "/mis-cosas/mensajes" : "/login"}>
+                {authed ? "Panel" : "Iniciá sesión"}
+              </Link>
+            </Button>
           </div>
         </div>
       </div>

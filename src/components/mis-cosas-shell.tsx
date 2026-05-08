@@ -39,7 +39,7 @@ export function MisCosasShell({
 
   return (
     <TooltipProvider>
-      <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 flex-col md:border md:border-sidebar-border">
+      <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 flex-col md:border-x md:border-sidebar-border">
         <MisCosasBreadcrumb />
         <div className="flex min-h-0 flex-1">
           <MisCosasSidebar isAdmin={isAdmin} />

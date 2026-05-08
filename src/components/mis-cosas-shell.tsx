@@ -1,14 +1,17 @@
 "use client";
 
-import Link from "next/link";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import type { CSSProperties } from "react";
+import { usePathname } from "next/navigation";
+import { MisCosasBreadcrumb } from "@/components/mis-cosas-breadcrumb";
+import { MisCosasMobileBreadcrumb } from "@/components/mis-cosas-mobile-breadcrumb";
 import { MisCosasSidebar } from "@/components/mis-cosas-sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+const SIDEBAR_WIDTH_STYLE = {
+  "--sidebar-width": "255px",
+} as CSSProperties;
 
 export function MisCosasShell({
   children,
@@ -17,24 +20,45 @@ export function MisCosasShell({
   children: React.ReactNode;
   isAdmin: boolean;
 }) {
+  const pathname = usePathname() ?? "";
+  const isMobile = useIsMobile();
+  const isHub = pathname === "/mis-cosas";
+
+  if (isMobile) {
+    return (
+      <TooltipProvider>
+        <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 flex-col">
+          {!isHub ? <MisCosasMobileBreadcrumb /> : null}
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+            {isHub ? (
+              children
+            ) : (
+              <div className="flex min-h-0 flex-1 flex-col gap-6 px-6 pt-6">
+                {children}
+              </div>
+            )}
+          </div>
+        </div>
+      </TooltipProvider>
+    );
+  }
+
   return (
     <TooltipProvider>
-      <SidebarProvider className="flex min-h-0 min-w-0 flex-1">
-        <MisCosasSidebar isAdmin={isAdmin} />
-        <SidebarInset className="min-h-0 min-w-0 overflow-y-auto md:max-h-[calc(100svh-7rem)]">
-          <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-3 md:h-16 md:px-4">
-            <SidebarTrigger />
-            <Separator orientation="vertical" className="h-6" />
-            <Link
-              href="/"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground"
-            >
-              Inicio
-            </Link>
-          </header>
-          <div className="flex flex-1 flex-col gap-4 p-4 md:p-8">{children}</div>
-        </SidebarInset>
-      </SidebarProvider>
+      <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 flex-col md:border md:border-sidebar-border">
+        <MisCosasBreadcrumb />
+        <SidebarProvider
+          className="flex min-h-0 min-w-0 flex-1"
+          style={SIDEBAR_WIDTH_STYLE}
+        >
+          <MisCosasSidebar isAdmin={isAdmin} />
+          <SidebarInset className="min-h-0 min-w-0 md:max-h-[calc(100svh-7rem-4rem)]">
+            <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-6 pt-6">
+              {children}
+            </div>
+          </SidebarInset>
+        </SidebarProvider>
+      </div>
     </TooltipProvider>
   );
 }

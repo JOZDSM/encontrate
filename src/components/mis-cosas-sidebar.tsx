@@ -15,66 +15,35 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import type { MisCosasNavHref } from "@/lib/mis-cosas-nav";
+import { MIS_COSAS_NAV } from "@/lib/mis-cosas-nav";
 
-const nav = [
-  {
-    href: "/mis-cosas/anuncios",
-    label: "Mis anuncios",
-    icon: LayoutGrid,
-    match: (p: string) =>
-      p === "/mis-cosas/anuncios" || p.startsWith("/mis-cosas/anuncios/"),
-  },
-  {
-    href: "/mis-cosas/mensajes",
-    label: "Mensajes",
-    icon: MessageSquare,
-    match: (p: string) => p.startsWith("/mis-cosas/mensajes"),
-  },
-  {
-    href: "/mis-cosas/favoritos",
-    label: "Mis favoritos",
-    icon: Heart,
-    match: (p: string) => p === "/mis-cosas/favoritos",
-  },
-  {
-    href: "/mis-cosas/configuracion",
-    label: "Configuración",
-    icon: Settings2,
-    match: (p: string) => p.startsWith("/mis-cosas/configuracion"),
-  },
-] as const;
+const ICONS: Record<MisCosasNavHref, typeof LayoutGrid> = {
+  "/mis-cosas/anuncios": LayoutGrid,
+  "/mis-cosas/mensajes": MessageSquare,
+  "/mis-cosas/favoritos": Heart,
+  "/mis-cosas/configuracion": Settings2,
+};
 
 export function MisCosasSidebar({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname() ?? "";
 
   return (
-    <Sidebar collapsible="icon" variant="inset">
-      <SidebarHeader className="border-b border-sidebar-border">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              render={<Link href="/mis-cosas/mensajes" />}
-            >
-              <span className="truncate font-semibold">Panel</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
+    <Sidebar
+      collapsible="icon"
+      className="[&_[data-slot=sidebar-inner]]:!bg-background md:border-r md:border-sidebar-border"
+    >
+      <SidebarContent className="bg-background">
         <SidebarGroup>
-          <SidebarGroupLabel>Cuenta</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {nav.map((item) => {
-                const Icon = item.icon;
+              {MIS_COSAS_NAV.map((item) => {
+                const Icon = ICONS[item.href];
                 const active = item.match(pathname);
                 return (
                   <SidebarMenuItem key={item.href}>
@@ -93,7 +62,7 @@ export function MisCosasSidebar({ isAdmin }: { isAdmin: boolean }) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t border-sidebar-border">
+      <SidebarFooter className="border-t border-sidebar-border bg-background">
         <SidebarMenu>
           {isAdmin ? (
             <SidebarMenuItem>

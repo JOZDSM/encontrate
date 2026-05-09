@@ -13,6 +13,7 @@ import { BMAC_URL } from "@/lib/bmac";
 
 export type SupportReason =
   | "listing_published"
+  | "signal_published"
   | "booking_request_sent"
   | "booking_confirmed";
 
@@ -22,6 +23,10 @@ const COPY: Record<SupportReason, Copy> = {
   listing_published: {
     title: "Tu habitación está publicada",
     body: "Si encontrate te resultó útil, ¿nos invitás un café? Nos ayuda a mantener el proyecto.",
+  },
+  signal_published: {
+    title: "Tu señal está activa",
+    body: "Ya estás visible para anfitriones que estén buscando huésped. Si encontrate te resultó útil, ¿nos invitás un café?",
   },
   booking_request_sent: {
     title: "Solicitud enviada",

@@ -43,14 +43,22 @@ export default async function EditListingPage({
     <div className="mx-auto w-full max-w-3xl px-4 py-10">
       <Card className="border border-border bg-card shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
         <CardContent className="space-y-10 p-6 text-card-foreground">
-          <div>
+          <div className="space-y-2">
             <h1 className="text-2xl font-semibold">Editar anuncio</h1>
-            <Link
-              href={`/listings/${listing.id}`}
-              className="text-sm text-muted-foreground underline"
-            >
-              Ver página pública
-            </Link>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+              <Link
+                href={`/listings/${listing.id}`}
+                className="text-muted-foreground underline"
+              >
+                Ver página pública
+              </Link>
+              <Link
+                href="/mis-cosas/buscar-huesped"
+                className="text-muted-foreground underline"
+              >
+                Buscar huésped
+              </Link>
+            </div>
           </div>
           <HostListingForm
             listingId={listing.id}

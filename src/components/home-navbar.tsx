@@ -35,6 +35,10 @@ function isCargaHabitacionPath(p: string | null): boolean {
   );
 }
 
+function isBuscoHabitacionPath(p: string | null): boolean {
+  return Boolean(p && (p === "/signals" || p.startsWith("/signals/")));
+}
+
 function isMisCosasPath(p: string | null): boolean {
   return Boolean(p && p.startsWith("/mis-cosas"));
 }
@@ -53,6 +57,7 @@ export function HomeNavbar({ topOffset = "none" }: { topOffset?: TopOffset } = {
 
   const buscarActive = isBuscarHabitacionPath(pathname);
   const cargarActive = isCargaHabitacionPath(pathname);
+  const buscoHabitacionActive = isBuscoHabitacionPath(pathname);
   const misCosasActive = isMisCosasPath(pathname);
 
   const desktopNavItem = (active: boolean) =>
@@ -123,6 +128,13 @@ export function HomeNavbar({ topOffset = "none" }: { topOffset?: TopOffset } = {
                 aria-current={cargarActive ? "page" : undefined}
               >
                 Cargá habitación
+              </Link>
+              <Link
+                href="/signals"
+                className={desktopNavItem(buscoHabitacionActive)}
+                aria-current={buscoHabitacionActive ? "page" : undefined}
+              >
+                Busco habitación
               </Link>
               {showPanel ? (
                 <Link
@@ -231,6 +243,14 @@ export function HomeNavbar({ topOffset = "none" }: { topOffset?: TopOffset } = {
               onClick={closeMenu}
             >
               Cargá habitación
+            </Link>
+            <Link
+              href="/signals"
+              className={mobileNavItem(buscoHabitacionActive)}
+              aria-current={buscoHabitacionActive ? "page" : undefined}
+              onClick={closeMenu}
+            >
+              Busco habitación
             </Link>
             <div className="my-2 h-px bg-border" />
             {showPanel ? (

@@ -3,6 +3,7 @@ import { Figtree, Geist_Mono, Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { SiteChrome } from "@/components/site-chrome";
 import { SiteFooter } from "@/components/site-footer";
+import { SiteMainScrollBand } from "@/components/site-main-scroll-band";
 import { auth } from "@/auth";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -89,12 +90,12 @@ export default async function RootLayout({
         <Providers session={session}>
           <SiteChrome>
             <main className="flex min-h-0 flex-1 flex-col overflow-visible pt-20 md:overflow-hidden md:pt-28">
-              <div className="flex min-h-0 flex-1 flex-col overflow-visible md:border-t md:border-b md:border-sidebar-border md:overflow-y-auto md:overscroll-y-contain">
+              <SiteMainScrollBand>
                 <div className="flex flex-1 flex-col md:min-h-0">{children}</div>
                 <div className="shrink-0 md:hidden">
                   <SiteFooter />
                 </div>
-              </div>
+              </SiteMainScrollBand>
               <div className="hidden shrink-0 md:block">
                 <SiteFooter />
               </div>

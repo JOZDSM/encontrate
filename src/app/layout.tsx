@@ -52,8 +52,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/open-graph-image.png",
-        width: 1200,
-        height: 630,
+        width: 1201,
+        height: 631,
         alt: "Encontrate",
       },
     ],

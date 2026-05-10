@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, Menu } from "lucide-react";
-import { Poppins } from "next/font/google";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { signOutAction } from "@/app/actions/auth";
@@ -14,14 +13,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { EncontrateMark } from "@/components/encontrate-mark";
+import { EncontrateLockup } from "@/components/encontrate-lockup";
 import { isPublicListingDetailPath } from "@/lib/listing-route";
 import { cn } from "@/lib/utils";
-
-const logo = Poppins({
-  weight: "500",
-  subsets: ["latin"],
-});
 
 function isBuscarHabitacionPath(p: string | null): boolean {
   return Boolean(p && (p === "/listings" || p.startsWith("/listings/")));
@@ -88,9 +82,9 @@ export function HomeNavbar({ topOffset = "none" }: { topOffset?: TopOffset } = {
         <div className="flex w-full max-w-[1440px] items-center justify-between">
           <Link
             href="/"
+            aria-label="encontrate — Inicio"
             className={cn(
-              logo.className,
-              "inline-flex items-center gap-2 text-2xl leading-8",
+              "inline-flex items-center",
               plainBackground
                 ? "text-foreground"
                 : "text-primary-foreground dark:text-foreground",
@@ -102,8 +96,7 @@ export function HomeNavbar({ topOffset = "none" }: { topOffset?: TopOffset } = {
               }
             }}
           >
-            <EncontrateMark className="size-8 shrink-0" />
-            encontrate
+            <EncontrateLockup className="h-8 w-auto shrink-0" />
           </Link>
 
           <div className="hidden flex-wrap items-center justify-end gap-3 md:flex lg:gap-4">

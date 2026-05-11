@@ -113,21 +113,21 @@ export function HomeNavbar({ topOffset = "none" }: { topOffset?: TopOffset } = {
                 className={desktopNavItem(buscarActive)}
                 aria-current={buscarActive ? "page" : undefined}
               >
-                Buscá habitación
+                Ver habitaciones
               </Link>
               <Link
                 href="/host/listings/new"
                 className={desktopNavItem(cargarActive)}
                 aria-current={cargarActive ? "page" : undefined}
               >
-                Cargá habitación
+                Cargar habitación
               </Link>
               <Link
                 href="/signals"
                 className={desktopNavItem(buscoHabitacionActive)}
                 aria-current={buscoHabitacionActive ? "page" : undefined}
               >
-                Busco habitación
+                Busco alojarme
               </Link>
               {showPanel ? (
                 <Link
@@ -227,7 +227,7 @@ export function HomeNavbar({ topOffset = "none" }: { topOffset?: TopOffset } = {
               aria-current={buscarActive ? "page" : undefined}
               onClick={closeMenu}
             >
-              Buscá habitación
+              Ver habitaciones
             </Link>
             <Link
               href="/host/listings/new"
@@ -235,7 +235,7 @@ export function HomeNavbar({ topOffset = "none" }: { topOffset?: TopOffset } = {
               aria-current={cargarActive ? "page" : undefined}
               onClick={closeMenu}
             >
-              Cargá habitación
+              Cargar habitación
             </Link>
             <Link
               href="/signals"
@@ -243,7 +243,7 @@ export function HomeNavbar({ topOffset = "none" }: { topOffset?: TopOffset } = {
               aria-current={buscoHabitacionActive ? "page" : undefined}
               onClick={closeMenu}
             >
-              Busco habitación
+              Busco alojarme
             </Link>
             <div className="my-2 h-px bg-border" />
             {showPanel ? (

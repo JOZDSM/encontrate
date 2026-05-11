@@ -45,8 +45,12 @@ export default async function MisCosasSignalsPage() {
           <div>
             <h1 className="text-2xl font-semibold">Mis señales</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Cada señal es una versión de «estoy buscando habitación». Solo
-              una puede estar activa a la vez.
+              Aquí viven las señales que estás emitiendo dentro de encontrate.
+              Por ahora solo son de búsqueda de habitación, pero en un futuro
+              podrás emitir señales de otro tipo.
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Solo una señal puede estar activa a la vez.
             </p>
           </div>
           <SignalCreateButton />

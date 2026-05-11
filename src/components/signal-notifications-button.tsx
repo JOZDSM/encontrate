@@ -82,14 +82,15 @@ export function SignalNotificationsButton({
         }
       />
       <DialogPrimitive.Portal>
+        {/* Bump above the navbar (z-[100]) so the overlay covers and inerts it. */}
         <DialogPrimitive.Backdrop
           data-slot="dialog-overlay"
-          className="fixed inset-0 isolate z-50 bg-background/90 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0"
+          className="fixed inset-0 isolate z-[110] bg-background/90 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0"
         />
         <DialogPrimitive.Popup
           data-slot="dialog-content"
           className={cn(
-            "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-4xl bg-background p-6 text-sm ring-1 ring-foreground/5 duration-100 outline-none sm:max-w-lg data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+            "fixed top-1/2 left-1/2 z-[110] grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-4xl bg-background p-6 text-sm ring-1 ring-foreground/5 duration-100 outline-none sm:max-w-2xl data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           )}
         >
           <div className="flex flex-col gap-2 pr-10">
@@ -131,12 +132,7 @@ export function SignalNotificationsButton({
                 </Button>
               }
             />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleSave}
-              disabled={isPending}
-            >
+            <Button type="button" onClick={handleSave} disabled={isPending}>
               {isPending ? "Guardando…" : "Guardar cambios"}
             </Button>
           </div>
@@ -170,19 +166,21 @@ function NotificationOption({
   disabled: boolean;
   label: string;
 }) {
+  // Per Figma: unchecked uses fill `accent` + stroke `primary`; checked uses
+  // fill `muted` + stroke `border`. Box is 48px tall with 12px padding/gap and
+  // 10px corner radius.
   return (
     <label
       className={cn(
-        "flex cursor-pointer items-center gap-3 rounded-full border border-border bg-input/30 px-4 py-3 text-sm leading-snug transition-colors hover:bg-input/50",
-        checked && "border-primary/60 bg-primary/10 hover:bg-primary/15",
-        disabled && "cursor-not-allowed opacity-60 hover:bg-input/30",
+        "flex min-h-12 cursor-pointer items-center gap-3 rounded-[10px] border p-3 text-sm leading-snug transition-colors",
+        checked ? "border-border bg-muted" : "border-primary bg-accent",
+        disabled && "cursor-not-allowed opacity-60",
       )}
     >
       <Checkbox
         checked={checked}
         disabled={disabled}
         onCheckedChange={(v) => onChange(v === true)}
-        className="rounded-full"
       />
       <span>{label}</span>
     </label>

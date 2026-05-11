@@ -4,14 +4,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Bath,
-  BedDouble,
   Bold,
+  Check,
   ChevronDown,
   ChevronUp,
   DoorOpen,
   Globe2,
-  Grid2X2,
-  Heart,
   Home,
   ImagePlus,
   Italic,
@@ -20,7 +18,6 @@ import {
   RefreshCcw,
   Ruler,
   Sofa,
-  Sparkles,
   Trash2,
   Upload,
   Wifi,
@@ -73,12 +70,11 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { BarcelonaZonePicker } from "@/components/barcelona-zone-picker";
-import { SignalImportanceButtons } from "@/components/signal-importance-buttons";
+import { SignalSteppedMeter } from "@/components/signal-stepped-meter";
 import { SupportEncontrateDialog } from "@/components/support-encontrate-dialog";
 import { COUNTRY_OPTIONS } from "@/lib/countries";
 import { stripHtmlForSnippet } from "@/lib/listing-description-html";
 import {
-  LISTING_PHOTO_SIZE_HELPER_ES,
   LISTING_PHOTO_TOO_LARGE_MESSAGE,
 } from "@/lib/listing-photo-upload";
 import { compressListingPhotoIfNeeded } from "@/lib/listing-photo-compress";
@@ -88,8 +84,9 @@ import {
   updateSignalStep,
   type UpdateSignalStepInput,
 } from "@/app/actions/signals";
+import { normalizeSignalWizardResumeStep } from "@/lib/signal-wizard-resume";
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 10;
 
 const GENDER_OPTIONS = [
   { value: "FEMALE", label: "Mujer" },
@@ -160,6 +157,35 @@ function makeId() {
   return Math.random().toString(16).slice(2) + Date.now().toString(16);
 }
 
+function WizardNotificationRow({
+  checked,
+  onChange,
+  disabled,
+  label,
+}: {
+  checked: boolean;
+  onChange: (next: boolean) => void;
+  disabled?: boolean;
+  label: string;
+}) {
+  return (
+    <label
+      className={cn(
+        "flex min-h-12 cursor-pointer items-center gap-3 rounded-[10px] border p-3 text-sm leading-snug transition-colors",
+        checked ? "border-border bg-muted" : "border-primary bg-accent",
+        disabled && "cursor-not-allowed opacity-60",
+      )}
+    >
+      <Checkbox
+        checked={checked}
+        disabled={disabled}
+        onCheckedChange={(v) => onChange(v === true)}
+      />
+      <span>{label}</span>
+    </label>
+  );
+}
+
 function looksLikeImageFile(file: File): boolean {
   if (file.type.startsWith("image/")) return true;
   return /\.(jpe?g|png|gif|webp|heic|heif|avif|bmp)$/i.test(file.name);
@@ -213,11 +239,14 @@ export type SignalWizardInitialState = {
   listingAlertInApp: boolean;
   listingAlertEmail: boolean;
   photos: readonly { id: string; url: string; sortOrder: number }[];
+  /** DB wizard resume version (1 = legacy 8-step UI). */
+  wizardFlowVersion: number;
 };
 
 export type SignalWizardProps = {
   signalId: string;
   initialState: SignalWizardInitialState;
+  /** DB resume cursor; pass through `normalizeSignalWizardResumeStep` from the server. */
   startStep: number;
 };
 
@@ -358,7 +387,16 @@ export function SignalWizard({
 }: SignalWizardProps) {
   const router = useRouter();
   const [stepIndex, setStepIndex] = useState(() =>
-    Math.min(Math.max(0, startStep), TOTAL_STEPS - 1),
+    Math.min(
+      Math.max(
+        0,
+        normalizeSignalWizardResumeStep(
+          startStep,
+          initialState.wizardFlowVersion ?? 2,
+        ),
+      ),
+      TOTAL_STEPS - 1,
+    ),
   );
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [savingNext, setSavingNext] = useState(false);
@@ -369,7 +407,9 @@ export function SignalWizard({
   // Step 1 — Introducite
   const [fullName, setFullName] = useState(initialState.fullName ?? "");
   const [age, setAge] = useState<string>(
-    initialState.age !== null ? String(initialState.age) : "",
+    initialState.age !== null && initialState.age !== undefined
+      ? String(initialState.age)
+      : "18",
   );
   const [gender, setGender] = useState<string>(initialState.gender ?? "");
   const [countryOfOrigin, setCountryOfOrigin] = useState<string>(
@@ -429,7 +469,6 @@ export function SignalWizard({
     ...initialState.flexStayLengths,
   ]);
   const [flexMonths, setFlexMonths] = useState<string[]>([...initialState.flexMonths]);
-  const [asapUrgent, setAsapUrgent] = useState<boolean>(initialState.asapUrgent);
   const monthOptions = useMemo(() => buildMonthOptions(14), []);
 
   // Step 7 — Qué buscás
@@ -477,6 +516,13 @@ export function SignalWizard({
         : "any",
   );
 
+  const [listingAlertInApp, setListingAlertInApp] = useState(
+    initialState.listingAlertInApp,
+  );
+  const [listingAlertEmail, setListingAlertEmail] = useState(
+    initialState.listingAlertEmail,
+  );
+
   // Step 8 — Presentate (TipTap)
   const [descriptionHtml, setDescriptionHtml] = useState(initialState.description ?? "");
   const [descriptionText, setDescriptionText] = useState(() =>
@@ -492,7 +538,7 @@ export function SignalWizard({
       }),
       Placeholder.configure({
         placeholder:
-          "Contale a los anfitriones quién sos, qué te gusta y por qué buscás esa habitación.",
+          "Ej. Qué tal? Soy un estudiante de medicina aquí en Barcelona por un semestre. Estoy buscando una habitación en un piso con gente buena onda, joven, con ganas de hacer planes.",
       }),
     ],
     content: initialState.description ?? "",
@@ -528,12 +574,7 @@ export function SignalWizard({
     }
     if (stepIndex === 1) return photoUploadingCount === 0;
     if (stepIndex === 2) return Boolean(occupation && movingWith && languages.length > 0);
-    if (stepIndex === 3) {
-      return (
-        cleanlinessImportance !== null &&
-        orderImportance !== null
-      );
-    }
+    if (stepIndex === 3) return true;
     if (stepIndex === 4) return true;
     if (stepIndex === 5) {
       if (dateMode === "asap") return true;
@@ -542,10 +583,12 @@ export function SignalWizard({
       return false;
     }
     if (stepIndex === 6) return true;
-    if (stepIndex === 7) {
+    if (stepIndex === 7) return true;
+    if (stepIndex === 8) {
       const len = descriptionText.trim().length;
       return len >= 10 && len <= 8000;
     }
+    if (stepIndex === 9) return true;
     return true;
   }, [
     stepIndex,
@@ -554,8 +597,6 @@ export function SignalWizard({
     occupation,
     movingWith,
     languages,
-    cleanlinessImportance,
-    orderImportance,
     dateMode,
     exactCheckIn,
     exactCheckOut,
@@ -566,6 +607,14 @@ export function SignalWizard({
 
   const progressValue = Math.min(1, Math.max(0, (stepIndex + 1) / TOTAL_STEPS));
   const isLastStep = stepIndex === TOTAL_STEPS - 1;
+
+  const primaryFooterLabel = useMemo(() => {
+    if (stepIndex === 9) return savingNext ? "Publicando…" : "Publicar señal";
+    if ([3, 4, 6].includes(stepIndex)) {
+      return savingNext ? "Guardando…" : "Saltear / Seguir";
+    }
+    return savingNext ? "Guardando…" : "Siguiente";
+  }, [stepIndex, savingNext]);
 
   async function uploadOne(file: File): Promise<string> {
     const next = await compressListingPhotoIfNeeded(file);
@@ -670,7 +719,7 @@ export function SignalWizard({
       return {
         step: "identity",
         fullName: fullName.trim(),
-        age: age.trim() === "" ? null : Number(age),
+        age: age.trim() === "" || Number.isNaN(Number(age)) ? null : Number(age),
         gender: (gender || null) as never,
         countryOfOrigin: countryOfOrigin.trim() === "" ? null : countryOfOrigin,
       };
@@ -713,13 +762,15 @@ export function SignalWizard({
         exactFlexDays: dateMode === "exact" ? exactFlexDays : null,
         flexStayLengths: dateMode === "flex" ? (flexStayLengths as never) : ([] as never),
         flexMonths: dateMode === "flex" ? flexMonths : [],
-        asapUrgent: dateMode === "asap" || asapUrgent,
+        asapUrgent: dateMode === "asap",
       };
     }
     if (stepIndex === 6) {
+      return { step: "preferencesLocation", preferredZones };
+    }
+    if (stepIndex === 7) {
       return {
-        step: "preferences",
-        preferredZones,
+        step: "preferencesRoom",
         preferredBedSizes: preferredBedSizes as never,
         preferredWindowTypes: preferredWindowTypes as never,
         preferredRoomSizeSqmMin:
@@ -742,9 +793,16 @@ export function SignalWizard({
           preferredWifi === "any" ? null : preferredWifi === "si",
       };
     }
+    if (stepIndex === 8) {
+      return {
+        step: "description",
+        description: (editor?.getHTML() ?? descriptionHtml).trim(),
+      };
+    }
     return {
-      step: "description",
-      description: (editor?.getHTML() ?? descriptionHtml).trim(),
+      step: "notifications",
+      listingAlertInApp,
+      listingAlertEmail,
     };
   }
 
@@ -810,7 +868,9 @@ export function SignalWizard({
           <div
             className={cn(
               "mx-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden",
-              stepIndex === 1 ? "max-w-full" : "max-w-[730px]",
+              stepIndex === 1 || stepIndex === 7 || stepIndex === 8
+                ? "max-w-full"
+                : "max-w-[730px]",
             )}
           >
             {/* ============ Step 1 — Introducite ============ */}
@@ -823,11 +883,12 @@ export function SignalWizard({
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
-                        Introducite
+                        Lanzá una Señal: Introducite
                       </h1>
                       <p className="text-sm leading-5 text-muted-foreground">
-                        Contanos quién sos. Vas a poder describirte mejor en el último
-                        paso, así que acá alcanza con lo básico.
+                        Hacé saber que estás buscando hospedaje; rellená tu información
+                        básica en este primer paso (vas a poder describirte con tus propias
+                        palabras en el último paso).
                       </p>
                     </div>
 
@@ -838,30 +899,27 @@ export function SignalWizard({
                           id="signal-fullname"
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
-                          placeholder="Ej. María García"
+                          placeholder="Ken Adams"
                           maxLength={120}
                         />
                       </div>
 
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
-                          <Label htmlFor="signal-age">Edad</Label>
-                          <Input
+                          <SignalSteppedMeter
                             id="signal-age"
-                            type="number"
-                            inputMode="numeric"
+                            label="Edad"
                             min={16}
                             max={120}
-                            value={age}
-                            onChange={(e) => setAge(e.target.value)}
-                            placeholder="Ej. 27"
+                            value={Math.min(120, Math.max(16, Number(age) || 18))}
+                            onChange={(n) => setAge(String(n))}
                           />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="signal-gender">Género</Label>
                           <Select value={gender} onValueChange={(v) => setGender(v ?? "")}>
                             <SelectTrigger id="signal-gender" className="w-full">
-                              <SelectValue placeholder="Elegí una opción" />
+                              <SelectValue placeholder="Definí tu género" />
                             </SelectTrigger>
                             <SelectContent>
                               {GENDER_OPTIONS.map((o) => (
@@ -908,11 +966,9 @@ export function SignalWizard({
                         Dejate ver
                       </h1>
                       <p className="text-sm leading-5 text-muted-foreground">
-                        Subir tu foto de perfil es opcional, pero cambia el juego: los
-                        anfitriones confían más en señales con cara visible.
-                      </p>
-                      <p className="text-sm leading-5 text-muted-foreground">
-                        {LISTING_PHOTO_SIZE_HELPER_ES}
+                        La foto es opcional, pero tené en cuenta que los anfitriones confían
+                        más en señales con cara visible. Tu foto puede pesar como máximo 4
+                        MB. Si pesa más, la vamos a comprimir automáticamente al subirla.
                       </p>
                     </>
                   ) : (
@@ -944,7 +1000,7 @@ export function SignalWizard({
                 >
                   {photos.length === 0 ? (
                     <label
-                      className="flex w-full cursor-pointer items-center justify-center rounded-xl border border-border bg-muted/10 px-4 py-12 text-sm text-muted-foreground transition-colors hover:bg-muted/20"
+                      className="flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/10 px-4 py-12 text-sm text-muted-foreground transition-colors hover:bg-muted/20"
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={(e) => {
                         e.preventDefault();
@@ -965,10 +1021,10 @@ export function SignalWizard({
                         <ImagePlus className="size-6" aria-hidden />
                         <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium text-foreground shadow-xs">
                           <Upload className="size-4" aria-hidden />
-                          Cargar foto
+                          Cargar imagen
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          Podés arrastrar y soltar
+                          (Podés arrastrar y soltar aquí)
                         </span>
                       </div>
                     </label>
@@ -1024,18 +1080,21 @@ export function SignalWizard({
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
-                        Los básicos
+                        Más sobre vos
                       </h1>
                       <p className="text-sm leading-5 text-muted-foreground">
-                        Información clave que ayuda a anfitriones a entender tu situación.
+                        Información importante que puede ayudarte a encontrarte un
+                        anfitrión con tu misma vibra.
                       </p>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="signal-occupation">¿A qué te dedicás?</Label>
+                      <Label htmlFor="signal-occupation">
+                        ¿Cuál de estas opciones te describe mejor en este momento?
+                      </Label>
                       <Select value={occupation} onValueChange={(v) => setOccupation(v ?? "")}>
                         <SelectTrigger id="signal-occupation" className="w-full">
-                          <SelectValue placeholder="Elegí una opción" />
+                          <SelectValue placeholder="Elegí una" />
                         </SelectTrigger>
                         <SelectContent>
                           {OCCUPATION_OPTIONS.map((o) => (
@@ -1085,10 +1144,10 @@ export function SignalWizard({
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="signal-moving-with">¿Quién se muda?</Label>
+                      <Label htmlFor="signal-moving-with">¿Quién busca habitación?</Label>
                       <Select value={movingWith} onValueChange={(v) => setMovingWith(v ?? "")}>
                         <SelectTrigger id="signal-moving-with" className="w-full">
-                          <SelectValue placeholder="Elegí una opción" />
+                          <SelectValue placeholder="Elegí una" />
                         </SelectTrigger>
                         <SelectContent>
                           {MOVING_WITH_OPTIONS.map((o) => (
@@ -1114,54 +1173,51 @@ export function SignalWizard({
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
-                        Un poco más sobre vos
+                        Opcional, pero muy útil
                       </h1>
                       <p className="text-sm leading-5 text-muted-foreground">
-                        Esto ayuda a que anfitriones sepan si encajás bien en su casa.
+                        Un último poquito de información.
                       </p>
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="signal-time-use">
-                        ¿Cómo pasás la mayoría de tu tiempo?
+                        Contá cómo pasás la mayoría de tu tiempo
                       </Label>
                       <Textarea
                         id="signal-time-use"
-                        rows={3}
+                        rows={4}
                         maxLength={280}
                         value={timeUseDescription}
                         onChange={(e) => setTimeUseDescription(e.target.value)}
-                        placeholder="Ej. trabajo desde casa de día y suelo salir los fines de semana."
+                        placeholder="Ej. Trabajo desde casa de día y suelo salir los fines de semana."
                       />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="signal-indoor-outdoor">
-                        ¿Preferís pasar más tiempo dentro o fuera de casa?
+                        Preferís pasar más tiempo dentro o fuera de la casa?
                       </Label>
                       <Textarea
                         id="signal-indoor-outdoor"
-                        rows={3}
+                        rows={4}
                         maxLength={280}
                         value={indoorOutdoorDescription}
                         onChange={(e) => setIndoorOutdoorDescription(e.target.value)}
-                        placeholder="Ej. equilibrado, salgo seguido pero también disfruto un buen día en casa."
+                        placeholder="Ej. Equilibrado, salgo seguido pero también disfruto un buen día en casa."
                       />
                     </div>
 
-                    <div className="space-y-3">
-                      <Label>¿Qué tanto te importa la limpieza?</Label>
-                      <SignalImportanceButtons
-                        ariaLabel="Importancia de la limpieza"
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <SignalSteppedMeter
+                        id="signal-cleanliness"
+                        label="Nivel de limpieza?"
                         value={cleanlinessImportance}
                         onChange={setCleanlinessImportance}
                       />
-                    </div>
-
-                    <div className="space-y-3">
-                      <Label>¿Qué tanto te importa el orden?</Label>
-                      <SignalImportanceButtons
-                        ariaLabel="Importancia del orden"
+                      <SignalSteppedMeter
+                        id="signal-order"
+                        label="Nivel de orden?"
                         value={orderImportance}
                         onChange={setOrderImportance}
                       />
@@ -1184,8 +1240,8 @@ export function SignalWizard({
                         ¿Esto es real?
                       </h1>
                       <p className="text-sm leading-5 text-muted-foreground">
-                        Compartir tus redes sumá confianza al anfitrión. Todos los campos
-                        son opcionales.
+                        Opcionales, pero compartir alguna de tus redes le suma confianza a
+                        tu anfitrión.
                       </p>
                     </div>
 
@@ -1214,7 +1270,7 @@ export function SignalWizard({
                           id="signal-facebook"
                           value={facebookHandle}
                           onChange={(e) => setFacebookHandle(e.target.value)}
-                          placeholder="usuario o url"
+                          placeholder="@usuario o URL"
                         />
                       </div>
                       <div className="space-y-2">
@@ -1242,11 +1298,11 @@ export function SignalWizard({
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
-                        ¿Cuándo?
+                        Para cuándo buscás?
                       </h1>
                       <p className="text-sm leading-5 text-muted-foreground">
-                        Tres modos: fechas exactas, rangos flexibles, o si lo necesitás
-                        cuanto antes.
+                        Podés elegir entre tres modos: fechas exactas, rangos flexibles, o
+                        simplemente marcar que buscás urgente.
                       </p>
                     </div>
 
@@ -1254,28 +1310,31 @@ export function SignalWizard({
                       value={dateMode}
                       onValueChange={(v) => {
                         setDateMode(v);
-                        if (v !== "asap") setAsapUrgent(false);
                       }}
-                      className="grid grid-cols-1 gap-3 sm:grid-cols-3"
+                      className="flex flex-col gap-1 rounded-full border border-border bg-muted/20 p-1 sm:flex-row sm:items-stretch"
                     >
                       {[
-                        { value: "exact", label: "Fechas" },
-                        { value: "flex", label: "Flexible" },
-                        { value: "asap", label: "Lo antes posible" },
+                        { value: "exact", label: "Fechas exactas" },
+                        { value: "flex", label: "Rangos flexibles" },
+                        { value: "asap", label: "Busco urgente" },
                       ].map((o) => {
                         const checked = dateMode === o.value;
                         return (
                           <label
                             key={o.value}
                             className={cn(
-                              "flex cursor-pointer items-center gap-3 rounded-2xl border p-4 transition-colors",
+                              "flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full px-2 py-2.5 text-center text-xs font-semibold transition-colors sm:px-3 sm:text-sm",
                               checked
-                                ? "border-foreground/70 bg-muted/25"
-                                : "border-border bg-muted/5 hover:bg-muted/15",
+                                ? "bg-background text-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-foreground",
                             )}
                           >
-                            <RadioGroupItem value={o.value} id={`signal-mode-${o.value}`} />
-                            <span className="text-sm font-semibold">{o.label}</span>
+                            <RadioGroupItem
+                              value={o.value}
+                              id={`signal-mode-${o.value}`}
+                              className="size-3.5 shrink-0"
+                            />
+                            <span className="leading-tight">{o.label}</span>
                           </label>
                         );
                       })}
@@ -1311,7 +1370,7 @@ export function SignalWizard({
                             onValueChange={(v) => setExactFlexDays(Number(v))}
                           >
                             <SelectTrigger id="signal-flex-days" className="w-full">
-                              <SelectValue />
+                              <SelectValue placeholder="± días" />
                             </SelectTrigger>
                             <SelectContent>
                               {FLEX_DAYS_OPTIONS.map((o) => (
@@ -1388,12 +1447,16 @@ export function SignalWizard({
                     ) : null}
 
                     {dateMode === "asap" ? (
-                      <div className="rounded-2xl border border-border bg-muted/10 p-4">
-                        <p className="flex items-center gap-2 text-sm">
-                          <Sparkles className="size-4" aria-hidden />
-                          Vamos a marcarte como
-                          <strong className="font-semibold">búsqueda urgente</strong>.
-                          Anfitriones con avisos activos te van a ver primero.
+                      <div className="flex gap-3 rounded-[10px] border border-border bg-muted/10 p-4">
+                        <div
+                          className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded border border-foreground bg-foreground text-background"
+                          aria-hidden
+                        >
+                          <Check className="size-3" strokeWidth={3} />
+                        </div>
+                        <p className="text-sm leading-snug text-foreground">
+                          Te marcamos como buscando urgente. Los anfitriones con avisos
+                          activos te van a ver primero.
                         </p>
                       </div>
                     ) : null}
@@ -1402,7 +1465,7 @@ export function SignalWizard({
               </div>
             ) : null}
 
-            {/* ============ Step 7 — Qué buscás ============ */}
+            {/* ============ Step 7 — Dónde? (zonas) ============ */}
             {stepIndex === 6 ? (
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
                 <div
@@ -1410,21 +1473,13 @@ export function SignalWizard({
                   data-wizard-scroll
                 >
                   <div className="space-y-2">
-                    <h1 className="text-[36px] leading-[40px] font-extrabold">
-                      ¿Qué buscás?
-                    </h1>
+                    <h1 className="text-[36px] leading-[40px] font-extrabold">Dónde?</h1>
                     <p className="text-sm leading-5 text-muted-foreground">
-                      Marcá las características que te gustaría que tenga la habitación.
-                      Todo es opcional — cuanto más completes, mejor te podremos cruzar
-                      con anuncios.
+                      Podés elegir tus zonas de preferencia o saltearte este paso.
                     </p>
                   </div>
 
                   <section className="space-y-3">
-                    <p className="flex items-center gap-2 text-sm font-medium">
-                      <Heart className="size-4 text-foreground" aria-hidden />
-                      Barrios preferidos
-                    </p>
                     <BarcelonaZonePicker
                       formId="signal-wizard-zones"
                       autoSubmit={false}
@@ -1433,34 +1488,52 @@ export function SignalWizard({
                       onChangeZones={(z) => setPreferredZones(z)}
                     />
                   </section>
+                </div>
+              </div>
+            ) : null}
 
-                  <Separator />
+            {/* ============ Step 8 — Hacé match con habitaciones ============ */}
+            {stepIndex === 7 ? (
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                <div
+                  className="mt-0 min-h-0 flex-1 space-y-6 overflow-visible md:overflow-y-auto md:overscroll-y-contain md:pr-1"
+                  data-wizard-scroll
+                >
+                  <div className="space-y-2">
+                    <h1 className="text-[36px] leading-[40px] font-extrabold">
+                      Hacé match con habitaciones
+                    </h1>
+                    <p className="text-sm leading-5 text-muted-foreground">
+                      Marcá las características que te gustaría que tenga tu habitación. Todo
+                      es opcional, pero cuanto más completes, mejor te podremos cruzar con
+                      las habitaciones cargadas.
+                    </p>
+                  </div>
 
                   <section className="space-y-3">
-                    <p className="flex items-center gap-2 text-sm font-medium">
-                      <BedDouble className="size-4 text-foreground" aria-hidden />
-                      Tamaño de cama
-                    </p>
-                    <div className="flex flex-wrap gap-2">
+                    <p className="text-sm font-medium text-foreground">Tamaño de cama</p>
+                    <div className="flex flex-col gap-2">
                       {(["INDIVIDUAL", "DOBLE"] as const).map((v) => {
                         const active = preferredBedSizes.includes(v);
                         return (
-                          <button
+                          <label
                             key={v}
-                            type="button"
-                            aria-pressed={active}
-                            onClick={() =>
-                              setPreferredBedSizes((prev) => toggleArrayValue(prev, v))
-                            }
                             className={cn(
-                              "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                              "flex cursor-pointer items-center gap-3 rounded-[10px] border px-3 py-2.5 text-sm transition-colors",
                               active
-                                ? "border-foreground bg-foreground text-background"
-                                : "border-border bg-background hover:bg-foreground/10",
+                                ? "border-foreground bg-muted/20"
+                                : "border-border bg-muted/5 hover:bg-muted/15",
                             )}
                           >
-                            {BED_SIZE_LABELS[v]}
-                          </button>
+                            <Checkbox
+                              checked={active}
+                              onCheckedChange={() =>
+                                setPreferredBedSizes((prev) => toggleArrayValue(prev, v))
+                              }
+                              className="shrink-0"
+                            />
+                            <span>{BED_SIZE_LABELS[v]}</span>
+                          </label>
                         );
                       })}
                     </div>
@@ -1469,36 +1542,40 @@ export function SignalWizard({
                   <Separator />
 
                   <section className="space-y-3">
-                    <p className="flex items-center gap-2 text-sm font-medium">
-                      <Grid2X2 className="size-4 text-foreground" aria-hidden />
-                      Ventana
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {(["CALLE", "CORAZON_DE_MANZANA", "POZO_DE_AIRE", "SIN_VENTANA"] as const).map(
-                        (v) => {
-                          const active = preferredWindowTypes.includes(v);
-                          return (
-                            <button
-                              key={v}
-                              type="button"
-                              aria-pressed={active}
-                              onClick={() =>
+                    <p className="text-sm font-medium text-foreground">Ventana</p>
+                    <div className="flex flex-col gap-2">
+                      {(
+                        [
+                          "CALLE",
+                          "CORAZON_DE_MANZANA",
+                          "POZO_DE_AIRE",
+                          "SIN_VENTANA",
+                        ] as const
+                      ).map((v) => {
+                        const active = preferredWindowTypes.includes(v);
+                        return (
+                          <label
+                            key={v}
+                            className={cn(
+                              "flex cursor-pointer items-center gap-3 rounded-[10px] border px-3 py-2.5 text-sm transition-colors",
+                              active
+                                ? "border-foreground bg-muted/20"
+                                : "border-border bg-muted/5 hover:bg-muted/15",
+                            )}
+                          >
+                            <Checkbox
+                              checked={active}
+                              onCheckedChange={() =>
                                 setPreferredWindowTypes((prev) =>
                                   toggleArrayValue(prev, v),
                                 )
                               }
-                              className={cn(
-                                "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-                                active
-                                  ? "border-foreground bg-foreground text-background"
-                                  : "border-border bg-background hover:bg-foreground/10",
-                              )}
-                            >
-                              {WINDOW_TYPE_LABELS[v]}
-                            </button>
-                          );
-                        },
-                      )}
+                              className="shrink-0"
+                            />
+                            <span>{WINDOW_TYPE_LABELS[v]}</span>
+                          </label>
+                        );
+                      })}
                     </div>
                   </section>
 
@@ -1508,7 +1585,7 @@ export function SignalWizard({
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2">
                         <Ruler className="size-4 text-foreground" aria-hidden />
-                        Tamaño mínimo (m²)
+                        Tamaño aproximado de la habitación (m²)
                       </Label>
                       <Input
                         type="number"
@@ -1517,77 +1594,23 @@ export function SignalWizard({
                         max={150}
                         value={preferredRoomSizeSqmMin}
                         onChange={(e) => setPreferredRoomSizeSqmMin(e.target.value)}
-                        placeholder="Sin mínimo"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
-                        <Sofa className="size-4 text-foreground" aria-hidden />
-                        Amueblada
-                      </Label>
-                      <Select
-                        value={preferredFurnished}
-                        onValueChange={(v) => setPreferredFurnished(v ?? "any")}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="any">Cualquiera</SelectItem>
-                          <SelectItem value="si">Sí</SelectItem>
-                          <SelectItem value="no">No</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </section>
-
-                  <Separator />
-
-                  <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
-                        <DoorOpen className="size-4 text-foreground" aria-hidden />
-                        Habitaciones (mín.)
-                      </Label>
-                      <Input
-                        type="number"
-                        inputMode="numeric"
-                        min={0}
-                        max={20}
-                        value={preferredApartmentRoomsMin}
-                        onChange={(e) => setPreferredApartmentRoomsMin(e.target.value)}
-                        placeholder="—"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
-                        <Bath className="size-4 text-foreground" aria-hidden />
-                        Baños (mín.)
-                      </Label>
-                      <Input
-                        type="number"
-                        inputMode="numeric"
-                        min={0}
-                        max={20}
-                        value={preferredApartmentBathsMin}
-                        onChange={(e) => setPreferredApartmentBathsMin(e.target.value)}
-                        placeholder="—"
+                        placeholder="Da igual"
                       />
                     </div>
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2">
                         <Home className="size-4 text-foreground" aria-hidden />
-                        Tamaño piso (m² mín.)
+                        Tamaño aproximado del piso (m²)
                       </Label>
                       <Select
                         value={preferredApartmentSizeSqmMin}
                         onValueChange={(v) => setPreferredApartmentSizeSqmMin(v ?? "")}
                       >
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Cualquiera" />
+                          <SelectValue placeholder="Da igual" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Cualquiera</SelectItem>
+                          <SelectItem value="">Da igual</SelectItem>
                           {APARTMENT_SIZE_STEPS.map((n) => (
                             <SelectItem key={n} value={String(n)}>
                               {n}+ m²
@@ -1600,37 +1623,93 @@ export function SignalWizard({
 
                   <Separator />
 
-                  <section className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                      <Wifi className="size-4 text-foreground" aria-hidden />
-                      Wifi
-                    </Label>
-                    <Select value={preferredWifi} onValueChange={(v) => setPreferredWifi(v ?? "any")}>
-                      <SelectTrigger className="w-full sm:w-64">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="any">Cualquiera</SelectItem>
-                        <SelectItem value="si">Sí, requerido</SelectItem>
-                        <SelectItem value="no">No me importa</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Sofa className="size-4 text-foreground" aria-hidden />
+                        Habitación amueblada
+                      </Label>
+                      <Select
+                        value={preferredFurnished}
+                        onValueChange={(v) => setPreferredFurnished(v ?? "any")}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="any">Da igual</SelectItem>
+                          <SelectItem value="si">Sí</SelectItem>
+                          <SelectItem value="no">No</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <DoorOpen className="size-4 text-foreground" aria-hidden />
+                        Nº de habitaciones en el piso
+                      </Label>
+                      <Input
+                        type="number"
+                        inputMode="numeric"
+                        min={0}
+                        max={20}
+                        value={preferredApartmentRoomsMin}
+                        onChange={(e) => setPreferredApartmentRoomsMin(e.target.value)}
+                        placeholder="Da igual"
+                      />
+                    </div>
+                  </section>
+
+                  <Separator />
+
+                  <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Bath className="size-4 text-foreground" aria-hidden />
+                        Nº de baños en el piso
+                      </Label>
+                      <Input
+                        type="number"
+                        inputMode="numeric"
+                        min={0}
+                        max={20}
+                        value={preferredApartmentBathsMin}
+                        onChange={(e) => setPreferredApartmentBathsMin(e.target.value)}
+                        placeholder="Da igual"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Wifi className="size-4 text-foreground" aria-hidden />
+                        WIFI
+                      </Label>
+                      <Select value={preferredWifi} onValueChange={(v) => setPreferredWifi(v ?? "any")}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="any">Da igual</SelectItem>
+                          <SelectItem value="si">Sí</SelectItem>
+                          <SelectItem value="no">No</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </section>
                 </div>
               </div>
             ) : null}
 
-            {/* ============ Step 8 — Presentate ============ */}
-            {stepIndex === 7 ? (
+            {/* ============ Step 9 — Presentate ============ */}
+            {stepIndex === 8 ? (
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
                 <div
-                  className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain"
+                  className="flex min-h-0 flex-1 flex-col overflow-visible md:overflow-y-auto md:overscroll-y-contain"
                   data-wizard-scroll
                 >
-                  <div className="space-y-6">
+                  <div className="space-y-6 pb-2">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
-                        Presentate
+                        Presentate con tus palabras
                       </h1>
                       <p className="text-sm leading-5 text-muted-foreground">
                         Mínimo 10 caracteres. Esto es lo que va a leer cada anfitrión que
@@ -1692,7 +1771,7 @@ export function SignalWizard({
                       </div>
 
                       <div
-                        className="min-h-[140px] w-full cursor-text rounded-xl border border-input bg-input/30 px-3 py-3 outline-none transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 [&_.ProseMirror]:min-h-[140px]"
+                        className="min-h-[220px] w-full cursor-text rounded-xl border border-input bg-input/30 px-3 py-3 outline-none transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 [&_.ProseMirror]:min-h-[200px]"
                         onMouseDown={(e) => {
                           if (!editor) return;
                           if (e.target === e.currentTarget) editor.chain().focus().run();
@@ -1700,6 +1779,43 @@ export function SignalWizard({
                       >
                         <EditorContent editor={editor} />
                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            {/* ============ Step 10 — Notificaciones ============ */}
+            {stepIndex === 9 ? (
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                <div
+                  className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain"
+                  data-wizard-scroll
+                >
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <h1 className="text-[36px] leading-[40px] font-extrabold">
+                        Por último: notificaciones
+                      </h1>
+                      <p className="text-sm leading-5 text-muted-foreground">
+                        Decinos si, y cómo, querés que te contactemos por habitaciones que
+                        te puedan servir.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <WizardNotificationRow
+                        checked={listingAlertInApp}
+                        onChange={setListingAlertInApp}
+                        disabled={savingNext}
+                        label="Quiero recibir mensajes sobre habitaciones que encajen con mi señal en la plataforma"
+                      />
+                      <WizardNotificationRow
+                        checked={listingAlertEmail}
+                        onChange={setListingAlertEmail}
+                        disabled={savingNext}
+                        label="Quiero recibir mensajes sobre habitaciones que encajen con mi señal por email"
+                      />
                     </div>
                   </div>
                 </div>
@@ -1734,6 +1850,7 @@ export function SignalWizard({
 
               <Button
                 type="button"
+                variant={isLastStep ? "default" : "secondary"}
                 size="sm"
                 className="rounded-full"
                 disabled={
@@ -1746,13 +1863,7 @@ export function SignalWizard({
                   else void handleNext();
                 }}
               >
-                {isLastStep
-                  ? savingNext
-                    ? "Publicando…"
-                    : "Publicar señal"
-                  : savingNext
-                    ? "Guardando…"
-                    : "Siguiente"}
+                {primaryFooterLabel}
               </Button>
             </div>
           </div>

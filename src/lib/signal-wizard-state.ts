@@ -47,5 +47,6 @@ export function serializeSignalForWizard(
     listingAlertInApp: signal.listingAlertInApp,
     listingAlertEmail: signal.listingAlertEmail,
     photos: signal.photos.map((p) => ({ id: p.id, url: p.url, sortOrder: p.sortOrder })),
+    wizardFlowVersion: signal.wizardFlowVersion,
   };
 }

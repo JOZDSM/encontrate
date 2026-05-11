@@ -105,9 +105,12 @@ const stepSchemas = {
       .default([]),
     asapUrgent: z.boolean().default(false),
   }),
-  preferences: z.object({
-    step: z.literal("preferences"),
+  preferencesLocation: z.object({
+    step: z.literal("preferencesLocation"),
     preferredZones: z.array(z.string().trim().min(1).max(80)).max(50).default([]),
+  }),
+  preferencesRoom: z.object({
+    step: z.literal("preferencesRoom"),
     preferredBedSizes: z.array(z.enum(BED_SIZE)).max(BED_SIZE.length).default([]),
     preferredWindowTypes: z.array(z.enum(WINDOW_TYPE)).max(WINDOW_TYPE.length).default([]),
     preferredRoomSizeSqmMin: z.number().int().min(0).max(150).nullable(),
@@ -130,6 +133,11 @@ const stepSchemas = {
         { message: "La descripción debe tener entre 10 y 8000 caracteres." },
       ),
   }),
+  notifications: z.object({
+    step: z.literal("notifications"),
+    listingAlertInApp: z.boolean(),
+    listingAlertEmail: z.boolean(),
+  }),
 } as const;
 
 const updateSignalStepSchema = z.discriminatedUnion("step", [
@@ -139,8 +147,10 @@ const updateSignalStepSchema = z.discriminatedUnion("step", [
   stepSchemas.more,
   stepSchemas.social,
   stepSchemas.dates,
-  stepSchemas.preferences,
+  stepSchemas.preferencesLocation,
+  stepSchemas.preferencesRoom,
   stepSchemas.description,
+  stepSchemas.notifications,
 ]);
 
 export type UpdateSignalStepInput = z.infer<typeof updateSignalStepSchema>;
@@ -152,8 +162,10 @@ const STEP_INDEX: Record<UpdateSignalStepInput["step"], number> = {
   more: 3,
   social: 4,
   dates: 5,
-  preferences: 6,
-  description: 7,
+  preferencesLocation: 6,
+  preferencesRoom: 7,
+  description: 8,
+  notifications: 9,
 };
 
 type GetOwnedSignal =
@@ -210,6 +222,7 @@ export async function createDraftSignal(
       userId: session.user.id,
       status: "DRAFT",
       wizardStep: 0,
+      wizardFlowVersion: 2,
       fullName: session.user.name?.trim() ?? "",
     },
     select: { id: true },
@@ -254,7 +267,7 @@ export async function updateSignalStep(
       }),
       prisma.signal.update({
         where: { id: signalId },
-        data: { wizardStep: nextWizardStep },
+        data: { wizardStep: nextWizardStep, wizardFlowVersion: 2 },
       }),
     ]);
   } else {
@@ -268,7 +281,7 @@ export async function updateSignalStep(
     }
     await prisma.signal.update({
       where: { id: signalId },
-      data: { ...patch, wizardStep: nextWizardStep },
+      data: { ...patch, wizardStep: nextWizardStep, wizardFlowVersion: 2 },
     });
   }
 
@@ -316,7 +329,7 @@ export async function publishSignal(
     }),
     prisma.signal.update({
       where: { id: signalId },
-      data: { status: "ACTIVE", wizardStep: 8 },
+      data: { status: "ACTIVE", wizardStep: 10, wizardFlowVersion: 2 },
     }),
   ]);
 

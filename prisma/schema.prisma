@@ -297,8 +297,10 @@ model Signal {
   userId     String
   user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   status     SignalStatus @default(DRAFT)
-  /// Highest step the user has completed so far (0..8); used to resume the wizard.
-  wizardStep Int          @default(0)
+  /// Highest step the user has completed so far (0..10); used to resume the wizard.
+  wizardStep Int @default(0)
+  /// `1` = legacy 8-step wizard resume rules; `2` = current 10-step flow (see `normalizeSignalWizardResumeStep`).
+  wizardFlowVersion Int @default(2)
 
   // Step 1 — Introducite
   fullName        String

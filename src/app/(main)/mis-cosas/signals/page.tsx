@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { Card, CardContent } from "@/components/ui/card";
 import { SignalCard } from "@/components/signal-card";
 import { SignalCreateButton } from "@/components/signal-create-button";
-import { SignalListingAlertsToggles } from "@/components/signal-listing-alerts-toggles";
+import { SignalNotificationsButton } from "@/components/signal-notifications-button";
 import { prisma } from "@/lib/db";
 
 export const metadata = {
@@ -35,10 +35,12 @@ export default async function MisCosasSignalsPage() {
     },
   });
 
+  const activeSignal = signals.find((s) => s.status === "ACTIVE") ?? null;
+
   return (
     <Card className="shrink-0 border border-border bg-card shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
       <CardContent className="space-y-6 p-6 text-card-foreground">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-semibold">Mis señales</h1>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -50,7 +52,20 @@ export default async function MisCosasSignalsPage() {
               Solo una señal puede estar activa a la vez.
             </p>
           </div>
-          <SignalCreateButton />
+          <div className="flex flex-wrap items-center gap-2">
+            <SignalCreateButton />
+            <SignalNotificationsButton
+              activeSignal={
+                activeSignal
+                  ? {
+                      id: activeSignal.id,
+                      listingAlertInApp: activeSignal.listingAlertInApp,
+                      listingAlertEmail: activeSignal.listingAlertEmail,
+                    }
+                  : null
+              }
+            />
+          </div>
         </div>
 
         {signals.length === 0 ? (
@@ -64,7 +79,7 @@ export default async function MisCosasSignalsPage() {
         ) : (
           <ul className="space-y-4">
             {signals.map((s) => (
-              <li key={s.id} className="flex flex-col gap-2">
+              <li key={s.id}>
                 <SignalCard
                   signal={{
                     id: s.id,
@@ -76,12 +91,6 @@ export default async function MisCosasSignalsPage() {
                     description: s.description,
                     coverUrl: s.photos[0]?.url ?? null,
                   }}
-                />
-                <SignalListingAlertsToggles
-                  signalId={s.id}
-                  initialInApp={s.listingAlertInApp}
-                  initialEmail={s.listingAlertEmail}
-                  enabled={s.status === "ACTIVE"}
                 />
               </li>
             ))}

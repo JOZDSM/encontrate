@@ -63,19 +63,26 @@ export function SignalCard({ signal }: { signal: SignalCardData }) {
   }
   if (instagramHandle) {
     metaSegments.push(
-      <a
-        key="ig"
-        href={`https://instagram.com/${instagramHandle}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={cn(
-          "inline-flex items-center gap-1.5 whitespace-nowrap text-primary hover:underline",
-          isDraft && "pointer-events-none",
-        )}
-      >
-        <SignalInstagramIcon className="size-[13px]" />
-        {instagramHandle}
-      </a>,
+      isDraft ? (
+        <span
+          key="ig"
+          className="inline-flex items-center gap-1.5 whitespace-nowrap text-muted-foreground"
+        >
+          <SignalInstagramIcon className="size-[13px]" />
+          {instagramHandle}
+        </span>
+      ) : (
+        <a
+          key="ig"
+          href={`https://instagram.com/${instagramHandle}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 whitespace-nowrap text-primary hover:underline"
+        >
+          <SignalInstagramIcon className="size-[13px]" />
+          {instagramHandle}
+        </a>
+      ),
     );
   }
 
@@ -135,22 +142,34 @@ export function SignalCard({ signal }: { signal: SignalCardData }) {
 
         <div className="flex w-full shrink-0 flex-col gap-2.5 md:w-[298px] md:items-stretch md:justify-center">
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className={cn("flex-1", isDraft && "text-muted-foreground")}
-            >
-              <Link href={`/signals/${signal.id}`}>Ver</Link>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className={cn("flex-1", isDraft && "text-muted-foreground")}
-            >
-              <Link href={`/signals/${signal.id}/editar`}>Editar</Link>
-            </Button>
+            {isDraft ? (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled
+                className="flex-1 text-muted-foreground disabled:opacity-100"
+              >
+                Ver
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" asChild className="flex-1">
+                <Link href={`/signals/${signal.id}`}>Ver</Link>
+              </Button>
+            )}
+            {isDraft ? (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled
+                className="flex-1 text-muted-foreground disabled:opacity-100"
+              >
+                Editar
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" asChild className="flex-1">
+                <Link href={`/signals/${signal.id}/editar`}>Editar</Link>
+              </Button>
+            )}
             <SignalDeleteButton signalId={signal.id} className="flex-1" />
           </div>
 

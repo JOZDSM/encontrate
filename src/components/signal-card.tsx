@@ -66,7 +66,7 @@ export function SignalCard({ signal }: { signal: SignalCardData }) {
       isDraft ? (
         <span
           key="ig"
-          className="inline-flex items-center gap-1.5 whitespace-nowrap text-lime-700"
+          className="inline-flex items-center gap-1.5 whitespace-nowrap text-lime-400"
         >
           <SignalInstagramIcon className="size-[13px]" />
           {instagramHandle}
@@ -77,7 +77,7 @@ export function SignalCard({ signal }: { signal: SignalCardData }) {
           href={`https://instagram.com/${instagramHandle}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 whitespace-nowrap text-lime-700 hover:underline"
+          className="inline-flex items-center gap-1.5 whitespace-nowrap text-lime-400 hover:underline"
         >
           <SignalInstagramIcon className="size-[13px]" />
           {instagramHandle}

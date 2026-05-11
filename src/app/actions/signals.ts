@@ -64,7 +64,7 @@ const stepSchemas = {
   }),
   photos: z.object({
     step: z.literal("photos"),
-    photoUrls: z.array(z.string().url()).max(5).default([]),
+    photoUrls: z.array(z.string().url()).max(1).default([]),
   }),
   basics: z.object({
     step: z.literal("basics"),
@@ -240,10 +240,13 @@ export async function updateSignalStep(
   const nextWizardStep = Math.max(owned.signal.wizardStep, stepIndex + 1);
 
   if (data.step === "photos") {
+    // Defense in depth: the schema already caps `photoUrls` at one entry, but
+    // an old client could still POST stale state, so we slice before persisting.
+    const photoUrls = data.photoUrls.slice(0, 1);
     await prisma.$transaction([
       prisma.signalPhoto.deleteMany({ where: { signalId } }),
       prisma.signalPhoto.createMany({
-        data: data.photoUrls.map((url, sortOrder) => ({
+        data: photoUrls.map((url, sortOrder) => ({
           signalId,
           url,
           sortOrder,

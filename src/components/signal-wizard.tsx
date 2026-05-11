@@ -600,7 +600,9 @@ export function SignalWizard({
     const arr = Array.from(files);
     if (arr.length === 0) return;
     setPhotoUploadError(null);
-    const remaining = Math.max(0, 5 - photos.length);
+    // Señales only allow a single profile photo. Take the first valid image
+    // and ignore any extras the user may have selected.
+    const remaining = Math.max(0, 1 - photos.length);
     const picked = arr.slice(0, remaining).filter(looksLikeImageFile);
     if (picked.length === 0) {
       setPhotoUploadError(
@@ -906,40 +908,22 @@ export function SignalWizard({
                         Dejate ver
                       </h1>
                       <p className="text-sm leading-5 text-muted-foreground">
-                        Subir una foto es opcional, pero cambia el juego: los anfitriones
-                        confían más en señales con cara visible. Hasta 5 fotos.
+                        Subir tu foto de perfil es opcional, pero cambia el juego: los
+                        anfitriones confían más en señales con cara visible.
                       </p>
                       <p className="text-sm leading-5 text-muted-foreground">
                         {LISTING_PHOTO_SIZE_HELPER_ES}
                       </p>
                     </>
                   ) : (
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="space-y-2">
-                        <h1 className="text-[36px] leading-[40px] font-extrabold">
-                          ¡Genial!
-                        </h1>
-                        <p className="text-sm leading-5 text-muted-foreground">
-                          Podés cambiar el orden arrastrando las fotos.
-                        </p>
-                      </div>
-                      {photos.length < 5 ? (
-                        <label className="inline-flex shrink-0 cursor-pointer items-center gap-2 self-start rounded-full border border-border bg-background px-3 py-2 text-xs font-medium text-foreground shadow-xs hover:bg-muted/30 sm:mt-1">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            className="hidden"
-                            onChange={(e) => {
-                              const files = e.target.files;
-                              if (files) void addFiles(files);
-                              e.currentTarget.value = "";
-                            }}
-                          />
-                          <Upload className="size-4" aria-hidden />
-                          Agregar más
-                        </label>
-                      ) : null}
+                    <div className="space-y-2">
+                      <h1 className="text-[36px] leading-[40px] font-extrabold">
+                        ¡Genial!
+                      </h1>
+                      <p className="text-sm leading-5 text-muted-foreground">
+                        Esta es tu foto de perfil. Podés reemplazarla o quitarla cuando
+                        quieras.
+                      </p>
                     </div>
                   )}
                   {photoUploadError ? (
@@ -949,8 +933,7 @@ export function SignalWizard({
                   ) : null}
                   {photoUploadingCount > 0 ? (
                     <p className="text-xs text-muted-foreground">
-                      Subiendo {photoUploadingCount}{" "}
-                      {photoUploadingCount === 1 ? "foto" : "fotos"}…
+                      Subiendo foto…
                     </p>
                   ) : null}
                 </div>
@@ -971,7 +954,6 @@ export function SignalWizard({
                       <input
                         type="file"
                         accept="image/*"
-                        multiple
                         className="hidden"
                         onChange={(e) => {
                           const files = e.target.files;
@@ -983,7 +965,7 @@ export function SignalWizard({
                         <ImagePlus className="size-6" aria-hidden />
                         <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium text-foreground shadow-xs">
                           <Upload className="size-4" aria-hidden />
-                          Cargar imágenes
+                          Cargar foto
                         </span>
                         <span className="text-xs text-muted-foreground">
                           Podés arrastrar y soltar
@@ -1023,33 +1005,6 @@ export function SignalWizard({
                               }
                               onMoveLater={() => movePhotoInList(photos[0].id, "later")}
                             />
-                          ) : null}
-
-                          {photos.length > 1 ? (
-                            <div className="grid grid-cols-2 gap-2">
-                              {photos.slice(1).map((p, sliceIdx) => {
-                                const index = sliceIdx + 1;
-                                return (
-                                  <SortablePhoto
-                                    key={p.id}
-                                    photo={p}
-                                    variant="tile"
-                                    index={index}
-                                    total={photos.length}
-                                    onDelete={() => removePhoto(p.id)}
-                                    onReplace={(file) =>
-                                      void replacePhoto(p.id, file)
-                                    }
-                                    onMoveEarlier={() =>
-                                      movePhotoInList(p.id, "earlier")
-                                    }
-                                    onMoveLater={() =>
-                                      movePhotoInList(p.id, "later")
-                                    }
-                                  />
-                                );
-                              })}
-                            </div>
                           ) : null}
                         </SortableContext>
                       </DndContext>

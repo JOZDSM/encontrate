@@ -36,7 +36,7 @@ export default async function MisCosasSignalsPage() {
   });
 
   return (
-    <Card className="border border-border bg-card shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
+    <Card className="shrink-0 border border-border bg-card shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)]">
       <CardContent className="space-y-6 p-6 text-card-foreground">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>

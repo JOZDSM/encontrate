@@ -13,7 +13,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-export function SignalDeleteButton({ signalId }: { signalId: string }) {
+export function SignalDeleteButton({
+  signalId,
+  className,
+}: {
+  signalId: string;
+  /** Forwarded to the trigger button so callers can size it (e.g. `flex-1`). */
+  className?: string;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -31,6 +38,7 @@ export function SignalDeleteButton({ signalId }: { signalId: string }) {
         type="button"
         size="sm"
         variant="destructive"
+        className={className}
         onClick={() => setOpen(true)}
       >
         Eliminar

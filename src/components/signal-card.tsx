@@ -133,13 +133,13 @@ export function SignalCard({ signal }: { signal: SignalCardData }) {
           ) : null}
         </div>
 
-        <div className="flex shrink-0 flex-col gap-2.5 md:min-w-[260px] md:items-stretch md:justify-center">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="flex w-full shrink-0 flex-col gap-2.5 md:w-[298px] md:items-stretch md:justify-center">
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
               asChild
-              className={cn(isDraft && "text-muted-foreground")}
+              className={cn("flex-1", isDraft && "text-muted-foreground")}
             >
               <Link href={`/signals/${signal.id}`}>Ver</Link>
             </Button>
@@ -147,11 +147,11 @@ export function SignalCard({ signal }: { signal: SignalCardData }) {
               variant="outline"
               size="sm"
               asChild
-              className={cn(isDraft && "text-muted-foreground")}
+              className={cn("flex-1", isDraft && "text-muted-foreground")}
             >
               <Link href={`/signals/${signal.id}/editar`}>Editar</Link>
             </Button>
-            <SignalDeleteButton signalId={signal.id} />
+            <SignalDeleteButton signalId={signal.id} className="flex-1" />
           </div>
 
           {isDraft ? (

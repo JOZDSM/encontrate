@@ -26,7 +26,7 @@ export default async function ConfirmarCambioEmailPage({
               configuración.
             </p>
             <Button asChild variant="outline" size="sm">
-              <Link href="/mis-cosas/configuracion">Ir a configuración</Link>
+              <Link href="/mis-cosas/configuracion">Ir a mi cuenta</Link>
             </Button>
           </CardContent>
         </Card>

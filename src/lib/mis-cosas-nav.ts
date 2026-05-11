@@ -41,7 +41,7 @@ export const MIS_COSAS_NAV: readonly MisCosasNavItem[] = [
   },
   {
     href: "/mis-cosas/configuracion",
-    label: "Configuración",
+    label: "Mi cuenta",
     match: (p) => p.startsWith("/mis-cosas/configuracion"),
   },
 ];

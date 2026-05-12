@@ -713,12 +713,7 @@ export function SignalWizard({
   const progressValue = Math.min(1, Math.max(0, (stepIndex + 1) / TOTAL_STEPS));
   const isLastStep = stepIndex === TOTAL_STEPS - 1;
 
-  // Optional steps: the Siguiente button reads "Saltear / Siguiente".
   const isOptionalStep = [1, 3, 4, 6, 7].includes(stepIndex);
-  // Subset that should also stay primary from the start (no user input
-  // needed). Step 7 ("Hacé match con habitaciones") is excluded so the
-  // button starts secondary until the user picks at least one preference.
-  const isAlwaysPrimaryOptional = [1, 3, 4, 6].includes(stepIndex);
 
   const primaryFooterLabel = useMemo(() => {
     if (stepIndex === 9) return savingNext ? "Publicando…" : "Publicar señal";
@@ -2057,7 +2052,7 @@ export function SignalWizard({
               <Button
                 type="button"
                 variant={
-                  isLastStep || isStepComplete || isAlwaysPrimaryOptional
+                  isLastStep || isStepComplete || isOptionalStep
                     ? "default"
                     : "secondary"
                 }

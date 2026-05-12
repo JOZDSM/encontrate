@@ -37,7 +37,7 @@ export default async function SignalsPage() {
         status: "DRAFT",
         wizardStep: 0,
         wizardFlowVersion: 2,
-        fullName: session.user.name?.trim() ?? "",
+        fullName: "",
       },
       include: { photos: { orderBy: { sortOrder: "asc" } } },
     });

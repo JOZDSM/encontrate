@@ -8,9 +8,9 @@ import { SignalWizard } from "@/components/signal-wizard";
 import { serializeSignalForWizard } from "@/lib/signal-wizard-state";
 
 /**
- * Owner-gated edit for a Señal. Re-renders the wizard at the saved
- * `wizardStep` so the user can keep refining a draft, or jump back into
- * an active Señal to revise.
+ * Owner-gated edit for a Señal. Always starts the wizard at step 1 so the
+ * user can review every field on the way to the final step — `/signals`
+ * (DRAFT entry) still resumes at the saved `wizardStep`.
  */
 export default async function EditSignalPage({
   params,
@@ -34,7 +34,7 @@ export default async function EditSignalPage({
     <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
       <SignalWizard
         signalId={signal.id}
-        startStep={signal.wizardStep}
+        startStep={0}
         initialState={serializeSignalForWizard(signal)}
       />
     </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { Minus, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +17,11 @@ type Props = {
   emptyHint?: string;
 };
 
-/** Pill with − / + for bounded numeric steps (age, 1–10 scales, etc.). */
+/**
+ * 32-px pill with − / + for bounded numeric steps (age, 1–10 scales, …). The
+ * +/− buttons are square 32×32 and separated from the readout by a vertical
+ * divider, matching the Figma spec.
+ */
 export function SignalSteppedMeter({
   id,
   label,
@@ -43,21 +46,19 @@ export function SignalSteppedMeter({
       <div
         id={id}
         className={cn(
-          "flex h-12 items-stretch justify-between gap-2 rounded-full border border-border bg-input/30 px-1",
+          "flex h-8 items-stretch overflow-hidden rounded-full border border-input bg-input/30",
           disabled && "pointer-events-none opacity-50",
         )}
       >
-        <Button
+        <button
           type="button"
-          variant="ghost"
-          size="icon-sm"
-          className="shrink-0 rounded-full"
+          aria-label="Menos"
           disabled={disabled || effective <= min}
           onClick={() => bump(-1)}
-          aria-label="Menos"
+          className="grid size-8 shrink-0 place-items-center border-r border-input text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Minus className="size-4" aria-hidden />
-        </Button>
+        </button>
         <div className="flex min-w-0 flex-1 items-center justify-center tabular-nums text-sm font-medium text-foreground">
           {value === null ? (
             <span className="text-muted-foreground">{hint}</span>
@@ -65,17 +66,15 @@ export function SignalSteppedMeter({
             <span>{value}</span>
           )}
         </div>
-        <Button
+        <button
           type="button"
-          variant="ghost"
-          size="icon-sm"
-          className="shrink-0 rounded-full"
+          aria-label="Más"
           disabled={disabled || effective >= max}
           onClick={() => bump(1)}
-          aria-label="Más"
+          className="grid size-8 shrink-0 place-items-center border-l border-input text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Plus className="size-4" aria-hidden />
-        </Button>
+        </button>
       </div>
     </div>
   );

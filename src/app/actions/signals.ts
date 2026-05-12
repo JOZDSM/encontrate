@@ -223,7 +223,7 @@ export async function createDraftSignal(
       status: "DRAFT",
       wizardStep: 0,
       wizardFlowVersion: 2,
-      fullName: session.user.name?.trim() ?? "",
+      fullName: "",
     },
     select: { id: true },
   });

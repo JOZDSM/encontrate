@@ -89,10 +89,9 @@ import { normalizeSignalWizardResumeStep } from "@/lib/signal-wizard-resume";
 const TOTAL_STEPS = 10;
 
 const GENDER_OPTIONS = [
-  { value: "FEMALE", label: "Mujer" },
   { value: "MALE", label: "Hombre" },
-  { value: "NON_BINARY", label: "No binarie" },
-  { value: "OTHER", label: "Prefiero no decirlo / otro" },
+  { value: "FEMALE", label: "Mujer" },
+  { value: "OTHER", label: "Otro" },
 ] as const;
 
 const OCCUPATION_OPTIONS = [
@@ -605,6 +604,102 @@ export function SignalWizard({
     descriptionText,
   ]);
 
+  // "Step complete" is a *visual* gate separate from `canGoNext` (which actually
+  // blocks progression): the Siguiente button flips to primary once every field
+  // on the step has user input — even on optional steps where skipping is still
+  // allowed.
+  const isStepComplete = useMemo(() => {
+    if (stepIndex === 0) {
+      const t = fullName.trim();
+      return (
+        t.length >= 3 &&
+        t.length <= 120 &&
+        age.trim() !== "" &&
+        !Number.isNaN(Number(age)) &&
+        Boolean(gender) &&
+        Boolean(countryOfOrigin)
+      );
+    }
+    if (stepIndex === 1) return photoUploadingCount === 0 && photos.length > 0;
+    if (stepIndex === 2)
+      return Boolean(occupation && movingWith && languages.length > 0);
+    if (stepIndex === 3) {
+      return (
+        timeUseDescription.trim().length > 0 ||
+        indoorOutdoorDescription.trim().length > 0 ||
+        cleanlinessImportance !== null ||
+        orderImportance !== null
+      );
+    }
+    if (stepIndex === 4) {
+      return Boolean(
+        instagramHandle.trim() ||
+          twitterHandle.trim() ||
+          facebookHandle.trim() ||
+          tiktokHandle.trim(),
+      );
+    }
+    if (stepIndex === 5) {
+      if (dateMode === "asap") return true;
+      if (dateMode === "exact") return Boolean(exactCheckIn && exactCheckOut);
+      if (dateMode === "flex")
+        return flexStayLengths.length > 0 || flexMonths.length > 0;
+      return false;
+    }
+    if (stepIndex === 6) return preferredZones.length > 0;
+    if (stepIndex === 7) {
+      return (
+        preferredBedSizes.length > 0 ||
+        preferredWindowTypes.length > 0 ||
+        preferredRoomSizeSqmMin !== "" ||
+        preferredFurnished !== "any" ||
+        preferredApartmentRoomsMin !== "" ||
+        preferredApartmentBathsMin !== "" ||
+        preferredApartmentSizeSqmMin !== "" ||
+        preferredWifi !== "any"
+      );
+    }
+    if (stepIndex === 8) {
+      const len = descriptionText.trim().length;
+      return len >= 10 && len <= 8000;
+    }
+    return true;
+  }, [
+    stepIndex,
+    fullName,
+    age,
+    gender,
+    countryOfOrigin,
+    photoUploadingCount,
+    photos,
+    occupation,
+    movingWith,
+    languages,
+    timeUseDescription,
+    indoorOutdoorDescription,
+    cleanlinessImportance,
+    orderImportance,
+    instagramHandle,
+    twitterHandle,
+    facebookHandle,
+    tiktokHandle,
+    dateMode,
+    exactCheckIn,
+    exactCheckOut,
+    flexStayLengths,
+    flexMonths,
+    preferredZones,
+    preferredBedSizes,
+    preferredWindowTypes,
+    preferredRoomSizeSqmMin,
+    preferredFurnished,
+    preferredApartmentRoomsMin,
+    preferredApartmentBathsMin,
+    preferredApartmentSizeSqmMin,
+    preferredWifi,
+    descriptionText,
+  ]);
+
   const progressValue = Math.min(1, Math.max(0, (stepIndex + 1) / TOTAL_STEPS));
   const isLastStep = stepIndex === TOTAL_STEPS - 1;
 
@@ -865,91 +960,100 @@ export function SignalWizard({
       <div ref={topRef} />
       <Card className="mx-auto flex h-full min-h-0 w-full max-w-[1220px] flex-1 flex-col overflow-visible border border-border bg-card pt-6 pb-3 shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] md:max-h-full md:overflow-hidden">
         <CardContent className="flex min-h-0 flex-1 flex-col gap-8 overflow-visible px-6 pt-6 pb-0 text-card-foreground md:overflow-hidden">
-          <div
-            className={cn(
-              "mx-auto flex min-h-0 w-full flex-1 flex-col overflow-hidden",
-              stepIndex === 1 || stepIndex === 7 || stepIndex === 8
-                ? "max-w-full"
-                : "max-w-[730px]",
-            )}
-          >
+          <div className="mx-auto flex min-h-0 w-full max-w-[730px] flex-1 flex-col overflow-hidden">
             {/* ============ Step 1 — Introducite ============ */}
             {stepIndex === 0 ? (
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div
-                  className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain"
-                  data-wizard-scroll
-                >
-                  <div className="space-y-6">
+              <div
+                className="flex min-h-0 flex-1 flex-col overflow-visible md:overflow-y-auto md:overscroll-y-contain"
+                data-wizard-scroll
+              >
+                <div className="my-auto w-full space-y-6 py-10 md:py-20">
+                  <div className="space-y-2">
+                    <h1 className="text-[36px] leading-[40px] font-extrabold">
+                      Lanzá una Señal: Introducite
+                    </h1>
+                    <p className="text-sm leading-5 text-muted-foreground">
+                      Hacé saber que estás buscando hospedaje; rellená tu información
+                      básica en este primer paso (vas a poder describirte con tus propias
+                      palabras en el último paso).
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-4">
                     <div className="space-y-2">
-                      <h1 className="text-[36px] leading-[40px] font-extrabold">
-                        Lanzá una Señal: Introducite
-                      </h1>
-                      <p className="text-sm leading-5 text-muted-foreground">
-                        Hacé saber que estás buscando hospedaje; rellená tu información
-                        básica en este primer paso (vas a poder describirte con tus propias
-                        palabras en el último paso).
-                      </p>
+                      <Label htmlFor="signal-fullname">Nombre y apellido</Label>
+                      <Input
+                        id="signal-fullname"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="Ken Adams"
+                        maxLength={120}
+                      />
                     </div>
 
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="signal-fullname">Nombre y apellido</Label>
-                        <Input
-                          id="signal-fullname"
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                          placeholder="Ken Adams"
-                          maxLength={120}
-                        />
-                      </div>
+                    <Separator />
 
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                          <SignalSteppedMeter
-                            id="signal-age"
-                            label="Edad"
-                            min={16}
-                            max={120}
-                            value={Math.min(120, Math.max(16, Number(age) || 18))}
-                            onChange={(n) => setAge(String(n))}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="signal-gender">Género</Label>
-                          <Select value={gender} onValueChange={(v) => setGender(v ?? "")}>
-                            <SelectTrigger id="signal-gender" className="w-full">
-                              <SelectValue placeholder="Definí tu género" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {GENDER_OPTIONS.map((o) => (
-                                <SelectItem key={o.value} value={o.value}>
-                                  {o.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <SignalSteppedMeter
+                        id="signal-age"
+                        label="Edad"
+                        min={16}
+                        max={120}
+                        value={Math.min(120, Math.max(16, Number(age) || 18))}
+                        onChange={(n) => setAge(String(n))}
+                      />
                       <div className="space-y-2">
-                        <Label htmlFor="signal-country">País de origen</Label>
-                        <Select
-                          value={countryOfOrigin}
-                          onValueChange={(v) => setCountryOfOrigin(v ?? "")}
-                        >
-                          <SelectTrigger id="signal-country" className="w-full">
-                            <SelectValue placeholder="Elegí un país" />
+                        <Label htmlFor="signal-gender">Género</Label>
+                        <Select value={gender} onValueChange={(v) => setGender(v ?? "")}>
+                          <SelectTrigger id="signal-gender" className="w-full">
+                            <SelectValue placeholder="Definí tu género">
+                              {(value) => {
+                                const v =
+                                  typeof value === "string" ? value : "";
+                                if (!v) return "Definí tu género";
+                                return (
+                                  GENDER_OPTIONS.find((o) => o.value === v)
+                                    ?.label ?? v
+                                );
+                              }}
+                            </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
-                            {COUNTRY_OPTIONS.map((c) => (
-                              <SelectItem key={c} value={c}>
-                                {c}
+                            {GENDER_OPTIONS.map((o) => (
+                              <SelectItem key={o.value} value={o.value}>
+                                {o.label}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </div>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-2">
+                      <Label htmlFor="signal-country">País de origen</Label>
+                      <Select
+                        value={countryOfOrigin}
+                        onValueChange={(v) => setCountryOfOrigin(v ?? "")}
+                      >
+                        <SelectTrigger id="signal-country" className="w-full">
+                          <SelectValue placeholder="Elegí un país">
+                            {(value) => {
+                              const v = typeof value === "string" ? value : "";
+                              if (!v) return "Elegí un país";
+                              return v;
+                            }}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {COUNTRY_OPTIONS.map((c) => (
+                            <SelectItem key={c} value={c}>
+                              {c}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </div>
@@ -958,46 +1062,45 @@ export function SignalWizard({
 
             {/* ============ Step 2 — Dejate ver ============ */}
             {stepIndex === 1 ? (
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="shrink-0 space-y-2">
-                  {photos.length === 0 ? (
-                    <>
-                      <h1 className="text-[36px] leading-[40px] font-extrabold">
-                        Dejate ver
-                      </h1>
-                      <p className="text-sm leading-5 text-muted-foreground">
-                        La foto es opcional, pero tené en cuenta que los anfitriones confían
-                        más en señales con cara visible. Tu foto puede pesar como máximo 4
-                        MB. Si pesa más, la vamos a comprimir automáticamente al subirla.
+              <div
+                className="flex min-h-0 flex-1 flex-col overflow-visible md:overflow-y-auto md:overscroll-y-contain"
+                data-wizard-scroll
+              >
+                <div className="my-auto w-full space-y-6 py-10 md:py-20">
+                  <div className="space-y-2">
+                    {photos.length === 0 ? (
+                      <>
+                        <h1 className="text-[36px] leading-[40px] font-extrabold">
+                          Dejate ver
+                        </h1>
+                        <p className="text-sm leading-5 text-muted-foreground">
+                          La foto es opcional, pero tené en cuenta que los anfitriones
+                          confían más en señales con cara visible. Tu foto puede pesar como
+                          máximo 4 MB. Si pesa más, la vamos a comprimir automáticamente al
+                          subirla.
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <h1 className="text-[36px] leading-[40px] font-extrabold">
+                          ¡Genial!
+                        </h1>
+                        <p className="text-sm leading-5 text-muted-foreground">
+                          Esta es tu foto de perfil. Podés reemplazarla o quitarla cuando
+                          quieras.
+                        </p>
+                      </>
+                    )}
+                    {photoUploadError ? (
+                      <p className="text-sm text-destructive" role="alert">
+                        {photoUploadError}
                       </p>
-                    </>
-                  ) : (
-                    <div className="space-y-2">
-                      <h1 className="text-[36px] leading-[40px] font-extrabold">
-                        ¡Genial!
-                      </h1>
-                      <p className="text-sm leading-5 text-muted-foreground">
-                        Esta es tu foto de perfil. Podés reemplazarla o quitarla cuando
-                        quieras.
-                      </p>
-                    </div>
-                  )}
-                  {photoUploadError ? (
-                    <p className="text-sm text-destructive" role="alert">
-                      {photoUploadError}
-                    </p>
-                  ) : null}
-                  {photoUploadingCount > 0 ? (
-                    <p className="text-xs text-muted-foreground">
-                      Subiendo foto…
-                    </p>
-                  ) : null}
-                </div>
+                    ) : null}
+                    {photoUploadingCount > 0 ? (
+                      <p className="text-xs text-muted-foreground">Subiendo foto…</p>
+                    ) : null}
+                  </div>
 
-                <div
-                  className="mt-6 min-h-0 flex-1 overflow-visible md:overflow-y-auto md:overscroll-y-contain md:pr-1"
-                  data-wizard-scroll
-                >
                   {photos.length === 0 ? (
                     <label
                       className="flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/10 px-4 py-12 text-sm text-muted-foreground transition-colors hover:bg-muted/20"
@@ -1029,42 +1132,40 @@ export function SignalWizard({
                       </div>
                     </label>
                   ) : (
-                    <div className="mx-auto flex w-full max-w-[860px] flex-col gap-2">
-                      <DndContext
-                        sensors={sensors}
-                        collisionDetection={closestCenter}
-                        onDragEnd={({ active, over }) => {
-                          if (!over || active.id === over.id) return;
-                          setPhotos((prev) => {
-                            const oldIndex = prev.findIndex((p) => p.id === active.id);
-                            const newIndex = prev.findIndex((p) => p.id === over.id);
-                            if (oldIndex === -1 || newIndex === -1) return prev;
-                            return arrayMove(prev, oldIndex, newIndex);
-                          });
-                        }}
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={({ active, over }) => {
+                        if (!over || active.id === over.id) return;
+                        setPhotos((prev) => {
+                          const oldIndex = prev.findIndex((p) => p.id === active.id);
+                          const newIndex = prev.findIndex((p) => p.id === over.id);
+                          if (oldIndex === -1 || newIndex === -1) return prev;
+                          return arrayMove(prev, oldIndex, newIndex);
+                        });
+                      }}
+                    >
+                      <SortableContext
+                        items={photos.map((p) => p.id)}
+                        strategy={rectSortingStrategy}
                       >
-                        <SortableContext
-                          items={photos.map((p) => p.id)}
-                          strategy={rectSortingStrategy}
-                        >
-                          {photos[0] ? (
-                            <SortablePhoto
-                              key={photos[0].id}
-                              photo={photos[0]}
-                              variant="hero"
-                              index={0}
-                              total={photos.length}
-                              onDelete={() => removePhoto(photos[0].id)}
-                              onReplace={(file) => void replacePhoto(photos[0].id, file)}
-                              onMoveEarlier={() =>
-                                movePhotoInList(photos[0].id, "earlier")
-                              }
-                              onMoveLater={() => movePhotoInList(photos[0].id, "later")}
-                            />
-                          ) : null}
-                        </SortableContext>
-                      </DndContext>
-                    </div>
+                        {photos[0] ? (
+                          <SortablePhoto
+                            key={photos[0].id}
+                            photo={photos[0]}
+                            variant="hero"
+                            index={0}
+                            total={photos.length}
+                            onDelete={() => removePhoto(photos[0].id)}
+                            onReplace={(file) => void replacePhoto(photos[0].id, file)}
+                            onMoveEarlier={() =>
+                              movePhotoInList(photos[0].id, "earlier")
+                            }
+                            onMoveLater={() => movePhotoInList(photos[0].id, "later")}
+                          />
+                        ) : null}
+                      </SortableContext>
+                    </DndContext>
                   )}
                 </div>
               </div>
@@ -1072,12 +1173,11 @@ export function SignalWizard({
 
             {/* ============ Step 3 — Los básicos ============ */}
             {stepIndex === 2 ? (
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div
-                  className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain"
-                  data-wizard-scroll
-                >
-                  <div className="space-y-6">
+              <div
+                className="flex min-h-0 flex-1 flex-col overflow-visible md:overflow-y-auto md:overscroll-y-contain"
+                data-wizard-scroll
+              >
+                <div className="my-auto w-full space-y-6 py-10 md:py-20">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
                         Más sobre vos
@@ -1160,17 +1260,15 @@ export function SignalWizard({
                     </div>
                   </div>
                 </div>
-              </div>
             ) : null}
 
             {/* ============ Step 4 — Un poco más sobre vos ============ */}
             {stepIndex === 3 ? (
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div
-                  className="flex min-h-0 flex-1 flex-col overflow-visible md:overflow-y-auto md:overscroll-y-contain"
-                  data-wizard-scroll
-                >
-                  <div className="space-y-6">
+              <div
+                className="flex min-h-0 flex-1 flex-col overflow-visible md:overflow-y-auto md:overscroll-y-contain"
+                data-wizard-scroll
+              >
+                <div className="my-auto w-full space-y-6 py-10 md:py-20">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
                         Opcional, pero muy útil
@@ -1224,17 +1322,15 @@ export function SignalWizard({
                     </div>
                   </div>
                 </div>
-              </div>
             ) : null}
 
             {/* ============ Step 5 — Esto es real? ============ */}
             {stepIndex === 4 ? (
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div
-                  className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain"
-                  data-wizard-scroll
-                >
-                  <div className="space-y-6">
+              <div
+                className="flex min-h-0 flex-1 flex-col overflow-visible md:overflow-y-auto md:overscroll-y-contain"
+                data-wizard-scroll
+              >
+                <div className="my-auto w-full space-y-6 py-10 md:py-20">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
                         ¿Esto es real?
@@ -1285,17 +1381,15 @@ export function SignalWizard({
                     </div>
                   </div>
                 </div>
-              </div>
             ) : null}
 
             {/* ============ Step 6 — Cuándo ============ */}
             {stepIndex === 5 ? (
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div
-                  className="flex min-h-0 flex-1 flex-col overflow-visible md:overflow-y-auto md:overscroll-y-contain"
-                  data-wizard-scroll
-                >
-                  <div className="space-y-6">
+              <div
+                className="flex min-h-0 flex-1 flex-col overflow-visible md:overflow-y-auto md:overscroll-y-contain"
+                data-wizard-scroll
+              >
+                <div className="my-auto w-full space-y-6 py-10 md:py-20">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
                         Para cuándo buscás?
@@ -1462,16 +1556,15 @@ export function SignalWizard({
                     ) : null}
                   </div>
                 </div>
-              </div>
             ) : null}
 
             {/* ============ Step 7 — Dónde? (zonas) ============ */}
             {stepIndex === 6 ? (
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div
-                  className="mt-0 min-h-0 flex-1 space-y-6 overflow-visible md:overflow-y-auto md:overscroll-y-contain md:pr-1"
-                  data-wizard-scroll
-                >
+              <div
+                className="flex min-h-0 flex-1 flex-col overflow-visible md:overflow-y-auto md:overscroll-y-contain"
+                data-wizard-scroll
+              >
+                <div className="my-auto w-full space-y-6 py-10 md:py-20">
                   <div className="space-y-2">
                     <h1 className="text-[36px] leading-[40px] font-extrabold">Dónde?</h1>
                     <p className="text-sm leading-5 text-muted-foreground">
@@ -1494,11 +1587,11 @@ export function SignalWizard({
 
             {/* ============ Step 8 — Hacé match con habitaciones ============ */}
             {stepIndex === 7 ? (
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div
-                  className="mt-0 min-h-0 flex-1 space-y-6 overflow-visible md:overflow-y-auto md:overscroll-y-contain md:pr-1"
-                  data-wizard-scroll
-                >
+              <div
+                className="flex min-h-0 flex-1 flex-col overflow-visible md:overflow-y-auto md:overscroll-y-contain"
+                data-wizard-scroll
+              >
+                <div className="my-auto w-full space-y-6 py-10 md:py-20">
                   <div className="space-y-2">
                     <h1 className="text-[36px] leading-[40px] font-extrabold">
                       Hacé match con habitaciones
@@ -1701,12 +1794,11 @@ export function SignalWizard({
 
             {/* ============ Step 9 — Presentate ============ */}
             {stepIndex === 8 ? (
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div
-                  className="flex min-h-0 flex-1 flex-col overflow-visible md:overflow-y-auto md:overscroll-y-contain"
-                  data-wizard-scroll
-                >
-                  <div className="space-y-6 pb-2">
+              <div
+                className="flex min-h-0 flex-1 flex-col overflow-visible md:overflow-y-auto md:overscroll-y-contain"
+                data-wizard-scroll
+              >
+                <div className="my-auto w-full space-y-6 py-10 md:py-20">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
                         Presentate con tus palabras
@@ -1782,17 +1874,15 @@ export function SignalWizard({
                     </div>
                   </div>
                 </div>
-              </div>
             ) : null}
 
             {/* ============ Step 10 — Notificaciones ============ */}
             {stepIndex === 9 ? (
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div
-                  className="flex min-h-0 flex-1 flex-col justify-center overflow-visible md:overflow-y-auto md:overscroll-y-contain"
-                  data-wizard-scroll
-                >
-                  <div className="space-y-6">
+              <div
+                className="flex min-h-0 flex-1 flex-col overflow-visible md:overflow-y-auto md:overscroll-y-contain"
+                data-wizard-scroll
+              >
+                <div className="my-auto w-full space-y-6 py-10 md:py-20">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
                         Por último: notificaciones
@@ -1819,7 +1909,6 @@ export function SignalWizard({
                     </div>
                   </div>
                 </div>
-              </div>
             ) : null}
           </div>
 
@@ -1839,7 +1928,7 @@ export function SignalWizard({
             <div className="mt-4 flex items-center justify-between">
               <Button
                 type="button"
-                variant="secondary"
+                variant={stepIndex === 0 ? "default" : "secondary"}
                 size="sm"
                 className="rounded-full"
                 onClick={handleBack}
@@ -1850,7 +1939,7 @@ export function SignalWizard({
 
               <Button
                 type="button"
-                variant={isLastStep ? "default" : "secondary"}
+                variant={isLastStep || isStepComplete ? "default" : "secondary"}
                 size="sm"
                 className="rounded-full"
                 disabled={

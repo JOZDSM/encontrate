@@ -1984,7 +1984,7 @@ export function SignalWizard({
               <Button
                 type="button"
                 variant={
-                  isLastStep || isStepComplete || stepIndex === 1
+                  isLastStep || isStepComplete || stepIndex === 1 || stepIndex === 3
                     ? "default"
                     : "secondary"
                 }

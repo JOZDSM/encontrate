@@ -205,7 +205,7 @@ export function BarcelonaZonePicker({
           </p>
         </>
       ) : (
-        <div className="grid items-center gap-10 md:grid-cols-[1fr_auto]">
+        <div className="grid items-center gap-10 md:grid-cols-[minmax(0,520px)_minmax(0,1fr)]">
           <div
             className="mx-auto w-full max-w-[520px] p-2 md:p-4 [&_svg]:max-h-none"
             role="group"
@@ -218,7 +218,7 @@ export function BarcelonaZonePicker({
             />
           </div>
 
-          <div className="flex items-center justify-center md:justify-end">
+          <div className="flex min-w-0 items-center justify-center md:justify-end">
             {selectedZones.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {selectedZones.map((zone) => (

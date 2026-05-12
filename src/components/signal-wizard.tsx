@@ -703,13 +703,15 @@ export function SignalWizard({
   const progressValue = Math.min(1, Math.max(0, (stepIndex + 1) / TOTAL_STEPS));
   const isLastStep = stepIndex === TOTAL_STEPS - 1;
 
+  const isOptionalStep = [1, 3, 4, 6].includes(stepIndex);
+
   const primaryFooterLabel = useMemo(() => {
     if (stepIndex === 9) return savingNext ? "Publicando…" : "Publicar señal";
-    if ([1, 3, 4, 6].includes(stepIndex)) {
+    if (isOptionalStep) {
       return savingNext ? "Guardando…" : "Saltear / Siguiente";
     }
     return savingNext ? "Guardando…" : "Siguiente";
-  }, [stepIndex, savingNext]);
+  }, [stepIndex, isOptionalStep, savingNext]);
 
   async function uploadOne(file: File): Promise<string> {
     const next = await compressListingPhotoIfNeeded(file);
@@ -2022,7 +2024,7 @@ export function SignalWizard({
               <Button
                 type="button"
                 variant={
-                  isLastStep || isStepComplete || stepIndex === 1 || stepIndex === 3
+                  isLastStep || isStepComplete || isOptionalStep
                     ? "default"
                     : "secondary"
                 }

@@ -151,6 +151,16 @@ const WINDOW_TYPE_LABELS: Record<string, string> = {
 
 const APARTMENT_SIZE_STEPS = Array.from({ length: 25 }, (_, i) => (i + 4) * 10);
 
+// Mirrors the room-size dropdown in listings filter so signal preferences
+// line up with what hosts/guests can actually filter for.
+const ROOM_SIZE_OPTIONS = [
+  { value: "5", label: "5 m²" },
+  { value: "10", label: "10 m²" },
+  { value: "15", label: "15 m²" },
+  { value: "20", label: "20 m²" },
+  { value: "21", label: "+20 m²" },
+] as const;
+
 type UploadedPhoto = { id: string; url: string };
 
 function makeId() {
@@ -491,7 +501,7 @@ export function SignalWizard({
       ? "si"
       : initialState.preferredFurnished === false
         ? "no"
-        : "any",
+        : "",
   );
   const [preferredApartmentRoomsMin, setPreferredApartmentRoomsMin] = useState<string>(
     initialState.preferredApartmentRoomsMin !== null
@@ -513,7 +523,7 @@ export function SignalWizard({
       ? "si"
       : initialState.preferredWifi === false
         ? "no"
-        : "any",
+        : "",
   );
 
   const [listingAlertInApp, setListingAlertInApp] = useState(
@@ -652,11 +662,11 @@ export function SignalWizard({
         preferredBedSizes.length > 0 ||
         preferredWindowTypes.length > 0 ||
         preferredRoomSizeSqmMin !== "" ||
-        preferredFurnished !== "any" ||
+        preferredFurnished !== "" ||
         preferredApartmentRoomsMin !== "" ||
         preferredApartmentBathsMin !== "" ||
         preferredApartmentSizeSqmMin !== "" ||
-        preferredWifi !== "any"
+        preferredWifi !== ""
       );
     }
     if (stepIndex === 8) {
@@ -873,7 +883,7 @@ export function SignalWizard({
         preferredRoomSizeSqmMin:
           preferredRoomSizeSqmMin === "" ? null : Number(preferredRoomSizeSqmMin),
         preferredFurnished:
-          preferredFurnished === "any" ? null : preferredFurnished === "si",
+          preferredFurnished === "" ? null : preferredFurnished === "si",
         preferredApartmentRoomsMin:
           preferredApartmentRoomsMin === ""
             ? null
@@ -887,7 +897,7 @@ export function SignalWizard({
             ? null
             : Number(preferredApartmentSizeSqmMin),
         preferredWifi:
-          preferredWifi === "any" ? null : preferredWifi === "si",
+          preferredWifi === "" ? null : preferredWifi === "si",
       };
     }
     if (stepIndex === 8) {
@@ -1764,15 +1774,24 @@ export function SignalWizard({
                         <Ruler className="size-4 text-foreground" aria-hidden />
                         Tamaño aproximado de la habitación (m²)
                       </Label>
-                      <Input
-                        type="number"
-                        inputMode="numeric"
-                        min={0}
-                        max={150}
+                      <Select
                         value={preferredRoomSizeSqmMin}
-                        onChange={(e) => setPreferredRoomSizeSqmMin(e.target.value)}
-                        placeholder="Da igual"
-                      />
+                        onValueChange={(v) =>
+                          setPreferredRoomSizeSqmMin(v === "any" ? "" : (v ?? ""))
+                        }
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Da igual" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="any">Da igual</SelectItem>
+                          {ROOM_SIZE_OPTIONS.map((o) => (
+                            <SelectItem key={o.value} value={o.value}>
+                              {o.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2">
@@ -1781,16 +1800,18 @@ export function SignalWizard({
                       </Label>
                       <Select
                         value={preferredApartmentSizeSqmMin}
-                        onValueChange={(v) => setPreferredApartmentSizeSqmMin(v ?? "")}
+                        onValueChange={(v) =>
+                          setPreferredApartmentSizeSqmMin(v === "any" ? "" : (v ?? ""))
+                        }
                       >
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Da igual" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Da igual</SelectItem>
+                          <SelectItem value="any">Da igual</SelectItem>
                           {APARTMENT_SIZE_STEPS.map((n) => (
                             <SelectItem key={n} value={String(n)}>
-                              {n}+ m²
+                              {n} m²
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -1808,10 +1829,12 @@ export function SignalWizard({
                       </Label>
                       <Select
                         value={preferredFurnished}
-                        onValueChange={(v) => setPreferredFurnished(v ?? "any")}
+                        onValueChange={(v) =>
+                          setPreferredFurnished(v === "any" ? "" : (v ?? ""))
+                        }
                       >
                         <SelectTrigger className="w-full">
-                          <SelectValue />
+                          <SelectValue placeholder="Da igual" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="any">Da igual</SelectItem>
@@ -1860,9 +1883,14 @@ export function SignalWizard({
                         <Wifi className="size-4 text-foreground" aria-hidden />
                         WIFI
                       </Label>
-                      <Select value={preferredWifi} onValueChange={(v) => setPreferredWifi(v ?? "any")}>
+                      <Select
+                        value={preferredWifi}
+                        onValueChange={(v) =>
+                          setPreferredWifi(v === "any" ? "" : (v ?? ""))
+                        }
+                      >
                         <SelectTrigger className="w-full">
-                          <SelectValue />
+                          <SelectValue placeholder="Da igual" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="any">Da igual</SelectItem>

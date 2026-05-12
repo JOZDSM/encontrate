@@ -405,10 +405,10 @@ export function SignalWizard({
 
   // Step 1 — Introducite
   const [fullName, setFullName] = useState(initialState.fullName ?? "");
-  const [age, setAge] = useState<string>(
+  const [age, setAge] = useState<number | null>(
     initialState.age !== null && initialState.age !== undefined
-      ? String(initialState.age)
-      : "18",
+      ? initialState.age
+      : null,
   );
   const [gender, setGender] = useState<string>(initialState.gender ?? "");
   const [countryOfOrigin, setCountryOfOrigin] = useState<string>(
@@ -614,8 +614,7 @@ export function SignalWizard({
       return (
         t.length >= 3 &&
         t.length <= 120 &&
-        age.trim() !== "" &&
-        !Number.isNaN(Number(age)) &&
+        age !== null &&
         Boolean(gender) &&
         Boolean(countryOfOrigin)
       );
@@ -814,7 +813,7 @@ export function SignalWizard({
       return {
         step: "identity",
         fullName: fullName.trim(),
-        age: age.trim() === "" || Number.isNaN(Number(age)) ? null : Number(age),
+        age,
         gender: (gender || null) as never,
         countryOfOrigin: countryOfOrigin.trim() === "" ? null : countryOfOrigin,
       };
@@ -997,15 +996,22 @@ export function SignalWizard({
                       <SignalSteppedMeter
                         id="signal-age"
                         label="Edad"
-                        min={16}
+                        min={0}
                         max={120}
-                        value={Math.min(120, Math.max(16, Number(age) || 18))}
-                        onChange={(n) => setAge(String(n))}
+                        value={age}
+                        editable
+                        emptyHint="Tu edad"
+                        seedWhenEmpty={0}
+                        onChange={(n) => setAge(n)}
                       />
                       <div className="space-y-2">
                         <Label htmlFor="signal-gender">Género</Label>
                         <Select value={gender} onValueChange={(v) => setGender(v ?? "")}>
-                          <SelectTrigger id="signal-gender" className="w-full">
+                          <SelectTrigger
+                            id="signal-gender"
+                            className="w-full"
+                            iconClassName="text-primary"
+                          >
                             <SelectValue placeholder="Definí tu género">
                               {(value) => {
                                 const v =
@@ -1037,7 +1043,11 @@ export function SignalWizard({
                         value={countryOfOrigin}
                         onValueChange={(v) => setCountryOfOrigin(v ?? "")}
                       >
-                        <SelectTrigger id="signal-country" className="w-full">
+                        <SelectTrigger
+                          id="signal-country"
+                          className="w-full"
+                          iconClassName="text-primary"
+                        >
                           <SelectValue placeholder="Elegí un país">
                             {(value) => {
                               const v = typeof value === "string" ? value : "";

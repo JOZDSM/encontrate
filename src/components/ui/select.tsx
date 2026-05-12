@@ -32,10 +32,13 @@ function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
 function SelectTrigger({
   className,
   size = "default",
+  iconClassName,
   children,
   ...props
 }: SelectPrimitive.Trigger.Props & {
   size?: "sm" | "default"
+  /** Optional class merged into the trigger's chevron icon (e.g. `text-primary`). */
+  iconClassName?: string
 }) {
   return (
     <SelectPrimitive.Trigger
@@ -50,7 +53,7 @@ function SelectTrigger({
       {children}
       <SelectPrimitive.Icon
         render={
-          <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} className="pointer-events-none size-4 text-muted-foreground" />
+          <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} className={cn("pointer-events-none size-4 text-muted-foreground", iconClassName)} />
         }
       />
     </SelectPrimitive.Trigger>

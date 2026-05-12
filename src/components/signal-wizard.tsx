@@ -704,6 +704,7 @@ export function SignalWizard({
 
   const primaryFooterLabel = useMemo(() => {
     if (stepIndex === 9) return savingNext ? "Publicando…" : "Publicar señal";
+    if (stepIndex === 1) return savingNext ? "Guardando…" : "Saltear / Siguiente";
     if ([3, 4, 6].includes(stepIndex)) {
       return savingNext ? "Guardando…" : "Saltear / Seguir";
     }
@@ -1938,7 +1939,7 @@ export function SignalWizard({
             <div className="mt-4 flex items-center justify-between">
               <Button
                 type="button"
-                variant={stepIndex === 0 ? "default" : "secondary"}
+                variant="default"
                 size="sm"
                 className="rounded-full"
                 onClick={handleBack}
@@ -1949,7 +1950,11 @@ export function SignalWizard({
 
               <Button
                 type="button"
-                variant={isLastStep || isStepComplete ? "default" : "secondary"}
+                variant={
+                  isLastStep || isStepComplete || stepIndex === 1
+                    ? "default"
+                    : "secondary"
+                }
                 size="sm"
                 className="rounded-full"
                 disabled={

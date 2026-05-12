@@ -704,9 +704,8 @@ export function SignalWizard({
 
   const primaryFooterLabel = useMemo(() => {
     if (stepIndex === 9) return savingNext ? "Publicando…" : "Publicar señal";
-    if (stepIndex === 1) return savingNext ? "Guardando…" : "Saltear / Siguiente";
-    if ([3, 4, 6].includes(stepIndex)) {
-      return savingNext ? "Guardando…" : "Saltear / Seguir";
+    if ([1, 3, 4, 6].includes(stepIndex)) {
+      return savingNext ? "Guardando…" : "Saltear / Siguiente";
     }
     return savingNext ? "Guardando…" : "Siguiente";
   }, [stepIndex, savingNext]);

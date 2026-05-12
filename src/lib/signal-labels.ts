@@ -11,11 +11,11 @@ export const SIGNAL_GENDER_LABELS: Record<string, string> = {
 
 export const SIGNAL_OCCUPATION_LABELS: Record<string, string> = {
   STUDENT: "Estudiante",
-  EMPLOYED: "Empleade en relación de dependencia",
-  FREELANCE: "Freelance",
+  EMPLOYED: "Empleado/a en relación de dependencia",
+  FREELANCE: "Freelancer",
   ENTREPRENEUR: "Emprendedor/a",
-  REMOTE_WORKER: "Remote worker",
-  OTHER: "Otro",
+  REMOTE_WORKER: "Trabajador/a remoto",
+  OTHER: "Entre cosas :)",
 };
 
 export const SIGNAL_LANGUAGE_LABELS: Record<string, string> = {
@@ -30,10 +30,9 @@ export const SIGNAL_LANGUAGE_LABELS: Record<string, string> = {
 };
 
 export const SIGNAL_MOVING_WITH_LABELS: Record<string, string> = {
-  SOLO: "Solo/a",
-  COUPLE: "Con mi pareja",
-  FAMILY: "Con mi familia",
-  ROOMMATES: "Con compañeres",
+  SOLO: "Yo",
+  COUPLE: "Mi pareja y yo",
+  OTHER: "Otros",
 };
 
 export const SIGNAL_FLEX_STAY_LABELS: Record<string, string> = {

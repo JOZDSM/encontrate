@@ -38,7 +38,7 @@ const OCCUPATION_VALUES = [
   "OTHER",
 ] as const;
 const LANGUAGE_VALUES = ["ES", "EN", "CA", "IT", "FR", "DE", "PT", "OTHER"] as const;
-const MOVING_WITH_VALUES = ["SOLO", "COUPLE", "FAMILY", "ROOMMATES"] as const;
+const MOVING_WITH_VALUES = ["SOLO", "COUPLE", "OTHER"] as const;
 const FLEX_STAY_VALUES = ["WEEKEND", "WEEK", "MONTH"] as const;
 
 export type BuscarHuespedFormProps = {

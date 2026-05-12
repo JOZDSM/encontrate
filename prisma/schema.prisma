@@ -53,8 +53,7 @@ enum Language {
 enum MovingWith {
   SOLO
   COUPLE
-  FAMILY
-  ROOMMATES
+  OTHER
 }
 
 enum Occupation {

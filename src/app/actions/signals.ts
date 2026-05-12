@@ -17,7 +17,7 @@ const allowedCountries = new Set<string>(COUNTRY_OPTIONS);
 
 const GENDER = ["FEMALE", "MALE", "NON_BINARY", "OTHER"] as const;
 const LANGUAGE = ["ES", "EN", "CA", "IT", "FR", "DE", "PT", "OTHER"] as const;
-const MOVING_WITH = ["SOLO", "COUPLE", "FAMILY", "ROOMMATES"] as const;
+const MOVING_WITH = ["SOLO", "COUPLE", "OTHER"] as const;
 const OCCUPATION = [
   "STUDENT",
   "EMPLOYED",

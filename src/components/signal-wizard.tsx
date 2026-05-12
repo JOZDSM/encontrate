@@ -8,8 +8,8 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  CircleCheck,
   DoorOpen,
-  Globe2,
   Home,
   ImagePlus,
   Italic,
@@ -39,6 +39,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { badgeVariants } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -96,11 +97,11 @@ const GENDER_OPTIONS = [
 
 const OCCUPATION_OPTIONS = [
   { value: "STUDENT", label: "Estudiante" },
-  { value: "EMPLOYED", label: "Empleade en relación de dependencia" },
-  { value: "FREELANCE", label: "Freelance" },
+  { value: "EMPLOYED", label: "Empleado/a en relación de dependencia" },
+  { value: "FREELANCE", label: "Freelancer" },
   { value: "ENTREPRENEUR", label: "Emprendedor/a" },
-  { value: "REMOTE_WORKER", label: "Remote worker" },
-  { value: "OTHER", label: "Otro" },
+  { value: "REMOTE_WORKER", label: "Trabajador/a remoto" },
+  { value: "OTHER", label: "Entre cosas :)" },
 ] as const;
 
 const LANGUAGE_OPTIONS = [
@@ -115,10 +116,9 @@ const LANGUAGE_OPTIONS = [
 ] as const;
 
 const MOVING_WITH_OPTIONS = [
-  { value: "SOLO", label: "Solo/a" },
-  { value: "COUPLE", label: "Con mi pareja" },
-  { value: "FAMILY", label: "Con mi familia" },
-  { value: "ROOMMATES", label: "Con compañeres" },
+  { value: "SOLO", label: "Yo" },
+  { value: "COUPLE", label: "Mi pareja y yo" },
+  { value: "OTHER", label: "Otros" },
 ] as const;
 
 const FLEX_STAY_OPTIONS = [
@@ -1189,23 +1189,36 @@ export function SignalWizard({
                 data-wizard-scroll
               >
                 <div className="my-auto w-full space-y-6 py-10 md:py-20">
-                    <div className="space-y-2">
-                      <h1 className="text-[36px] leading-[40px] font-extrabold">
-                        Más sobre vos
-                      </h1>
-                      <p className="text-sm leading-5 text-muted-foreground">
-                        Información importante que puede ayudarte a encontrarte un
-                        anfitrión con tu misma vibra.
-                      </p>
-                    </div>
+                  <div className="space-y-2">
+                    <h1 className="text-[36px] leading-[40px] font-extrabold">
+                      Más sobre vos
+                    </h1>
+                    <p className="text-sm leading-5 text-muted-foreground">
+                      Información importante que puede ayudarte a encontrarte un
+                      anfitrión con tu misma vibra.
+                    </p>
+                  </div>
 
+                  <div className="flex flex-col gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="signal-occupation">
-                        ¿Cuál de estas opciones te describe mejor en este momento?
+                        Cuál de estas opciones te describe mejor en este momento?
                       </Label>
                       <Select value={occupation} onValueChange={(v) => setOccupation(v ?? "")}>
-                        <SelectTrigger id="signal-occupation" className="w-full">
-                          <SelectValue placeholder="Elegí una" />
+                        <SelectTrigger
+                          id="signal-occupation"
+                          className="w-full"
+                          iconClassName="text-primary"
+                        >
+                          <SelectValue placeholder="Elegí una">
+                            {(value) => {
+                              const v = typeof value === "string" ? value : "";
+                              if (!v) return "Elegí una";
+                              return (
+                                OCCUPATION_OPTIONS.find((o) => o.value === v)?.label ?? v
+                              );
+                            }}
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           {OCCUPATION_OPTIONS.map((o) => (
@@ -1217,48 +1230,67 @@ export function SignalWizard({
                       </Select>
                     </div>
 
+                    <Separator />
+
                     <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
-                        <Globe2 className="size-4 text-foreground" aria-hidden />
-                        ¿Qué idiomas hablás?
-                      </Label>
+                      <Label>Qué idiomas hablás?</Label>
                       <p className="text-xs text-muted-foreground">
                         Marcá todos los que apliquen.
                       </p>
-                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                      <div className="flex flex-wrap gap-1">
                         {LANGUAGE_OPTIONS.map((opt) => {
-                          const checked = languages.includes(opt.value);
+                          const on = languages.includes(opt.value);
                           return (
-                            <label
+                            <button
                               key={opt.value}
+                              type="button"
+                              aria-pressed={on}
                               className={cn(
-                                "flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm transition-colors",
-                                checked
-                                  ? "border-foreground/70 bg-muted/25"
-                                  : "border-border bg-muted/5 hover:bg-muted/15",
+                                badgeVariants({ variant: "outline" }),
+                                "h-auto min-h-8 cursor-pointer rounded-full px-2 py-1.5 text-xs font-medium shadow-xs",
+                                on
+                                  ? "border-foreground bg-accent text-accent-foreground hover:bg-accent/90"
+                                  : "border-border bg-background text-foreground hover:bg-muted/60",
                               )}
+                              onClick={() =>
+                                setLanguages((prev) => toggleArrayValue(prev, opt.value))
+                              }
                             >
-                              <Checkbox
-                                checked={checked}
-                                onCheckedChange={() =>
-                                  setLanguages((prev) =>
-                                    toggleArrayValue(prev, opt.value),
-                                  )
-                                }
-                                className="shrink-0"
-                              />
-                              <span>{opt.label}</span>
-                            </label>
+                              <span className="flex items-center gap-1.5">
+                                {on ? (
+                                  <CircleCheck
+                                    className="size-4 shrink-0"
+                                    strokeWidth={2}
+                                    aria-hidden
+                                  />
+                                ) : null}
+                                {opt.label}
+                              </span>
+                            </button>
                           );
                         })}
                       </div>
                     </div>
 
+                    <Separator />
+
                     <div className="space-y-2">
-                      <Label htmlFor="signal-moving-with">¿Quién busca habitación?</Label>
+                      <Label htmlFor="signal-moving-with">Quién busca habitación?</Label>
                       <Select value={movingWith} onValueChange={(v) => setMovingWith(v ?? "")}>
-                        <SelectTrigger id="signal-moving-with" className="w-full">
-                          <SelectValue placeholder="Elegí una" />
+                        <SelectTrigger
+                          id="signal-moving-with"
+                          className="w-full"
+                          iconClassName="text-primary"
+                        >
+                          <SelectValue placeholder="Elegí una">
+                            {(value) => {
+                              const v = typeof value === "string" ? value : "";
+                              if (!v) return "Elegí una";
+                              return (
+                                MOVING_WITH_OPTIONS.find((o) => o.value === v)?.label ?? v
+                              );
+                            }}
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           {MOVING_WITH_OPTIONS.map((o) => (
@@ -1271,6 +1303,7 @@ export function SignalWizard({
                     </div>
                   </div>
                 </div>
+              </div>
             ) : null}
 
             {/* ============ Step 4 — Un poco más sobre vos ============ */}
@@ -1344,7 +1377,7 @@ export function SignalWizard({
                 <div className="my-auto w-full space-y-6 py-10 md:py-20">
                     <div className="space-y-2">
                       <h1 className="text-[36px] leading-[40px] font-extrabold">
-                        ¿Esto es real?
+                        Esto es real?
                       </h1>
                       <p className="text-sm leading-5 text-muted-foreground">
                         Opcionales, pero compartir alguna de tus redes le suma confianza a
@@ -1492,7 +1525,7 @@ export function SignalWizard({
                     {dateMode === "flex" ? (
                       <div className="space-y-6">
                         <div className="space-y-3">
-                          <Label>¿Por cuánto tiempo te querés quedar?</Label>
+                          <Label>Por cuánto tiempo te querés quedar?</Label>
                           <div className="flex flex-wrap gap-2">
                             {FLEX_STAY_OPTIONS.map((opt) => {
                               const active = flexStayLengths.includes(opt.value);
@@ -1521,7 +1554,7 @@ export function SignalWizard({
                         </div>
 
                         <div className="space-y-3">
-                          <Label>¿Durante qué meses?</Label>
+                          <Label>Durante qué meses?</Label>
                           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                             {monthOptions.map((m) => {
                               const active = flexMonths.includes(m.ym);
@@ -1986,7 +2019,7 @@ export function SignalWizard({
       <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
         <DialogContent className="gap-4 border-border sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>¿Salir de crear señal?</DialogTitle>
+            <DialogTitle>Salir de crear señal?</DialogTitle>
             <DialogDescription>
               Tu progreso se guarda como borrador. Podés volver más tarde desde el Panel.
             </DialogDescription>

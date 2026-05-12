@@ -39,6 +39,8 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { badgeVariants } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -60,7 +62,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -461,8 +462,8 @@ export function SignalWizard({
   const [exactCheckOut, setExactCheckOut] = useState<string>(
     initialState.exactCheckOut ?? "",
   );
-  const [exactFlexDays, setExactFlexDays] = useState<number>(
-    initialState.exactFlexDays ?? 0,
+  const [exactFlexDays, setExactFlexDays] = useState<number | null>(
+    initialState.exactFlexDays ?? null,
   );
   const [flexStayLengths, setFlexStayLengths] = useState<string[]>([
     ...initialState.flexStayLengths,
@@ -1443,71 +1444,109 @@ export function SignalWizard({
                       </p>
                     </div>
 
-                    <RadioGroup
-                      value={dateMode}
-                      onValueChange={(v) => {
-                        setDateMode(v);
-                      }}
-                      className="flex flex-col gap-1 rounded-full border border-border bg-muted/20 p-1 sm:flex-row sm:items-stretch"
+                    <div
+                      role="radiogroup"
+                      aria-label="Para cuándo buscás?"
+                      className="flex flex-col divide-y divide-border rounded-2xl border border-border sm:h-8 sm:flex-row sm:divide-y-0 sm:rounded-full sm:border-border"
                     >
                       {[
                         { value: "exact", label: "Fechas exactas" },
                         { value: "flex", label: "Rangos flexibles" },
                         { value: "asap", label: "Busco urgente" },
                       ].map((o) => {
-                        const checked = dateMode === o.value;
+                        const active = dateMode === o.value;
                         return (
-                          <label
+                          <button
                             key={o.value}
+                            type="button"
+                            role="radio"
+                            aria-checked={active}
+                            onClick={() => setDateMode(o.value)}
                             className={cn(
-                              "flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full px-2 py-2.5 text-center text-xs font-semibold transition-colors sm:px-3 sm:text-sm",
-                              checked
-                                ? "bg-background text-foreground shadow-sm"
+                              "flex flex-1 cursor-pointer items-center gap-2.5 text-sm transition-colors",
+                              "min-h-12 justify-start px-4",
+                              "sm:h-8 sm:min-h-0 sm:justify-center sm:px-3",
+                              active
+                                ? "text-foreground sm:rounded-full sm:border sm:border-border sm:bg-muted"
                                 : "text-muted-foreground hover:text-foreground",
                             )}
                           >
-                            <RadioGroupItem
-                              value={o.value}
-                              id={`signal-mode-${o.value}`}
-                              className="size-3.5 shrink-0"
-                            />
+                            <span
+                              className={cn(
+                                "grid size-4 shrink-0 place-items-center rounded-full border border-border",
+                                active && "border-foreground",
+                              )}
+                              aria-hidden
+                            >
+                              {active ? (
+                                <span className="size-2 rounded-full bg-foreground" />
+                              ) : null}
+                            </span>
                             <span className="leading-tight">{o.label}</span>
-                          </label>
+                          </button>
                         );
                       })}
-                    </RadioGroup>
+                    </div>
 
                     {dateMode === "exact" ? (
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                           <div className="space-y-2">
                             <Label htmlFor="signal-checkin">Check-in</Label>
-                            <Input
-                              id="signal-checkin"
-                              type="date"
-                              value={exactCheckIn}
-                              onChange={(e) => setExactCheckIn(e.target.value)}
-                            />
+                            <div className="relative">
+                              <Input
+                                id="signal-checkin"
+                                type="date"
+                                value={exactCheckIn}
+                                onChange={(e) => setExactCheckIn(e.target.value)}
+                                className="signal-date-input pr-9"
+                              />
+                              <HugeiconsIcon
+                                icon={ArrowDown01Icon}
+                                strokeWidth={2}
+                                className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground"
+                              />
+                            </div>
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="signal-checkout">Check-out</Label>
-                            <Input
-                              id="signal-checkout"
-                              type="date"
-                              value={exactCheckOut}
-                              onChange={(e) => setExactCheckOut(e.target.value)}
-                              min={exactCheckIn || undefined}
-                            />
+                            <div className="relative">
+                              <Input
+                                id="signal-checkout"
+                                type="date"
+                                value={exactCheckOut}
+                                onChange={(e) => setExactCheckOut(e.target.value)}
+                                min={exactCheckIn || undefined}
+                                className="signal-date-input pr-9"
+                              />
+                              <HugeiconsIcon
+                                icon={ArrowDown01Icon}
+                                strokeWidth={2}
+                                className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground"
+                              />
+                            </div>
                           </div>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="signal-flex-days">Flexibilidad</Label>
                           <Select
-                            value={String(exactFlexDays)}
-                            onValueChange={(v) => setExactFlexDays(Number(v))}
+                            value={exactFlexDays === null ? "" : String(exactFlexDays)}
+                            onValueChange={(v) =>
+                              setExactFlexDays(v === null || v === "" ? null : Number(v))
+                            }
                           >
                             <SelectTrigger id="signal-flex-days" className="w-full">
-                              <SelectValue placeholder="± días" />
+                              <SelectValue placeholder="± días">
+                                {(value) => {
+                                  const v = typeof value === "string" ? value : "";
+                                  if (!v) return "± días";
+                                  return (
+                                    FLEX_DAYS_OPTIONS.find(
+                                      (o) => String(o.value) === v,
+                                    )?.label ?? v
+                                  );
+                                }}
+                              </SelectValue>
                             </SelectTrigger>
                             <SelectContent>
                               {FLEX_DAYS_OPTIONS.map((o) => (

@@ -1,8 +1,18 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { BARCELONA_ZONE_LABELS } from "@/lib/barcelona-zones";
+import { sendEmail } from "@/lib/email";
 
 type SignalForMatch = Prisma.SignalGetPayload<true>;
 type ListingForMatch = Prisma.ListingGetPayload<true>;
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
 
 function intersect<T>(a: readonly T[], b: readonly T[]): boolean {
   if (a.length === 0 || b.length === 0) return false;
@@ -26,10 +36,11 @@ function preferredZoneLabels(zones: readonly string[]): string[] {
  * True iff the Listing satisfies every populated preference on the Señal.
  * Empty arrays / `null` mins mean "no constraint" — they always match.
  *
- * Date overlap is intentionally not enforced in v1: the listing model doesn't
- * carry advertised dates, and the availability calendar is too noisy to be a
- * reliable matching signal. We surface every spatial/structural fit and let
- * the human do the date check on the listing page.
+ * Only wizard steps with listing-comparable fields are considered:
+ *   - Step 7 (Dónde?): `preferredZones`
+ *   - Step 8 (Hacé match con habitaciones): bed, windows, room/apt mins, wifi
+ * Identity, photos, lifestyle text, social, description, and step 6 dates are
+ * ignored. Date overlap is not enforced in v1 (listings lack move-in fields).
  */
 export function listingMatchesSignal(
   listing: ListingForMatch,
@@ -87,8 +98,7 @@ export function listingMatchesSignal(
 
 /**
  * Returns all active Señales (with at least one alert channel on) that match a
- * specific listing. Used by the matching cron to fan out a freshly-published
- * Listing into per-signal GuestListingMatch rows.
+ * specific listing.
  */
 export async function findSignalsForNewListing(
   prisma: Prisma.TransactionClient,
@@ -103,4 +113,52 @@ export async function findSignalsForNewListing(
     },
   });
   return candidates.filter((s) => listingMatchesSignal(listing, s));
+}
+
+/**
+ * Creates `GuestListingMatch` rows (and optional emails) for every matching
+ * active Señal. Called on listing create and by the daily cron backup pass.
+ */
+export async function processGuestListingMatchesForListing(
+  prisma: Prisma.TransactionClient,
+  listing: ListingForMatch,
+): Promise<{ matchesCreated: number; emailsSent: number }> {
+  const signals = await findSignalsForNewListing(prisma, listing);
+  let matchesCreated = 0;
+  let emailsSent = 0;
+
+  for (const signal of signals) {
+    const created = await prisma.guestListingMatch
+      .create({
+        data: { signalId: signal.id, listingId: listing.id },
+        select: { id: true },
+      })
+      .catch(() => null);
+    if (!created) continue;
+
+    matchesCreated++;
+
+    if (signal.listingAlertEmail) {
+      const guest = await prisma.user.findUnique({
+        where: { id: signal.userId },
+        select: { email: true },
+      });
+      const to = guest?.email?.trim();
+      if (to) {
+        const url = `https://encontrate.es/listings/${listing.id}`;
+        await sendEmail({
+          to,
+          subject: `Nueva habitación que coincide con tu señal`,
+          html: `
+              <p>Acabamos de detectar una habitación nueva que cumple con lo que pediste.</p>
+              <p><strong>${escapeHtml(listing.title)}</strong> · ${escapeHtml(listing.neighborhood)}</p>
+              <p><a href="${url}">Ver la habitación</a></p>
+            `,
+        }).catch(() => {});
+        emailsSent++;
+      }
+    }
+  }
+
+  return { matchesCreated, emailsSent };
 }

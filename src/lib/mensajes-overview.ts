@@ -145,7 +145,7 @@ export async function loadSignalInquiryThreads(
 }
 
 /**
- * System messages from the matching cron — surfaced in the inbox so users see
+ * System messages from listing/signal matching — surfaced in the inbox so users see
  * "you matched with X" without leaving Mensajes. Combines:
  *   - Hosts → SignalMatch (a guest's señal matched my Buscar huésped filter)
  *   - Guests → GuestListingMatch (a new listing matched my señal alert)

@@ -426,9 +426,8 @@ model SignalMatch {
   @@index([hostId, notifiedAt])
 }
 
-/// One row per (signal, listing) — represents a notification produced by the
-/// daily matching cron when a freshly-published Listing matched the guest's
-/// active Señal alert preferences.
+/// One row per (signal, listing) — notification when a Listing matched the
+/// guest's active Señal alert preferences (on create + daily cron backup).
 model GuestListingMatch {
   id         String    @id @default(cuid())
   signalId   String

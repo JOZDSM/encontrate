@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendEmail } from "@/lib/email";
 import { findHostFiltersForSignal } from "@/lib/signal-match";
-import { findSignalsForNewListing } from "@/lib/listing-for-signal-match";
+import { processGuestListingMatchesForListing } from "@/lib/listing-for-signal-match";
 
 export const runtime = "nodejs";
 // Vercel cron pings this with `Authorization: Bearer ${CRON_SECRET}`. We never
@@ -94,38 +94,9 @@ async function runGuestMatchPass(since: Date): Promise<{
   let matchesCreated = 0;
   let emailsSent = 0;
   for (const listing of newListings) {
-    const signals = await findSignalsForNewListing(prisma, listing);
-    for (const signal of signals) {
-      const created = await prisma.guestListingMatch
-        .create({
-          data: { signalId: signal.id, listingId: listing.id },
-          select: { id: true },
-        })
-        .catch(() => null);
-      if (!created) continue; // unique([signalId, listingId]) hit → skip
-      matchesCreated++;
-
-      if (signal.listingAlertEmail) {
-        const guest = await prisma.user.findUnique({
-          where: { id: signal.userId },
-          select: { email: true },
-        });
-        const to = guest?.email?.trim();
-        if (to) {
-          const url = `https://encontrate.es/listings/${listing.id}`;
-          await sendEmail({
-            to,
-            subject: `Nueva habitación que coincide con tu señal`,
-            html: `
-              <p>Acabamos de detectar una habitación nueva que cumple con lo que pediste.</p>
-              <p><strong>${escapeHtml(listing.title)}</strong> · ${escapeHtml(listing.neighborhood)}</p>
-              <p><a href="${url}">Ver la habitación</a></p>
-            `,
-          }).catch(() => {});
-          emailsSent++;
-        }
-      }
-    }
+    const result = await processGuestListingMatchesForListing(prisma, listing);
+    matchesCreated += result.matchesCreated;
+    emailsSent += result.emailsSent;
   }
   return { listingsScanned: newListings.length, matchesCreated, emailsSent };
 }

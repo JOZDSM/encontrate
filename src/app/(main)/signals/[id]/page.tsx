@@ -57,9 +57,9 @@ function CharacteristicRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-start gap-3">
+    <div className="flex min-w-0 items-start gap-3">
       <Icon className="mt-0.5 size-4 shrink-0 text-foreground" aria-hidden />
-      <p className="text-sm text-foreground">{children}</p>
+      <p className="min-w-0 flex-1 text-sm text-foreground">{children}</p>
     </div>
   );
 }
@@ -168,18 +168,18 @@ export default async function SignalDetailPage({
     .map((z) => BARCELONA_ZONE_LABELS[z] ?? z)
     .join(" · ");
 
-  const prefLeft: React.ReactNode[] = [];
-  const prefRight: React.ReactNode[] = [];
-
-  if (signal.preferredZones.length > 0) {
-    prefLeft.push(
+  const prefZonesRow =
+    signal.preferredZones.length > 0 ? (
       <CharacteristicRow key="zones" icon={MapPin}>
         <span className="font-medium">Barrios:</span> {zoneLabels}
-      </CharacteristicRow>,
-    );
-  }
+      </CharacteristicRow>
+    ) : null;
+
+  const prefLeftCol: React.ReactNode[] = [];
+  const prefRightCol: React.ReactNode[] = [];
+
   if (signal.preferredWindowTypes.length > 0) {
-    prefLeft.push(
+    prefLeftCol.push(
       <CharacteristicRow key="win" icon={Grid2X2}>
         <span className="font-medium">Ventana:</span>{" "}
         {joinSignalLabels(signal.preferredWindowTypes, SIGNAL_WINDOW_TYPE_LABELS)}
@@ -187,7 +187,7 @@ export default async function SignalDetailPage({
     );
   }
   if (signal.preferredRoomSizeSqmMin !== null) {
-    prefLeft.push(
+    prefLeftCol.push(
       <CharacteristicRow key="room" icon={Ruler}>
         <span className="font-medium">Tamaño de habitación:</span>{" "}
         {formatSignalRoomSizePreference(signal.preferredRoomSizeSqmMin)}
@@ -195,7 +195,7 @@ export default async function SignalDetailPage({
     );
   }
   if (signal.preferredBedSizes.length > 0) {
-    prefRight.push(
+    prefRightCol.push(
       <CharacteristicRow key="bed" icon={BedDouble}>
         <span className="font-medium">Cama:</span>{" "}
         {joinSignalLabels(signal.preferredBedSizes, SIGNAL_BED_SIZE_LABELS)}
@@ -203,7 +203,7 @@ export default async function SignalDetailPage({
     );
   }
   if (signal.preferredFurnished !== null) {
-    prefRight.push(
+    prefRightCol.push(
       <CharacteristicRow key="furn" icon={Sofa}>
         <span className="font-medium">Habitación amueblada:</span>{" "}
         {signal.preferredFurnished ? "Sí" : "No"}
@@ -211,7 +211,7 @@ export default async function SignalDetailPage({
     );
   }
   if (signal.preferredWifi !== null) {
-    prefRight.push(
+    prefRightCol.push(
       <CharacteristicRow key="wifi" icon={Wifi}>
         <span className="font-medium">WIFI:</span>{" "}
         {signal.preferredWifi ? "Sí" : "No"}
@@ -219,7 +219,10 @@ export default async function SignalDetailPage({
     );
   }
 
-  const showPrefs = prefLeft.length > 0 || prefRight.length > 0;
+  const showPrefs =
+    prefZonesRow !== null || prefLeftCol.length > 0 || prefRightCol.length > 0;
+  const showPrefsGrid = prefLeftCol.length > 0 || prefRightCol.length > 0;
+  const prefsTwoColumns = prefLeftCol.length > 0 && prefRightCol.length > 0;
   const showCaracteristicas =
     basicsRows.length > 0 ||
     moreRows.length > 0 ||
@@ -327,12 +330,23 @@ export default async function SignalDetailPage({
 
                 {showPrefs ? (
                   <CharacteristicCard title="Qué busca">
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {prefLeft.length > 0 ? (
-                        <div className="space-y-3">{prefLeft}</div>
-                      ) : null}
-                      {prefRight.length > 0 ? (
-                        <div className="space-y-3">{prefRight}</div>
+                    <div className="space-y-3">
+                      {prefZonesRow}
+                      {showPrefsGrid ? (
+                        <div
+                          className={
+                            prefsTwoColumns
+                              ? "grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-x-6"
+                              : "min-w-0 space-y-3"
+                          }
+                        >
+                          {prefLeftCol.length > 0 ? (
+                            <div className="min-w-0 space-y-3">{prefLeftCol}</div>
+                          ) : null}
+                          {prefRightCol.length > 0 ? (
+                            <div className="min-w-0 space-y-3">{prefRightCol}</div>
+                          ) : null}
+                        </div>
                       ) : null}
                     </div>
                   </CharacteristicCard>

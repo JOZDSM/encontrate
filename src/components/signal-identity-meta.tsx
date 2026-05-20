@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import { SignalInstagramIcon } from "@/components/signal-instagram-icon";
 import { canonicalizeCountry } from "@/lib/countries";
 import { cn } from "@/lib/utils";
@@ -12,9 +11,17 @@ export type SignalIdentityMetaProps = {
   className?: string;
 };
 
+function MetaSeparator() {
+  return (
+    <span aria-hidden className="text-muted-foreground">
+      |
+    </span>
+  );
+}
+
 /**
  * Second line under the Señal name: age | country | Instagram.
- * Shared by Mis señales cards and the public detail page.
+ * Figma auto-layout: horizontal row, gap-2 between every item (including |).
  */
 export function SignalIdentityMeta({
   age,
@@ -29,23 +36,28 @@ export function SignalIdentityMeta({
     : "";
   const ig = instagramHandle?.trim().replace(/^@/, "") || "";
 
-  const segments: React.ReactNode[] = [];
+  const items: React.ReactNode[] = [];
+
   if (age !== null && age !== undefined) {
-    segments.push(
+    items.push(
       <span key="age" className="whitespace-nowrap">
         {age} años
       </span>,
     );
   }
+
   if (displayCountry) {
-    segments.push(
+    if (items.length > 0) items.push(<MetaSeparator key="sep-country" />);
+    items.push(
       <span key="country" className="whitespace-nowrap">
         {displayCountry}
       </span>,
     );
   }
+
   if (ig) {
-    segments.push(
+    if (items.length > 0) items.push(<MetaSeparator key="sep-ig" />);
+    items.push(
       linkInstagram ? (
         <a
           key="ig"
@@ -69,25 +81,16 @@ export function SignalIdentityMeta({
     );
   }
 
-  if (segments.length === 0) return null;
+  if (items.length === 0) return null;
 
   return (
     <p
       className={cn(
-        "flex flex-wrap items-center gap-y-1 text-xs leading-snug sm:text-sm",
+        "flex min-h-6 flex-wrap items-center gap-2 text-xs leading-snug sm:text-sm",
         className ?? "text-foreground",
       )}
     >
-      {segments.map((segment, idx) => (
-        <Fragment key={idx}>
-          {idx > 0 ? (
-            <span aria-hidden className="text-muted-foreground">
-              {" | "}
-            </span>
-          ) : null}
-          {segment}
-        </Fragment>
-      ))}
+      {items}
     </p>
   );
 }

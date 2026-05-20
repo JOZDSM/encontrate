@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { sendEmail } from "@/lib/email";
-import { findHostFiltersForSignal } from "@/lib/signal-match";
+import { processHostSignalMatchesForSignal } from "@/lib/signal-match";
 import { processGuestListingMatchesForListing } from "@/lib/listing-for-signal-match";
 
 export const runtime = "nodejs";
@@ -22,16 +21,7 @@ function isAuthorized(req: Request): boolean {
   return header === `Bearer ${expected}`;
 }
 
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
-
-/** First pass: brand-new ACTIVE Señales → per-host SignalMatch + emails. */
+/** First pass: recently updated ACTIVE Señales → per-host SignalMatch + emails. */
 async function runHostMatchPass(since: Date): Promise<{
   signalsScanned: number;
   matchesCreated: number;
@@ -45,37 +35,9 @@ async function runHostMatchPass(since: Date): Promise<{
   let matchesCreated = 0;
   let emailsSent = 0;
   for (const signal of newSignals) {
-    const filters = await findHostFiltersForSignal(prisma, signal);
-    for (const filter of filters) {
-      const created = await prisma.signalMatch
-        .create({
-          data: { hostId: filter.userId, signalId: signal.id },
-          select: { id: true },
-        })
-        .catch(() => null);
-      if (!created) continue; // unique([hostId, signalId]) hit → skip duplicates
-      matchesCreated++;
-
-      if (filter.notifyByEmail) {
-        const host = await prisma.user.findUnique({
-          where: { id: filter.userId },
-          select: { email: true },
-        });
-        const to = host?.email?.trim();
-        if (to) {
-          const url = `https://encontrate.es/signals/${signal.id}`;
-          await sendEmail({
-            to,
-            subject: `Nueva señal que coincide con lo que estás buscando`,
-            html: `
-              <p><strong>${escapeHtml(signal.fullName)}</strong> publicó una señal que matchea con tu filtro de "Buscar huésped".</p>
-              <p><a href="${url}">Ver la señal</a></p>
-            `,
-          }).catch(() => {});
-          emailsSent++;
-        }
-      }
-    }
+    const result = await processHostSignalMatchesForSignal(prisma, signal);
+    matchesCreated += result.matchesCreated;
+    emailsSent += result.emailsSent;
   }
   return { signalsScanned: newSignals.length, matchesCreated, emailsSent };
 }

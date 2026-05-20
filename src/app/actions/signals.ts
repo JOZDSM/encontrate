@@ -7,6 +7,7 @@ import { isUserApproved } from "@/lib/approval";
 import { isPlatformAdmin } from "@/lib/admin";
 import { designPreviewWriteBlockedMessage } from "@/lib/design-preview";
 import { prisma } from "@/lib/db";
+import { processHostSignalMatchesForSignal } from "@/lib/signal-match";
 import {
   listingDescriptionPlainTextLength,
   sanitizeListingDescriptionHtml,
@@ -333,6 +334,11 @@ export async function publishSignal(
     }),
   ]);
 
+  const active = await prisma.signal.findUnique({ where: { id: signalId } });
+  if (active) {
+    await processHostSignalMatchesForSignal(prisma, active);
+  }
+
   revalidatePath("/mis-cosas/signals");
   revalidatePath(`/signals/${signalId}`);
   return { ok: true, id: signalId };
@@ -361,6 +367,12 @@ export async function setActiveSignal(
     }),
     prisma.signal.update({ where: { id: signalId }, data: { status: "ACTIVE" } }),
   ]);
+
+  const active = await prisma.signal.findUnique({ where: { id: signalId } });
+  if (active) {
+    await processHostSignalMatchesForSignal(prisma, active);
+  }
+
   revalidatePath("/mis-cosas/signals");
   return { ok: true };
 }

@@ -7,6 +7,7 @@ import { isUserApproved } from "@/lib/approval";
 import { designPreviewWriteBlockedMessage } from "@/lib/design-preview";
 import { COUNTRY_OPTIONS } from "@/lib/countries";
 import { prisma } from "@/lib/db";
+import { processHostSignalMatchesForFilter } from "@/lib/signal-match";
 
 const GENDER = ["FEMALE", "MALE", "NON_BINARY", "OTHER"] as const;
 const LANGUAGE = ["ES", "EN", "CA", "IT", "FR", "DE", "PT", "OTHER"] as const;
@@ -76,13 +77,18 @@ export async function saveBuscarHuespedFilter(
   }
 
   const data = parsed.data;
-  await prisma.buscarHuespedFilter.upsert({
+  const filter = await prisma.buscarHuespedFilter.upsert({
     where: { userId: session.user.id },
     update: data,
     create: { userId: session.user.id, ...data },
   });
 
+  if (filter.enabled) {
+    await processHostSignalMatchesForFilter(prisma, filter);
+  }
+
   revalidatePath("/mis-cosas/buscar-huesped");
+  revalidatePath("/mis-cosas/mensajes");
   return { ok: true };
 }
 

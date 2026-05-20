@@ -6,10 +6,9 @@ import { ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SignalDeleteButton } from "@/components/signal-delete-button";
-import { SignalInstagramIcon } from "@/components/signal-instagram-icon";
+import { SignalIdentityMeta } from "@/components/signal-identity-meta";
 import { SignalStatusControls } from "@/components/signal-status-controls";
 import { stripHtmlForSnippet } from "@/lib/listing-description-html";
-import { canonicalizeCountry } from "@/lib/countries";
 import { cn } from "@/lib/utils";
 
 export type SignalCardData = {
@@ -40,52 +39,6 @@ export function SignalCard({ signal }: { signal: SignalCardData }) {
   const isDraft = signal.status === "DRAFT";
   const title = signal.fullName.trim() || "Señal sin nombre";
 
-  const country = signal.countryOfOrigin?.trim() || "";
-  const displayCountry = country
-    ? canonicalizeCountry(country) ?? country
-    : "";
-  const instagramHandle = signal.instagramHandle?.trim().replace(/^@/, "") || "";
-
-  const metaSegments: React.ReactNode[] = [];
-  if (signal.age !== null && signal.age !== undefined) {
-    metaSegments.push(
-      <span key="age" className="whitespace-nowrap">
-        {signal.age} años
-      </span>,
-    );
-  }
-  if (displayCountry) {
-    metaSegments.push(
-      <span key="country" className="whitespace-nowrap">
-        {displayCountry}
-      </span>,
-    );
-  }
-  if (instagramHandle) {
-    metaSegments.push(
-      isDraft ? (
-        <span
-          key="ig"
-          className="inline-flex items-center gap-1.5 whitespace-nowrap text-brand-accent"
-        >
-          <SignalInstagramIcon className="size-[13px]" />
-          {instagramHandle}
-        </span>
-      ) : (
-        <a
-          key="ig"
-          href={`https://instagram.com/${instagramHandle}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 whitespace-nowrap text-brand-accent hover:underline"
-        >
-          <SignalInstagramIcon className="size-[13px]" />
-          {instagramHandle}
-        </a>
-      ),
-    );
-  }
-
   const descriptionSnippet = signal.description
     ? stripHtmlForSnippet(signal.description)
     : "";
@@ -109,25 +62,16 @@ export function SignalCard({ signal }: { signal: SignalCardData }) {
             {title}
           </h3>
 
-          {metaSegments.length > 0 ? (
-            <p
-              className={cn(
-                "mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs leading-snug sm:text-sm",
-                isDraft ? "text-muted-foreground" : "text-foreground",
-              )}
-            >
-              {metaSegments.map((segment, idx) => (
-                <span key={idx} className="inline-flex items-center gap-x-2">
-                  {idx > 0 ? (
-                    <span aria-hidden className="text-muted-foreground">
-                      |
-                    </span>
-                  ) : null}
-                  {segment}
-                </span>
-              ))}
-            </p>
-          ) : null}
+          <SignalIdentityMeta
+            age={signal.age}
+            countryOfOrigin={signal.countryOfOrigin}
+            instagramHandle={signal.instagramHandle}
+            linkInstagram={!isDraft}
+            className={cn(
+              "mt-2 text-xs leading-snug sm:text-sm",
+              isDraft ? "text-muted-foreground" : "text-foreground",
+            )}
+          />
 
           {descriptionSnippet ? (
             <p

@@ -7,7 +7,6 @@ import {
   Fingerprint,
   FlaskConical,
   Grid2X2,
-  ImageIcon,
   Languages,
   MapPin,
   Ruler,
@@ -227,7 +226,9 @@ export default async function SignalDetailPage({
     showDates ||
     showPrefs;
 
-  const showHeroPanel = coverPhoto !== null || hasBioSnippet;
+  const showPhotoSection = coverPhoto !== null;
+  const showBioSection = hasBioSnippet && Boolean(descriptionHtml);
+  const showHeroBlock = showPhotoSection || showBioSection;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col text-foreground">
@@ -256,29 +257,27 @@ export default async function SignalDetailPage({
             ) : null}
           </header>
 
-          {showHeroPanel ? (
-            <section className="w-full rounded-2xl border border-border">
-              <div className="flex justify-center px-4 py-6">
-                {coverPhoto ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={coverPhoto.url}
-                    alt=""
-                    className="max-h-[min(70vh,520px)] w-auto max-w-full object-contain"
-                  />
-                ) : (
-                  <div className="flex min-h-[200px] w-full items-center justify-center text-muted-foreground">
-                    <ImageIcon className="size-10 opacity-50" aria-hidden />
+          {showHeroBlock ? (
+            <div className="flex w-full flex-col gap-6">
+              {showPhotoSection && coverPhoto ? (
+                <section className="w-full rounded-2xl border border-border">
+                  <div className="flex justify-center px-4 py-6">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={coverPhoto.url}
+                      alt=""
+                      className="max-h-[min(70vh,520px)] w-auto max-w-full rounded-lg object-contain"
+                    />
                   </div>
-                )}
-              </div>
-              {hasBioSnippet && descriptionHtml ? (
+                </section>
+              ) : null}
+              {showBioSection ? (
                 <div
-                  className={`border-t border-border px-4 py-4 ${DESCRIPTION_PROSE}`}
-                  dangerouslySetInnerHTML={{ __html: descriptionHtml }}
+                  className={DESCRIPTION_PROSE}
+                  dangerouslySetInnerHTML={{ __html: descriptionHtml! }}
                 />
               ) : null}
-            </section>
+            </div>
           ) : null}
 
           <Separator className="my-8" />

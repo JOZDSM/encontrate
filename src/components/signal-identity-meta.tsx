@@ -1,5 +1,7 @@
+import { Fragment } from "react";
 import { SignalInstagramIcon } from "@/components/signal-instagram-icon";
 import { canonicalizeCountry } from "@/lib/countries";
+import { cn } from "@/lib/utils";
 
 export type SignalIdentityMetaProps = {
   age: number | null;
@@ -71,20 +73,20 @@ export function SignalIdentityMeta({
 
   return (
     <p
-      className={
-        className ??
-        "flex flex-wrap items-center gap-x-2 gap-y-1 text-xs leading-snug text-foreground sm:text-sm"
-      }
+      className={cn(
+        "flex flex-wrap items-center gap-y-1 text-xs leading-snug sm:text-sm",
+        className ?? "text-foreground",
+      )}
     >
       {segments.map((segment, idx) => (
-        <span key={idx} className="inline-flex items-center gap-x-2">
+        <Fragment key={idx}>
           {idx > 0 ? (
             <span aria-hidden className="text-muted-foreground">
-              |
+              {" | "}
             </span>
           ) : null}
           {segment}
-        </span>
+        </Fragment>
       ))}
     </p>
   );

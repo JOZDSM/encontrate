@@ -132,8 +132,9 @@ export default async function MisCosasBuscarHuespedPage() {
           </div>
           {matches.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Todavía no hay coincidencias. Vuelvas mañana — el cron corre todos
-              los días.
+              Todavía no hay coincidencias. Activá &quot;Buscar huéspedes
+              activamente&quot;, guardá el filtro, y las señales que ya estén
+              publicadas y coincidan aparecen acá al instante.
             </p>
           ) : (
             <ul className="space-y-3">

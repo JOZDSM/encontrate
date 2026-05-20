@@ -39,7 +39,7 @@ export function ConfirmEmailClient({ token }: { token: string }) {
         {error}
       </p>
       <Button asChild variant="outline" size="sm">
-        <Link href="/mis-cosas/configuracion">Volver a configuración</Link>
+        <Link href="/mis-cosas/configuracion">Volver a mi cuenta</Link>
       </Button>
     </div>
   );

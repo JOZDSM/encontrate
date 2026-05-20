@@ -16,6 +16,8 @@ import { formatDateLongES } from "@/lib/format";
 import {
   loadBookingRowsForMensajes,
   loadInquiryThreads,
+  loadSignalInquiryThreads,
+  loadSignalSystemMessages,
 } from "@/lib/mensajes-overview";
 
 function formatShortDateTime(d: Date): string {
@@ -27,10 +29,13 @@ function formatShortDateTime(d: Date): string {
 }
 
 export async function MensajesBody({ userId }: { userId: string }) {
-  const [bookings, inquiries] = await Promise.all([
-    loadBookingRowsForMensajes(userId),
-    loadInquiryThreads(userId),
-  ]);
+  const [bookings, inquiries, signalInquiries, systemMessages] =
+    await Promise.all([
+      loadBookingRowsForMensajes(userId),
+      loadInquiryThreads(userId),
+      loadSignalInquiryThreads(userId),
+      loadSignalSystemMessages(userId),
+    ]);
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
@@ -149,6 +154,106 @@ export async function MensajesBody({ userId }: { userId: string }) {
                     </Link>
                   </li>
                 ))}
+              </ul>
+            )}
+          </section>
+
+          <section className="space-y-3 border-t border-border pt-6">
+            <h2 className="text-lg font-semibold">Mensajes sobre señales</h2>
+            <p className="text-sm text-muted-foreground">
+              Conversaciones iniciadas desde el botón &quot;Contactar&quot; en una señal de
+              «estoy buscando habitación».
+            </p>
+            {signalInquiries.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No hay conversaciones de este tipo.
+              </p>
+            ) : (
+              <ul className="flex flex-col gap-2">
+                {signalInquiries.map((t) => (
+                  <li key={`${t.signalId}-${t.peerUserId}`}>
+                    <Link
+                      href={`/mis-cosas/mensajes/signal/${t.signalId}/${t.peerUserId}`}
+                      className="block rounded-lg border border-border bg-muted/20 p-4 transition-colors hover:bg-muted/40"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div>
+                          <p className="font-medium">{t.signalTitle}</p>
+                          <p className="text-xs text-muted-foreground">
+                            con {t.peerLabel}
+                          </p>
+                        </div>
+                        <time
+                          className="text-xs text-muted-foreground whitespace-nowrap"
+                          dateTime={t.lastAt.toISOString()}
+                        >
+                          {formatShortDateTime(t.lastAt)}
+                        </time>
+                      </div>
+                      <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                        {t.lastBody}
+                      </p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className="space-y-3 border-t border-border pt-6">
+            <h2 className="text-lg font-semibold">Notificaciones</h2>
+            <p className="text-sm text-muted-foreground">
+              Coincidencias automáticas: &quot;Buscar huésped&quot; (anfitrión) y alertas
+              de anuncios para tu señal (huésped).
+            </p>
+            {systemMessages.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No hay notificaciones todavía.
+              </p>
+            ) : (
+              <ul className="flex flex-col gap-2">
+                {systemMessages.map((m) => {
+                  const isHostSide = m.direction === "host-saw-signal";
+                  const href = isHostSide
+                    ? `/signals/${m.signalId}`
+                    : `/listings/${m.listingId}`;
+                  const title = isHostSide
+                    ? `Coincide con tu Buscar huésped: ${m.signalTitle ?? "señal"}`
+                    : `Nuevo anuncio para tu señal: ${m.listingTitle ?? "anuncio"}`;
+                  const subtitle = isHostSide
+                    ? "Mirá el perfil de la persona y respondé."
+                    : "Mirá el anuncio y, si te interesa, escribí al anfitrión.";
+                  return (
+                    <li key={m.id}>
+                      <Link
+                        href={href}
+                        className="block rounded-lg border border-border bg-muted/20 p-4 transition-colors hover:bg-muted/40"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <div>
+                            <p className="font-medium">{title}</p>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              {subtitle}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            <time
+                              className="text-xs text-muted-foreground whitespace-nowrap"
+                              dateTime={m.notifiedAt.toISOString()}
+                            >
+                              {formatShortDateTime(m.notifiedAt)}
+                            </time>
+                            {m.viewedAt ? null : (
+                              <Badge variant="default" className="text-[10px]">
+                                Nuevo
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </section>

@@ -6,8 +6,10 @@ import {
   Heart,
   LayoutGrid,
   MessageSquare,
+  Search,
   Settings2,
   Shield,
+  UserPlus,
 } from "lucide-react";
 import type { MisCosasNavHref } from "@/lib/mis-cosas-nav";
 import { MIS_COSAS_NAV } from "@/lib/mis-cosas-nav";
@@ -17,6 +19,8 @@ const ICONS: Record<MisCosasNavHref, typeof LayoutGrid> = {
   "/mis-cosas/anuncios": LayoutGrid,
   "/mis-cosas/mensajes": MessageSquare,
   "/mis-cosas/favoritos": Heart,
+  "/mis-cosas/signals": UserPlus,
+  "/mis-cosas/buscar-huesped": Search,
   "/mis-cosas/configuracion": Settings2,
 };
 

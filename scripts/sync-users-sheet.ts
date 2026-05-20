@@ -4,99 +4,16 @@ import { google } from "googleapis";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { PrismaClient } from "@/generated/prisma/client";
+import { COUNTRY_OPTIONS as APP_COUNTRY_OPTIONS, canonicalizeCountry } from "@/lib/countries";
 
 const SHEET_ID = process.env.GOOGLE_SHEET_ID?.trim();
 const SHEET_TAB = (process.env.GOOGLE_SHEET_TAB ?? "Users").trim();
 
 const CONTACTED_OPTIONS = ["Yes", "No", "Completed"] as const;
 
-// Latin America (sovereign), Northern America, Europe (incl. Council of Europe
-// transcontinental states). Sorted alphabetically; "Unknown" is the default.
-const COUNTRY_OPTIONS = [
-  "Unknown",
-  // Latin America
-  "Argentina",
-  "Belize",
-  "Bolivia",
-  "Brazil",
-  "Chile",
-  "Colombia",
-  "Costa Rica",
-  "Cuba",
-  "Dominican Republic",
-  "Ecuador",
-  "El Salvador",
-  "Guatemala",
-  "Guyana",
-  "Haiti",
-  "Honduras",
-  "Mexico",
-  "Nicaragua",
-  "Panama",
-  "Paraguay",
-  "Peru",
-  "Suriname",
-  "Uruguay",
-  "Venezuela",
-  // Northern America
-  "Canada",
-  "United States",
-  // Europe
-  "Albania",
-  "Andorra",
-  "Armenia",
-  "Austria",
-  "Azerbaijan",
-  "Belarus",
-  "Belgium",
-  "Bosnia and Herzegovina",
-  "Bulgaria",
-  "Croatia",
-  "Cyprus",
-  "Czechia",
-  "Denmark",
-  "Estonia",
-  "Finland",
-  "France",
-  "Georgia",
-  "Germany",
-  "Greece",
-  "Hungary",
-  "Iceland",
-  "Ireland",
-  "Italy",
-  "Kosovo",
-  "Latvia",
-  "Liechtenstein",
-  "Lithuania",
-  "Luxembourg",
-  "Malta",
-  "Moldova",
-  "Monaco",
-  "Montenegro",
-  "Netherlands",
-  "North Macedonia",
-  "Norway",
-  "Poland",
-  "Portugal",
-  "Romania",
-  "Russia",
-  "San Marino",
-  "Serbia",
-  "Slovakia",
-  "Slovenia",
-  "Spain",
-  "Sweden",
-  "Switzerland",
-  "Turkey",
-  "Ukraine",
-  "United Kingdom",
-  "Vatican City",
-] as const;
-
-const COUNTRY_CANONICAL_BY_LOWER = new Map<string, string>(
-  COUNTRY_OPTIONS.map((c) => [c.toLowerCase(), c]),
-);
+// Sheet adds an "Unknown" sentinel as the default for empty rows; the rest of
+// the canonical list is shared with the app via `src/lib/countries.ts`.
+const COUNTRY_OPTIONS = ["Unknown", ...APP_COUNTRY_OPTIONS] as const;
 
 const REQUIRED_HEADERS = [
   "userId",
@@ -125,7 +42,8 @@ function normalizeContacted(raw: string): (typeof CONTACTED_OPTIONS)[number] | "
 function normalizeCountry(raw: string): { value: string; isBlank: boolean } {
   const v = raw.replace(/\s+/g, " ").trim();
   if (!v) return { value: "", isBlank: true };
-  const canonical = COUNTRY_CANONICAL_BY_LOWER.get(v.toLowerCase());
+  if (v.toLowerCase() === "unknown") return { value: "Unknown", isBlank: false };
+  const canonical = canonicalizeCountry(v);
   // Preserve unknown free-text values as-is so we don't clobber manual entries;
   // the dropdown is non-strict and will surface a soft warning instead.
   return { value: canonical ?? v, isBlank: false };

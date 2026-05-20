@@ -13,6 +13,7 @@ import {
   sanitizeListingDescriptionHtml,
 } from "@/lib/listing-description-html";
 import { canEditListingAsOwnerOrAdmin } from "@/lib/listing-edit-permissions";
+import { processGuestListingMatchesForListing } from "@/lib/listing-for-signal-match";
 
 const allowedNeighborhoodLabels = new Set(
   Object.values(BARCELONA_ZONE_LABELS).map((s) => s.trim()),
@@ -138,6 +139,8 @@ export async function createListing(
       },
     },
   });
+
+  await processGuestListingMatchesForListing(prisma, listing);
 
   revalidatePath("/listings");
   revalidatePath("/host/listings");

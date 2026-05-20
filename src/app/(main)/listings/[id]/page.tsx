@@ -152,9 +152,12 @@ export default async function ListingDetailPage({
             ) : null}
           </div>
           {canEdit ? (
-            <div className="pt-1">
+            <div className="flex flex-wrap items-center gap-2 pt-1">
               <Button variant="outline" size="sm" asChild>
                 <Link href={`/host/listings/${listing.id}/edit`}>Editar anuncio</Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/mis-cosas/buscar-huesped">Buscar huésped</Link>
               </Button>
             </div>
           ) : null}

@@ -2,6 +2,8 @@ export type MisCosasNavHref =
   | "/mis-cosas/anuncios"
   | "/mis-cosas/mensajes"
   | "/mis-cosas/favoritos"
+  | "/mis-cosas/signals"
+  | "/mis-cosas/buscar-huesped"
   | "/mis-cosas/configuracion";
 
 export type MisCosasNavItem = {
@@ -23,13 +25,23 @@ export const MIS_COSAS_NAV: readonly MisCosasNavItem[] = [
       p === "/mis-cosas/anuncios" || p.startsWith("/mis-cosas/anuncios/"),
   },
   {
+    href: "/mis-cosas/signals",
+    label: "Mis señales",
+    match: (p) => p === "/mis-cosas/signals" || p.startsWith("/mis-cosas/signals/"),
+  },
+  {
+    href: "/mis-cosas/buscar-huesped",
+    label: "Buscar huésped",
+    match: (p) => p.startsWith("/mis-cosas/buscar-huesped"),
+  },
+  {
     href: "/mis-cosas/favoritos",
     label: "Mis favoritos",
     match: (p) => p === "/mis-cosas/favoritos",
   },
   {
     href: "/mis-cosas/configuracion",
-    label: "Configuración",
+    label: "Mi cuenta",
     match: (p) => p.startsWith("/mis-cosas/configuracion"),
   },
 ];

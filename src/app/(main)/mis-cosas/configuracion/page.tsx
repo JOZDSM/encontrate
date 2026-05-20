@@ -4,7 +4,7 @@ import { AccountSettingsPanel } from "@/components/account-settings-panel";
 import { prisma } from "@/lib/db";
 
 export const metadata = {
-  title: "Configuración",
+  title: "Mi cuenta",
 };
 
 export default async function MisCosasConfiguracionPage() {
@@ -40,9 +40,9 @@ export default async function MisCosasConfiguracionPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-2 text-card-foreground">
-        <h1 className="text-2xl font-semibold">Configuración</h1>
+        <h1 className="text-2xl font-semibold">Mi cuenta</h1>
         <p className="text-sm text-muted-foreground">
-          Gestioná tu cuenta, seguridad y datos personales.
+          Gestioná tus datos personales, seguridad y preferencias.
         </p>
       </div>
 

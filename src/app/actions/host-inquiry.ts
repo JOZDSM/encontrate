@@ -129,3 +129,116 @@ function escapeHtml(value: string): string {
     .replaceAll("'", "&#39;");
 }
 
+const signalInquirySchema = z.object({
+  signalId: z.string().min(1),
+  message: z.string().trim().min(5).max(4000),
+  shareWhatsapp: z.boolean().optional().default(false),
+  shareEmail: z.boolean().optional().default(false),
+});
+
+/**
+ * Symmetric counterpart of `sendHostInquiry` — used when a host (or any other
+ * approved user) wants to contact the author of a Señal. The created Message
+ * row carries `signalId` set and `listingId` left null so the inbox can route
+ * it to the Señal-anchored thread.
+ */
+export async function sendSignalInquiry(
+  input: z.infer<typeof signalInquirySchema>,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const session = await auth();
+  if (!session?.user?.id) return { ok: false, error: "Inicia sesión." };
+  if (!isUserApproved(session)) {
+    return { ok: false, error: "Tu cuenta está pendiente de aprobación." };
+  }
+
+  const previewBlock = designPreviewWriteBlockedMessage(session);
+  if (previewBlock) return { ok: false, error: previewBlock };
+
+  const parsed = signalInquirySchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Mensaje no válido." };
+
+  const alreadySent = await prisma.message.findFirst({
+    where: {
+      signalId: parsed.data.signalId,
+      senderId: session.user.id,
+      bookingId: null,
+    },
+    select: { id: true },
+  });
+  if (alreadySent) {
+    return { ok: false, error: "Ya enviaste una solicitud para esta señal." };
+  }
+
+  if (!rateLimit(`signal-inquiry:${session.user.id}`, 6, 60_000)) {
+    return { ok: false, error: "Demasiadas solicitudes. Espera un momento." };
+  }
+
+  const signal = await prisma.signal.findUnique({
+    where: { id: parsed.data.signalId },
+    include: { user: true },
+  });
+  if (!signal) return { ok: false, error: "Señal no encontrada." };
+  if (signal.status === "DRAFT") {
+    return { ok: false, error: "Esta señal todavía no está publicada." };
+  }
+  if (signal.userId === session.user.id) {
+    return { ok: false, error: "No podés enviarte un mensaje a vos mismo." };
+  }
+
+  await prisma.message.create({
+    data: {
+      signalId: signal.id,
+      listingId: null,
+      bookingId: null,
+      senderId: session.user.id,
+      body: parsed.data.message,
+    },
+  });
+
+  const recipientEmail = signal.user.email?.trim();
+  if (recipientEmail) {
+    const name = session.user.name?.trim() || "—";
+    const sharedEmail = parsed.data.shareEmail ? session.user.email?.trim() || "" : "";
+    const sharedWhatsapp = parsed.data.shareWhatsapp
+      ? (session.user as { whatsappNumber?: string }).whatsappNumber?.trim() || ""
+      : "";
+
+    const contactLines: string[] = [
+      `<li><strong>Nombre</strong>: ${escapeHtml(name)}</li>`,
+    ];
+    if (sharedEmail) {
+      contactLines.push(
+        `<li><strong>Email</strong>: ${escapeHtml(sharedEmail)}</li>`,
+      );
+    }
+    if (sharedWhatsapp) {
+      contactLines.push(
+        `<li><strong>WhatsApp</strong>: ${escapeHtml(sharedWhatsapp)}</li>`,
+      );
+    }
+    const noContactNote =
+      !sharedEmail && !sharedWhatsapp
+        ? `<p style="color:#666;font-size:13px;">Esta persona eligió no compartir email ni WhatsApp. Respondé desde la plataforma.</p>`
+        : "";
+
+    const subject = `Nueva consulta sobre tu señal`;
+    const html = `
+      <p><strong>Te escribieron por tu señal en encontrate.es</strong>.</p>
+      <ul>
+        ${contactLines.join("\n        ")}
+      </ul>
+      ${noContactNote}
+      <p><strong>Mensaje</strong>:</p>
+      <pre style="white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;line-height:1.4;margin:0;">${escapeHtml(
+        parsed.data.message,
+      )}</pre>
+    `;
+    await sendEmail({ to: recipientEmail, subject, html }).catch(() => {});
+  }
+
+  revalidatePath("/mis-cosas/mensajes");
+  revalidatePath(`/signals/${signal.id}`);
+
+  return { ok: true };
+}
+

@@ -26,25 +26,74 @@ enum WindowType {
   SIN_VENTANA
 }
 
+enum SignalStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+}
+
+enum Gender {
+  FEMALE
+  MALE
+  NON_BINARY
+  OTHER
+}
+
+enum Language {
+  ES
+  EN
+  CA
+  IT
+  FR
+  DE
+  PT
+  OTHER
+}
+
+enum MovingWith {
+  SOLO
+  COUPLE
+  OTHER
+}
+
+enum Occupation {
+  STUDENT
+  EMPLOYED
+  FREELANCE
+  ENTREPRENEUR
+  REMOTE_WORKER
+  OTHER
+}
+
+enum FlexStayLength {
+  WEEKEND
+  WEEK
+  MONTH
+}
+
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  isAdmin       Boolean   @default(false)
-  isApproved    Boolean   @default(false)
+  id             String    @id @default(cuid())
+  name           String?
+  email          String?   @unique
+  emailVerified  DateTime?
+  image          String?
+  isAdmin        Boolean   @default(false)
+  isApproved     Boolean   @default(false)
   whatsappNumber String?
-  createdAt     DateTime  @default(now())
+  createdAt      DateTime  @default(now())
 
   accounts Account[]
   sessions Session[]
 
-  listings Listing[] @relation("HostListings")
-  bookings Booking[] @relation("GuestBookings")
-  messages Message[]
+  listings         Listing[]         @relation("HostListings")
+  bookings         Booking[]         @relation("GuestBookings")
+  messages         Message[]
   favoriteListings FavoriteListing[]
-  listingVisits   ListingVisit[]
+  listingVisits    ListingVisit[]
+
+  signals             Signal[]
+  buscarHuespedFilter BuscarHuespedFilter?
+  signalMatches       SignalMatch[]        @relation("HostSignalMatches")
 
   emailChangeRequests EmailChangeRequest[]
 }
@@ -106,9 +155,9 @@ model VerificationToken {
 }
 
 model Listing {
-  id              String   @id @default(cuid())
+  id              String  @id @default(cuid())
   hostId          String
-  host            User     @relation("HostListings", fields: [hostId], references: [id], onDelete: Cascade)
+  host            User    @relation("HostListings", fields: [hostId], references: [id], onDelete: Cascade)
   title           String
   description     String
   city            String
@@ -118,38 +167,39 @@ model Listing {
   addressDetail   String?
   latitude        Float?
   longitude       Float?
-  timeZone        String   @default("Europe/Madrid")
+  timeZone        String  @default("Europe/Madrid")
   /// Monthly price in EUR (used for sorting; optional)
   priceMonthlyEur Int?
   priceNote       String?
 
   // Características de la habitación (required)
-  bedSize         BedSize  @default(INDIVIDUAL)
+  bedSize     BedSize      @default(INDIVIDUAL)
   /// Ventanas que aplican a la habitación (una o más).
-  windowTypes     WindowType[] @default([])
-  roomSizeSqm     Int      @default(10)
-  furnished       Boolean  @default(true)
+  windowTypes WindowType[] @default([])
+  roomSizeSqm Int          @default(10)
+  furnished   Boolean      @default(true)
 
   // Características del piso (required)
-  apartmentRooms  Int      @default(3)
-  apartmentBaths  Int      @default(1)
+  apartmentRooms   Int     @default(3)
+  apartmentBaths   Int     @default(1)
   apartmentSizeSqm Int     @default(80)
-  wifi            Boolean  @default(true)
+  wifi             Boolean @default(true)
 
   /// Guest can tap “Teléfono” on the public listing to reveal WhatsApp; if false, button is disabled.
   showWhatsappOnListing Boolean @default(true)
   /// Guest can tap “Email” on the public listing to reveal it; if false, button is disabled.
-  showEmailOnListing Boolean @default(true)
+  showEmailOnListing    Boolean @default(true)
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  photos   ListingPhoto[]
-  blocks   AvailabilityBlock[]
-  bookings Booking[]
-  messages Message[]
-  favoritedBy FavoriteListing[]
-  visits      ListingVisit[]
+  photos              ListingPhoto[]
+  blocks              AvailabilityBlock[]
+  bookings            Booking[]
+  messages            Message[]
+  favoritedBy         FavoriteListing[]
+  visits              ListingVisit[]
+  guestListingMatches GuestListingMatch[]
 
   @@index([city, country])
 }
@@ -223,14 +273,170 @@ model Booking {
 
 model Message {
   id        String   @id @default(cuid())
-  listingId String
-  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId String?
+  listing   Listing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
   bookingId String?
   booking   Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  signalId  String?
+  signal    Signal?  @relation(fields: [signalId], references: [id], onDelete: Cascade)
   senderId  String
   sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
   body      String
   createdAt DateTime @default(now())
 
   @@index([listingId, createdAt])
+  @@index([signalId, createdAt])
+}
+
+/// A guest's "looking for a room" post — mirror of `Listing` from the renter's side.
+/// Created/edited via the wizard at `/signals` (resumes DRAFT) and `/signals/[id]/editar`.
+/// Only one ACTIVE per user (enforced by a partial unique index in the migration).
+model Signal {
+  id         String       @id @default(cuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status     SignalStatus @default(DRAFT)
+  /// Highest step the user has completed so far (0..10); used to resume the wizard.
+  wizardStep Int @default(0)
+  /// `1` = legacy 8-step wizard resume rules; `2` = current 10-step flow (see `normalizeSignalWizardResumeStep`).
+  wizardFlowVersion Int @default(2)
+
+  // Step 1 — Introducite
+  fullName        String
+  age             Int?
+  gender          Gender?
+  countryOfOrigin String?
+
+  // Step 3 — Los básicos
+  occupation Occupation?
+  languages  Language[]  @default([])
+  movingWith MovingWith?
+
+  // Step 4 — Un poco más sobre vos
+  timeUseDescription       String?
+  indoorOutdoorDescription String?
+  cleanlinessImportance    Int?
+  orderImportance          Int?
+
+  // Step 5 — Esto es real?
+  instagramHandle String?
+  twitterHandle   String?
+  facebookHandle  String?
+  tiktokHandle    String?
+
+  // Step 6 — Cuándo
+  /// "exact" | "flex" | "asap"
+  dateMode        String?
+  exactCheckIn    DateTime?        @db.Date
+  exactCheckOut   DateTime?        @db.Date
+  exactFlexDays   Int?
+  flexStayLengths FlexStayLength[] @default([])
+  /// `YYYY-MM` strings, mirroring the listings filter panel's flex months.
+  flexMonths      String[]         @default([])
+  asapUrgent      Boolean          @default(false)
+
+  // Step 7 — Qué buscás (mirror of Listing fields)
+  preferredZones               String[]     @default([])
+  preferredBedSizes            BedSize[]    @default([])
+  preferredWindowTypes         WindowType[] @default([])
+  preferredRoomSizeSqmMin      Int?
+  preferredFurnished           Boolean?
+  preferredApartmentRoomsMin   Int?
+  preferredApartmentBathsMin   Int?
+  preferredApartmentSizeSqmMin Int?
+  preferredWifi                Boolean?
+
+  // Step 8 — Presentate (TipTap HTML)
+  description String?
+
+  // Guest-side push: notify when a Listing matches this Signal's preferences.
+  listingAlertInApp Boolean @default(false)
+  listingAlertEmail Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  photos              SignalPhoto[]
+  matches             SignalMatch[]
+  guestListingMatches GuestListingMatch[]
+  messages            Message[]
+
+  @@index([userId, status])
+  @@index([status])
+}
+
+model SignalPhoto {
+  id        String @id @default(cuid())
+  signalId  String
+  signal    Signal @relation(fields: [signalId], references: [id], onDelete: Cascade)
+  url       String
+  sortOrder Int    @default(0)
+
+  @@index([signalId])
+}
+
+/// Per-host saved filter for the "Buscar huésped" page. One row per host.
+model BuscarHuespedFilter {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  enabled       Boolean @default(false)
+  notifyByEmail Boolean @default(false)
+
+  // Filter fields — multi-selects + ranges over the Señal's selectable answers.
+  genders           Gender[]     @default([])
+  ageMin            Int?
+  ageMax            Int?
+  countriesOfOrigin String[]     @default([])
+  occupations       Occupation[] @default([])
+  languages         Language[]   @default([])
+  movingWith        MovingWith[] @default([])
+  cleanlinessMin    Int?
+  cleanlinessMax    Int?
+  orderMin          Int?
+  orderMax          Int?
+
+  // Date intent (overlap inputs mirror Signal's Step 6 fields).
+  dateMode        String?
+  exactCheckIn    DateTime?        @db.Date
+  exactCheckOut   DateTime?        @db.Date
+  exactFlexDays   Int?
+  flexStayLengths FlexStayLength[] @default([])
+  flexMonths      String[]         @default([])
+  includeAsap     Boolean          @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// One row per (host, signal) — represents a notification produced by the
+/// daily matching cron when a freshly-published Señal matched the host's filter.
+model SignalMatch {
+  id          String    @id @default(cuid())
+  hostId      String
+  host        User      @relation("HostSignalMatches", fields: [hostId], references: [id], onDelete: Cascade)
+  signalId    String
+  signal      Signal    @relation(fields: [signalId], references: [id], onDelete: Cascade)
+  notifiedAt  DateTime  @default(now())
+  viewedAt    DateTime?
+  dismissedAt DateTime?
+
+  @@unique([hostId, signalId])
+  @@index([hostId, notifiedAt])
+}
+
+/// One row per (signal, listing) — notification when a Listing matched the
+/// guest's active Señal alert preferences (on create + daily cron backup).
+model GuestListingMatch {
+  id         String    @id @default(cuid())
+  signalId   String
+  signal     Signal    @relation(fields: [signalId], references: [id], onDelete: Cascade)
+  listingId  String
+  listing    Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  notifiedAt DateTime  @default(now())
+  viewedAt   DateTime?
+
+  @@unique([signalId, listingId])
+  @@index([signalId, notifiedAt])
 }

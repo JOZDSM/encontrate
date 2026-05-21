@@ -52,7 +52,7 @@ export const metadata: Metadata = {
       "Coordina estancias en habitaciones en Barcelona: anuncios, solicitudes y mensajes. Sin pagos en la plataforma.",
     images: [
       {
-        url: "/open-graph-image.png",
+        url: "/open-graph-image-2026.png",
         width: 1201,
         height: 631,
         alt: "Encontrate",
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     title: "Encontrate",
     description:
       "Coordina estancias en habitaciones en Barcelona: anuncios, solicitudes y mensajes. Sin pagos en la plataforma.",
-    images: ["/open-graph-image.png"],
+    images: ["/open-graph-image-2026.png"],
   },
 };
 

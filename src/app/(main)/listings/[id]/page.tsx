@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { after } from "next/server";
 import { auth } from "@/auth";
 import { BookingRequestForm } from "@/components/booking-request-form";
+import { ExportListingPdfButton } from "@/components/export-listing-pdf-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -23,34 +24,18 @@ import {
   Sofa,
   Wifi,
 } from "lucide-react";
-import {
-  LISTING_WINDOW_OPTIONS,
-  type ListingWindowValue,
-} from "@/lib/listing-window-options";
+import type { ListingWindowValue } from "@/lib/listing-window-options";
 import { listingDescriptionDisplayHtml } from "@/lib/listing-description-html";
+import {
+  listingBedSizeLabel,
+  listingPriceDisplayLines,
+  listingWindowTypesLabel,
+} from "@/lib/listing-detail-format";
+import {
+  getListingDetailForViewer,
+  listingDetailTodayUtc,
+} from "@/lib/listing-detail-data";
 import { formatDateLongES } from "@/lib/format";
-
-function formatMonthlyPriceEur(priceMonthlyEur: number | null): string | null {
-  if (typeof priceMonthlyEur !== "number") return null;
-  if (!Number.isFinite(priceMonthlyEur)) return null;
-  if (priceMonthlyEur <= 0) return null;
-  const formatted = new Intl.NumberFormat("es-ES", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(priceMonthlyEur);
-  return `${formatted} / mes`;
-}
-
-function bedSizeLabel(v: "INDIVIDUAL" | "DOBLE"): string {
-  return v === "INDIVIDUAL" ? "Cama individual" : "Cama doble";
-}
-
-function windowTypesLabel(values: ListingWindowValue[]): string {
-  const dict = new Map(LISTING_WINDOW_OPTIONS.map((o) => [o.value, o.title]));
-  const labels = values.map((v) => dict.get(v) ?? v);
-  return labels.join(" · ");
-}
 
 export default async function ListingDetailPage({
   params,
@@ -62,55 +47,22 @@ export default async function ListingDetailPage({
   if (!session?.user?.id) redirect("/login");
   if (!isUserProfileComplete(session)) redirect("/onboarding");
 
-  // Today, midnight UTC. Used to filter out past availability blocks/bookings —
-  // showing past unavailability on a guest-facing page is just noise.
-  const todayUtc = new Date();
-  todayUtc.setUTCHours(0, 0, 0, 0);
-
-  const listing = await prisma.listing.findUnique({
-    where: { id },
-    include: {
-      photos: { orderBy: { sortOrder: "asc" } },
-      host: { select: { id: true, name: true, email: true, whatsappNumber: true } },
-      blocks: {
-        where: { endDate: { gte: todayUtc } },
-        orderBy: { startDate: "asc" },
-        select: { id: true, startDate: true, endDate: true },
-      },
-      bookings: {
-        where: { status: "CONFIRMED", endDate: { gte: todayUtc } },
-        orderBy: { startDate: "asc" },
-        select: { id: true, startDate: true, endDate: true },
-      },
-    },
+  const detail = await getListingDetailForViewer(id, {
+    todayUtc: listingDetailTodayUtc(),
   });
-  if (!listing) notFound();
+  if (!detail) notFound();
 
-  // Merge host-set blocks + confirmed bookings into a single sorted list of
-  // unavailable date ranges. Both block the calendar from a guest's POV; we
-  // intentionally don't surface block reasons or booking IDs here.
-  const unavailability = [
-    ...listing.blocks.map((b) => ({
-      key: `block-${b.id}`,
-      startDate: b.startDate,
-      endDate: b.endDate,
-    })),
-    ...listing.bookings.map((b) => ({
-      key: `booking-${b.id}`,
-      startDate: b.startDate,
-      endDate: b.endDate,
-    })),
-  ].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+  const { listing, unavailability } = detail;
 
-  // Unapproved users can't browse/search listings yet.
   if (!isUserApproved(session)) redirect("/pending");
 
   const isHost = session?.user?.id === listing.hostId;
   const canEdit = canEditListingAsOwnerOrAdmin(session, listing.hostId);
-  const monthlyPrice = formatMonthlyPriceEur(listing.priceMonthlyEur);
+  const priceLines = listingPriceDisplayLines(
+    listing.priceNote,
+    listing.priceMonthlyEur,
+  );
 
-  // Track unique-per-user visits (one row per listing+user). Skip the host viewing their
-  // own listing and platform admins so the metric reflects real guest interest.
   const viewerId = session.user.id;
   if (viewerId && !isHost && !isPlatformAdmin(session)) {
     const listingId = listing.id;
@@ -137,30 +89,45 @@ export default async function ListingDetailPage({
             {listing.title}
           </h1>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-            {listing.priceNote ? (
-              <span className="font-medium">
-                {listing.priceNote}
+            {priceLines.primary ? (
+              <span
+                className={
+                  priceLines.secondary ? "font-medium" : "font-medium"
+                }
+              >
+                {priceLines.primary}
               </span>
             ) : null}
-            {!listing.priceNote && monthlyPrice ? (
-              <span className="font-medium">
-                {monthlyPrice}
+            {priceLines.secondary ? (
+              <span
+                className={
+                  priceLines.primary
+                    ? "text-muted-foreground"
+                    : "font-medium"
+                }
+              >
+                {priceLines.secondary}
               </span>
-            ) : null}
-            {listing.priceNote && monthlyPrice ? (
-              <span className="text-muted-foreground">{monthlyPrice}</span>
             ) : null}
           </div>
-          {canEdit ? (
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              <Button variant="outline" size="sm" asChild>
-                <Link href={`/host/listings/${listing.id}/edit`}>Editar anuncio</Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/mis-cosas/buscar-huesped">Buscar huésped</Link>
-              </Button>
-            </div>
-          ) : null}
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <ExportListingPdfButton
+              listingId={listing.id}
+              listingTitle={listing.title}
+            />
+            {canEdit ? (
+              <>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={`/host/listings/${listing.id}/edit`}>
+                    Editar anuncio
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/mis-cosas/buscar-huesped">Buscar huésped</Link>
+                </Button>
+              </>
+            ) : null}
+          </div>
         </header>
 
         <div className="mt-6">
@@ -226,7 +193,9 @@ export default async function ListingDetailPage({
                 <div className="flex items-start gap-3">
                   <BedDouble className="mt-0.5 size-4 text-foreground" aria-hidden />
                   <div>
-                    <p className="text-foreground">{bedSizeLabel(listing.bedSize)}</p>
+                    <p className="text-foreground">
+                      {listingBedSizeLabel(listing.bedSize)}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -241,7 +210,9 @@ export default async function ListingDetailPage({
                   <Grid2X2 className="mt-0.5 size-4 text-foreground" aria-hidden />
                   <div>
                     <p className="text-foreground">
-                      {windowTypesLabel(listing.windowTypes as ListingWindowValue[])}
+                      {listingWindowTypesLabel(
+                        listing.windowTypes as ListingWindowValue[],
+                      )}
                     </p>
                   </div>
                 </div>

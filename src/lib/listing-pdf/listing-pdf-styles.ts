@@ -1,4 +1,5 @@
 import { StyleSheet } from "@react-pdf/renderer";
+import { listingPdfTokens as t } from "@/lib/listing-pdf/listing-pdf-tokens";
 
 /** Portrait page size (pt), iPhone-ish width at 72 dpi. */
 export const LISTING_PDF_PAGE_WIDTH = 390;
@@ -9,124 +10,158 @@ export const listingPdfPageSize: [number, number] = [
   LISTING_PDF_PAGE_HEIGHT,
 ];
 
+const basePage = {
+  backgroundColor: t.background,
+  color: t.foreground,
+  fontFamily: t.fontFamily,
+  fontSize: t.bodySize,
+  paddingTop: t.padTop,
+  paddingBottom: t.padBottom,
+  paddingHorizontal: t.padX,
+};
+
 export const listingPdfStyles = StyleSheet.create({
-  coverPage: {
-    padding: 28,
-    fontFamily: "Helvetica",
-    fontSize: 12,
-    color: "#1a1a1a",
-    backgroundColor: "#ffffff",
+  page: {
+    ...basePage,
   },
-  neighborhood: {
-    fontSize: 11,
-    color: "#525252",
+  badge: {
+    alignSelf: "flex-start",
+    backgroundColor: t.secondary,
+    borderRadius: t.radiusPill,
+    paddingVertical: 3,
+    paddingHorizontal: 10,
     marginBottom: 8,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+  },
+  badgeText: {
+    fontSize: t.captionSize,
+    fontWeight: 600,
+    color: t.secondaryForeground,
   },
   title: {
-    fontSize: 22,
-    fontFamily: "Helvetica-Bold",
-    marginBottom: 12,
-    lineHeight: 1.25,
+    fontSize: t.titleSize,
+    fontWeight: 600,
+    lineHeight: 1.2,
+    letterSpacing: -0.3,
+    marginBottom: 8,
+    color: t.foreground,
   },
   pricePrimary: {
-    fontSize: 14,
-    fontFamily: "Helvetica-Bold",
-    marginBottom: 4,
+    fontSize: t.bodySize,
+    fontWeight: 600,
+    color: t.foreground,
+    marginBottom: 2,
   },
   priceSecondary: {
-    fontSize: 12,
-    color: "#525252",
-    marginBottom: 8,
+    fontSize: t.bodySize,
+    color: t.mutedForeground,
+    marginBottom: 4,
   },
-  location: {
-    fontSize: 12,
-    color: "#525252",
-    marginTop: 4,
+  separator: {
+    borderBottomWidth: 1,
+    borderBottomColor: t.border,
+    marginVertical: t.sectionGap / 2,
   },
-  photoPage: {
-    width: LISTING_PDF_PAGE_WIDTH,
-    height: LISTING_PDF_PAGE_HEIGHT,
-    backgroundColor: "#f5f5f5",
+  photoFrame: {
+    borderRadius: t.radius2xl,
+    borderWidth: 1,
+    borderColor: t.border,
+    backgroundColor: t.photoWell,
+    overflow: "hidden",
+    marginBottom: 12,
   },
   photoImage: {
-    width: LISTING_PDF_PAGE_WIDTH,
-    height: LISTING_PDF_PAGE_HEIGHT,
-    objectFit: "cover",
+    width: t.photoWidth,
+    height: t.photoHeight,
   },
-  placeholderPage: {
-    width: LISTING_PDF_PAGE_WIDTH,
-    height: LISTING_PDF_PAGE_HEIGHT,
-    justifyContent: "center",
+  photoPlaceholderFrame: {
+    borderRadius: t.radius2xl,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderColor: t.border,
+    backgroundColor: t.photoWell,
+    paddingVertical: 40,
+    paddingHorizontal: 16,
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
+    marginBottom: 12,
   },
-  placeholderText: {
-    fontSize: 12,
-    color: "#737373",
-    fontFamily: "Helvetica",
+  photoPlaceholderText: {
+    fontSize: t.bodySize,
+    color: t.mutedForeground,
+    textAlign: "center",
   },
-  textPage: {
-    padding: 28,
-    paddingBottom: 40,
-    fontFamily: "Helvetica",
-    fontSize: 11,
-    lineHeight: 1.45,
-    color: "#1a1a1a",
-    backgroundColor: "#ffffff",
+  sectionHeading: {
+    fontSize: t.headingSize,
+    fontWeight: 600,
+    letterSpacing: -0.2,
+    color: t.foreground,
+    marginBottom: 12,
   },
-  sectionTitle: {
-    fontSize: 14,
-    fontFamily: "Helvetica-Bold",
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  sectionTitleFirst: {
-    fontSize: 14,
-    fontFamily: "Helvetica-Bold",
-    marginTop: 0,
-    marginBottom: 8,
-  },
-  body: {
-    fontSize: 11,
-    color: "#404040",
+  bodyMuted: {
+    fontSize: t.bodySize,
+    lineHeight: 1.55,
+    color: t.mutedForeground,
     marginBottom: 6,
   },
   contactLine: {
-    fontSize: 11,
-    marginBottom: 4,
+    fontSize: t.bodySize,
+    color: t.foreground,
+    marginBottom: 6,
   },
   contactLabel: {
-    fontFamily: "Helvetica-Bold",
+    fontWeight: 600,
   },
-  specGroupTitle: {
-    fontSize: 12,
-    fontFamily: "Helvetica-Bold",
-    marginTop: 10,
-    marginBottom: 6,
+  specRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 4,
   },
-  specLine: {
-    fontSize: 11,
-    color: "#404040",
-    marginBottom: 4,
-    paddingLeft: 4,
+  specCard: {
+    flex: 1,
+    borderRadius: t.radius2xl,
+    borderWidth: 1,
+    borderColor: t.border,
+    backgroundColor: t.cardFill,
+    padding: 14,
   },
-  availabilityLine: {
-    fontSize: 11,
-    color: "#404040",
-    marginBottom: 6,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    backgroundColor: "#f5f5f5",
+  specCardTitle: {
+    fontSize: t.bodySize,
+    fontWeight: 600,
+    color: t.foreground,
+    marginBottom: 10,
+  },
+  specValue: {
+    fontSize: t.bodySize,
+    color: t.foreground,
+    marginBottom: 8,
+  },
+  availabilityHint: {
+    fontSize: t.bodySize,
+    color: t.mutedForeground,
+    marginBottom: 8,
+  },
+  availabilityRow: {
+    fontSize: t.bodySize,
+    color: t.foreground,
+    borderWidth: 1,
+    borderColor: t.border,
+    backgroundColor: t.muted,
     borderRadius: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    marginBottom: 8,
+  },
+  linkLine: {
+    fontSize: t.bodySize,
+    color: t.mutedForeground,
+    marginTop: 16,
   },
   footer: {
     position: "absolute",
-    bottom: 20,
-    left: 28,
-    right: 28,
-    fontSize: 9,
-    color: "#737373",
+    bottom: 16,
+    left: t.padX,
+    right: t.padX,
+    fontSize: 8,
+    color: t.mutedForeground,
+    textAlign: "center",
   },
 });

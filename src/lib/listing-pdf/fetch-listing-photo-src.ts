@@ -1,9 +1,30 @@
+import sharp from "sharp";
+import { listingPdfTokens } from "@/lib/listing-pdf/listing-pdf-tokens";
+
 const FETCH_TIMEOUT_MS = 20_000;
 
-/** Resolve remote photo URL to a data URI for reliable PDF embedding. */
-export async function fetchListingPhotoDataUri(
+/** 2× gallery frame (`aspect-[16/10]`) for sharp output on retina screens. */
+const RENDER_WIDTH = listingPdfTokens.photoWidth * 2;
+const RENDER_HEIGHT = listingPdfTokens.photoHeight * 2;
+
+export type ListingPdfPhotoSource = {
+  src: { data: Buffer; format: "jpg" };
+};
+
+/**
+ * Fetch listing photos and normalize to JPEG for @react-pdf/renderer (JPG/PNG only;
+ * WebP/HEIC from Vercel Blob are converted with sharp).
+ */
+export async function resolveListingPdfPhotos(
+  urls: string[],
+): Promise<ListingPdfPhotoSource[]> {
+  const results = await Promise.all(urls.map((url) => preparePhotoForPdf(url)));
+  return results.filter((r): r is ListingPdfPhotoSource => r !== null);
+}
+
+async function preparePhotoForPdf(
   url: string,
-): Promise<string | null> {
+): Promise<ListingPdfPhotoSource | null> {
   const trimmed = url.trim();
   if (!trimmed) return null;
 
@@ -13,22 +34,23 @@ export async function fetchListingPhotoDataUri(
     });
     if (!res.ok) return null;
 
-    const buf = Buffer.from(await res.arrayBuffer());
-    if (buf.length === 0) return null;
+    const input = Buffer.from(await res.arrayBuffer());
+    if (input.length === 0) return null;
 
-    const contentType =
-      res.headers.get("content-type")?.split(";")[0]?.trim() ?? "image/jpeg";
-    return `data:${contentType};base64,${buf.toString("base64")}`;
-  } catch {
+    const data = await sharp(input)
+      .rotate()
+      .resize(RENDER_WIDTH, RENDER_HEIGHT, {
+        fit: "cover",
+        position: "centre",
+      })
+      .jpeg({ quality: 82, mozjpeg: true })
+      .toBuffer();
+
+    if (data.length === 0) return null;
+
+    return { src: { data, format: "jpg" } };
+  } catch (err) {
+    console.warn("[listing-pdf] photo prepare failed", trimmed, err);
     return null;
   }
-}
-
-export async function resolveListingPhotoSources(
-  urls: string[],
-): Promise<string[]> {
-  const resolved = await Promise.all(
-    urls.map((url) => fetchListingPhotoDataUri(url)),
-  );
-  return resolved.filter((s): s is string => Boolean(s));
 }

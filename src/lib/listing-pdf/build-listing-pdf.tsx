@@ -1,8 +1,9 @@
 import { renderToBuffer } from "@react-pdf/renderer";
+import { ensureListingPdfFonts } from "@/lib/listing-pdf/register-listing-pdf-fonts";
 import type { ListingDetailForViewer } from "@/lib/listing-detail-data";
 import type { ListingWindowValue } from "@/lib/listing-window-options";
 import { listingPublicUrl } from "@/lib/site-url";
-import { resolveListingPhotoSources } from "@/lib/listing-pdf/fetch-listing-photo-src";
+import { resolveListingPdfPhotos } from "@/lib/listing-pdf/fetch-listing-photo-src";
 import { ListingPdfDocument } from "@/lib/listing-pdf/listing-pdf-document";
 import { listingPdfFilename } from "@/lib/listing-pdf/listing-pdf-filename";
 
@@ -12,8 +13,18 @@ export async function buildListingPdfBuffer(
 ): Promise<{ buffer: Buffer; filename: string }> {
   const { listing, unavailability } = detail;
   const photoUrls = listing.photos.map((p) => p.url);
-  const photoDataUris = await resolveListingPhotoSources(photoUrls);
+  const photos = await resolveListingPdfPhotos(photoUrls);
+  if (photoUrls.length > 0 && photos.length === 0) {
+    console.warn(
+      "[listing-pdf] no photos embedded",
+      listing.id,
+      "urls:",
+      photoUrls.length,
+    );
+  }
   const listingUrl = listingPublicUrl(listing.id);
+
+  ensureListingPdfFonts();
 
   const buffer = await renderToBuffer(
     <ListingPdfDocument
@@ -43,7 +54,7 @@ export async function buildListingPdfBuffer(
         whatsappNumber: listing.host.whatsappNumber,
       }}
       unavailability={unavailability}
-      photoDataUris={photoDataUris}
+      photos={photos}
       showFullAddress={opts.showFullAddress}
       listingUrl={listingUrl}
     />,

@@ -1,5 +1,6 @@
 import type { ListingUnavailabilityRange } from "@/lib/listing-detail-data";
 import type { ListingWindowValue } from "@/lib/listing-window-options";
+import type { ListingPdfPhotoSource } from "@/lib/listing-pdf/fetch-listing-photo-src";
 
 export type ListingPdfProps = {
   listing: {
@@ -28,7 +29,7 @@ export type ListingPdfProps = {
     whatsappNumber: string | null;
   };
   unavailability: ListingUnavailabilityRange[];
-  photoDataUris: string[];
+  photos: ListingPdfPhotoSource[];
   showFullAddress: boolean;
   listingUrl: string;
 };

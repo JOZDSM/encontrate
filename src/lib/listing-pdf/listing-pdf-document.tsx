@@ -12,25 +12,29 @@ import {
   listingWindowTypesLabel,
 } from "@/lib/listing-detail-format";
 import { listingDescriptionPlainText } from "@/lib/listing-pdf/listing-description-plain";
+import type { ListingPdfPhotoSource } from "@/lib/listing-pdf/fetch-listing-photo-src";
 import {
   listingPdfPageSize,
-  listingPdfStyles,
+  listingPdfStyles as s,
 } from "@/lib/listing-pdf/listing-pdf-styles";
 import type { ListingPdfProps } from "@/lib/listing-pdf/listing-pdf-types";
 
-function ListingPdfPhotoPage({ src }: { src: string }) {
+function PdfSeparator() {
+  return <View style={s.separator} />;
+}
+
+function ListingPdfPhotoFrame({ photo }: { photo: ListingPdfPhotoSource }) {
   return (
-    <Page size={listingPdfPageSize} style={listingPdfStyles.photoPage}>
-      {/* @react-pdf Image has no alt prop; decorative listing photos */}
+    <View style={s.photoFrame}>
       {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image */}
-      <Image src={src} style={listingPdfStyles.photoImage} />
-    </Page>
+      <Image src={photo.src} style={s.photoImage} />
+    </View>
   );
 }
 
 function ListingPdfFooter({ url }: { url: string }) {
   return (
-    <Text style={listingPdfStyles.footer} fixed>
+    <Text style={s.footer} fixed>
       encontrate.es · {url}
     </Text>
   );
@@ -40,7 +44,7 @@ export function ListingPdfDocument({
   listing,
   host,
   unavailability,
-  photoDataUris,
+  photos,
   showFullAddress,
   listingUrl,
 }: ListingPdfProps) {
@@ -54,7 +58,6 @@ export function ListingPdfDocument({
     listing.showWhatsappOnListing && Boolean(host.whatsappNumber?.trim());
   const showEmail =
     listing.showEmailOnListing && Boolean(host.email?.trim());
-  const hasContact = showWhatsapp || showEmail;
 
   return (
     <Document
@@ -62,130 +65,119 @@ export function ListingPdfDocument({
       author="encontrate"
       subject={`Anuncio: ${listing.title}`}
     >
-      <Page size={listingPdfPageSize} style={listingPdfStyles.coverPage}>
-        <Text style={listingPdfStyles.neighborhood}>{listing.neighborhood}</Text>
-        <Text style={listingPdfStyles.title}>{listing.title}</Text>
+      <Page size={listingPdfPageSize} style={s.page} wrap>
+        <View style={s.badge}>
+          <Text style={s.badgeText}>{listing.neighborhood}</Text>
+        </View>
+        <Text style={s.title}>{listing.title}</Text>
         {priceLines.primary ? (
-          <Text style={listingPdfStyles.pricePrimary}>{priceLines.primary}</Text>
+          <Text style={s.pricePrimary}>{priceLines.primary}</Text>
         ) : null}
         {priceLines.secondary ? (
-          <Text style={listingPdfStyles.priceSecondary}>
-            {priceLines.secondary}
-          </Text>
+          <Text style={s.priceSecondary}>{priceLines.secondary}</Text>
         ) : null}
-        <Text style={listingPdfStyles.location}>
-          {listing.neighborhood}, {listing.city}, {listing.country}
-        </Text>
-        <ListingPdfFooter url={listingUrl} />
-      </Page>
 
-      {photoDataUris.length > 0 ? (
-        photoDataUris.map((src, i) => (
-          <ListingPdfPhotoPage key={`photo-${i}`} src={src} />
-        ))
-      ) : (
-        <Page size={listingPdfPageSize} style={listingPdfStyles.placeholderPage}>
-          <Text style={listingPdfStyles.placeholderText}>
-            Este anuncio no tiene fotos cargadas.
-          </Text>
-        </Page>
-      )}
+        <PdfSeparator />
 
-      <Page size={listingPdfPageSize} style={listingPdfStyles.textPage} wrap>
-        {hasContact ? (
-          <>
-            <Text style={listingPdfStyles.sectionTitleFirst}>
-              Información del anfitrión
+        {photos.length > 0 ? (
+          photos.map((photo, i) => (
+            <ListingPdfPhotoFrame key={`photo-${i}`} photo={photo} />
+          ))
+        ) : (
+          <View style={s.photoPlaceholderFrame}>
+            <Text style={s.photoPlaceholderText}>
+              Este anuncio no tiene fotos cargadas.
             </Text>
-            {showWhatsapp ? (
-              <Text style={listingPdfStyles.contactLine}>
-                <Text style={listingPdfStyles.contactLabel}>WhatsApp: </Text>
-                {host.whatsappNumber}
-              </Text>
-            ) : null}
-            {showEmail ? (
-              <Text style={listingPdfStyles.contactLine}>
-                <Text style={listingPdfStyles.contactLabel}>Email: </Text>
-                {host.email}
-              </Text>
-            ) : null}
-          </>
+          </View>
+        )}
+
+        <PdfSeparator />
+
+        <Text style={s.sectionHeading}>Información del anfitrión</Text>
+        {showWhatsapp ? (
+          <Text style={s.contactLine}>
+            <Text style={s.contactLabel}>WhatsApp: </Text>
+            {host.whatsappNumber}
+          </Text>
+        ) : null}
+        {showEmail ? (
+          <Text style={s.contactLine}>
+            <Text style={s.contactLabel}>Email: </Text>
+            {host.email}
+          </Text>
+        ) : null}
+        {!showWhatsapp && !showEmail ? (
+          <Text style={s.bodyMuted}>
+            El anfitrión no compartió contacto directo en este anuncio.
+          </Text>
         ) : null}
 
+        <PdfSeparator />
+
+        <Text style={s.sectionHeading}>Descripción</Text>
         {description ? (
-          <>
-            <Text
-              style={
-                hasContact
-                  ? listingPdfStyles.sectionTitle
-                  : listingPdfStyles.sectionTitleFirst
-              }
-            >
-              Descripción
+          <Text style={s.bodyMuted}>{description}</Text>
+        ) : (
+          <Text style={s.bodyMuted}>Sin descripción.</Text>
+        )}
+
+        <PdfSeparator />
+
+        <Text style={s.sectionHeading}>Características</Text>
+        <View style={s.specRow}>
+          <View style={s.specCard}>
+            <Text style={s.specCardTitle}>Habitación</Text>
+            <Text style={s.specValue}>{listingBedSizeLabel(listing.bedSize)}</Text>
+            <Text style={s.specValue}>{listing.roomSizeSqm} m² aprox.</Text>
+            <Text style={s.specValue}>
+              {listingWindowTypesLabel(listing.windowTypes)}
             </Text>
-            <Text style={listingPdfStyles.body}>{description}</Text>
-          </>
-        ) : null}
+            <Text style={s.specValue}>
+              {listing.furnished ? "Amueblada" : "Sin amueblar"}
+            </Text>
+          </View>
+          <View style={s.specCard}>
+            <Text style={s.specCardTitle}>Piso</Text>
+            <Text style={s.specValue}>
+              {listing.apartmentRooms} habitaciones
+            </Text>
+            <Text style={s.specValue}>{listing.apartmentBaths} baños</Text>
+            <Text style={s.specValue}>
+              {listing.apartmentSizeSqm} m² aprox.
+            </Text>
+            <Text style={s.specValue}>
+              {listing.wifi ? "Con WIFI" : "Sin WIFI"}
+            </Text>
+          </View>
+        </View>
 
-        <Text style={listingPdfStyles.sectionTitle}>Características</Text>
-        <Text style={listingPdfStyles.specGroupTitle}>Habitación</Text>
-        <Text style={listingPdfStyles.specLine}>
-          {listingBedSizeLabel(listing.bedSize)}
-        </Text>
-        <Text style={listingPdfStyles.specLine}>
-          {listing.roomSizeSqm} m² aprox.
-        </Text>
-        <Text style={listingPdfStyles.specLine}>
-          {listingWindowTypesLabel(listing.windowTypes)}
-        </Text>
-        <Text style={listingPdfStyles.specLine}>
-          {listing.furnished ? "Amueblada" : "Sin amueblar"}
-        </Text>
+        <PdfSeparator />
 
-        <Text style={listingPdfStyles.specGroupTitle}>Piso</Text>
-        <Text style={listingPdfStyles.specLine}>
-          {listing.apartmentRooms} habitaciones
-        </Text>
-        <Text style={listingPdfStyles.specLine}>
-          {listing.apartmentBaths} baños
-        </Text>
-        <Text style={listingPdfStyles.specLine}>
-          {listing.apartmentSizeSqm} m² aprox.
-        </Text>
-        <Text style={listingPdfStyles.specLine}>
-          {listing.wifi ? "Con WIFI" : "Sin WIFI"}
-        </Text>
-
-        <Text style={listingPdfStyles.sectionTitle}>Disponibilidad</Text>
+        <Text style={s.sectionHeading}>Disponibilidad</Text>
         {unavailability.length > 0 ? (
           <>
-            <Text style={listingPdfStyles.body}>
+            <Text style={s.availabilityHint}>
               La habitación no está disponible:
             </Text>
             {unavailability.map((u) => (
-              <Text key={u.key} style={listingPdfStyles.availabilityLine}>
+              <Text key={u.key} style={s.availabilityRow}>
                 {formatDateLongES(u.startDate)} → {formatDateLongES(u.endDate)}
               </Text>
             ))}
           </>
         ) : (
-          <Text style={listingPdfStyles.body}>
-            Sin fechas bloqueadas próximamente.
-          </Text>
+          <Text style={s.bodyMuted}>Sin fechas bloqueadas próximamente.</Text>
         )}
 
         {showFullAddress && listing.addressDetail?.trim() ? (
           <>
-            <Text style={listingPdfStyles.sectionTitle}>Dirección</Text>
-            <Text style={listingPdfStyles.body}>{listing.addressDetail.trim()}</Text>
+            <PdfSeparator />
+            <Text style={s.sectionHeading}>Dirección</Text>
+            <Text style={s.bodyMuted}>{listing.addressDetail.trim()}</Text>
           </>
         ) : null}
 
-        <View style={{ marginTop: 24 }}>
-          <Text style={listingPdfStyles.body}>
-            Ver anuncio en línea: {listingUrl}
-          </Text>
-        </View>
+        <Text style={s.linkLine}>Ver anuncio en línea: {listingUrl}</Text>
 
         <ListingPdfFooter url={listingUrl} />
       </Page>

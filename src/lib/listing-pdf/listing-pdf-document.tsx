@@ -136,7 +136,7 @@ export function ListingPdfDocument({
               {listing.furnished ? "Amueblada" : "Sin amueblar"}
             </Text>
           </View>
-          <View style={s.specCard}>
+          <View style={s.specCardLast}>
             <Text style={s.specCardTitle}>Piso</Text>
             <Text style={s.specValue}>
               {listing.apartmentRooms} habitaciones

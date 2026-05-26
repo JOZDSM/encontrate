@@ -10,6 +10,7 @@ import { buildListingPdfBuffer } from "@/lib/listing-pdf/build-listing-pdf";
 import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 const PDF_RATE_LIMIT = 10;
 const PDF_RATE_WINDOW_MS = 60_000;

@@ -1,8 +1,17 @@
+import path from "node:path";
 import { Font } from "@react-pdf/renderer";
 
 let registered = false;
 
-/** Figtree — same family as `layout.tsx` (`--font-sans`). */
+function figtreeFontFile(name: string): string {
+  return path.join(
+    process.cwd(),
+    "node_modules/@fontsource/figtree/files",
+    name,
+  );
+}
+
+/** Figtree — same family as `layout.tsx` (`--font-sans`). Loaded from disk (no CDN). */
 export function ensureListingPdfFonts(): void {
   if (registered) return;
 
@@ -10,11 +19,11 @@ export function ensureListingPdfFonts(): void {
     family: "Figtree",
     fonts: [
       {
-        src: "https://cdn.jsdelivr.net/npm/@fontsource/figtree@5.2.8/files/figtree-latin-400-normal.ttf",
+        src: figtreeFontFile("figtree-latin-400-normal.woff"),
         fontWeight: 400,
       },
       {
-        src: "https://cdn.jsdelivr.net/npm/@fontsource/figtree@5.2.8/files/figtree-latin-600-normal.ttf",
+        src: figtreeFontFile("figtree-latin-600-normal.woff"),
         fontWeight: 600,
       },
     ],

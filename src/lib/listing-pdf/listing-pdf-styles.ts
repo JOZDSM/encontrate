@@ -76,7 +76,6 @@ export const listingPdfStyles = StyleSheet.create({
   photoPlaceholderFrame: {
     borderRadius: t.radius2xl,
     borderWidth: 1,
-    borderStyle: "dashed",
     borderColor: t.border,
     backgroundColor: t.photoWell,
     paddingVertical: 40,
@@ -112,7 +111,6 @@ export const listingPdfStyles = StyleSheet.create({
   },
   specRow: {
     flexDirection: "row",
-    gap: 12,
     marginTop: 4,
   },
   specCard: {
@@ -122,6 +120,16 @@ export const listingPdfStyles = StyleSheet.create({
     borderColor: t.border,
     backgroundColor: t.cardFill,
     padding: 14,
+    marginRight: 6,
+  },
+  specCardLast: {
+    flex: 1,
+    borderRadius: t.radius2xl,
+    borderWidth: 1,
+    borderColor: t.border,
+    backgroundColor: t.cardFill,
+    padding: 14,
+    marginLeft: 6,
   },
   specCardTitle: {
     fontSize: t.bodySize,

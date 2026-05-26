@@ -8,7 +8,8 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["sharp", "@react-pdf/renderer"],
   outputFileTracingIncludes: {
     "/api/listings/[id]/pdf": [
-      "./node_modules/@fontsource/figtree/files/**/*",
+      "./src/lib/listing-pdf/fonts/**/*",
+      "./public/fonts/figtree/**/*",
     ],
   },
   // Dev: allow opening the app via your LAN IP (e.g. Safari on another device).

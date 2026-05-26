@@ -1,17 +1,33 @@
+import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { Font } from "@react-pdf/renderer";
 
 let registered = false;
 
-function figtreeFontFile(name: string): string {
-  return path.join(
-    process.cwd(),
-    "node_modules/@fontsource/figtree/files",
-    name,
+const moduleFontsDir = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "fonts",
+);
+
+/** Resolve vendored Figtree files across dev, build output, and Vercel layouts. */
+function resolveFigtreeFontPath(fileName: string): string {
+  const candidates = [
+    path.join(moduleFontsDir, fileName),
+    path.join(process.cwd(), "src/lib/listing-pdf/fonts", fileName),
+    path.join(process.cwd(), "public/fonts/figtree", fileName),
+  ];
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
+
+  throw new Error(
+    `PDF font missing: ${fileName} (checked ${candidates.join(", ")})`,
   );
 }
 
-/** Figtree — same family as `layout.tsx` (`--font-sans`). Loaded from disk (no CDN). */
+/** Figtree — same family as `layout.tsx` (`--font-sans`). */
 export function ensureListingPdfFonts(): void {
   if (registered) return;
 
@@ -19,11 +35,11 @@ export function ensureListingPdfFonts(): void {
     family: "Figtree",
     fonts: [
       {
-        src: figtreeFontFile("figtree-latin-400-normal.woff"),
+        src: resolveFigtreeFontPath("figtree-latin-400-normal.woff"),
         fontWeight: 400,
       },
       {
-        src: figtreeFontFile("figtree-latin-600-normal.woff"),
+        src: resolveFigtreeFontPath("figtree-latin-600-normal.woff"),
         fontWeight: 600,
       },
     ],

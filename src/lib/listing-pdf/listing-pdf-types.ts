@@ -31,5 +31,4 @@ export type ListingPdfProps = {
   unavailability: ListingUnavailabilityRange[];
   photos: ListingPdfPhotoSource[];
   showFullAddress: boolean;
-  listingUrl: string;
 };

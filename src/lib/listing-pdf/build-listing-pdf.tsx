@@ -2,7 +2,6 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { ensureListingPdfFonts } from "@/lib/listing-pdf/register-listing-pdf-fonts";
 import type { ListingDetailForViewer } from "@/lib/listing-detail-data";
 import type { ListingWindowValue } from "@/lib/listing-window-options";
-import { listingPublicUrl } from "@/lib/site-url";
 import { resolveListingPdfPhotos } from "@/lib/listing-pdf/fetch-listing-photo-src";
 import { ListingPdfDocument } from "@/lib/listing-pdf/listing-pdf-document";
 import { listingPdfFilename } from "@/lib/listing-pdf/listing-pdf-filename";
@@ -22,8 +21,6 @@ export async function buildListingPdfBuffer(
       photoUrls.length,
     );
   }
-  const listingUrl = listingPublicUrl(listing.id);
-
   ensureListingPdfFonts();
 
   const buffer = await renderToBuffer(
@@ -56,7 +53,6 @@ export async function buildListingPdfBuffer(
       unavailability={unavailability}
       photos={photos}
       showFullAddress={opts.showFullAddress}
-      listingUrl={listingUrl}
     />,
   );
 

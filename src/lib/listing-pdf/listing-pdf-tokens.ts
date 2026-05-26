@@ -1,17 +1,17 @@
 /**
- * Light-theme tokens aligned with `:root` in `src/app/globals.css`.
- * Listing detail uses plain `bg-background` (no rotating hero).
+ * Dark-theme tokens aligned with `.dark` in `src/app/globals.css`.
+ * PDF export matches the site’s default dark UI (listing detail uses `bg-background`).
  */
 export const listingPdfTokens = {
-  background: "#ffffff",
-  foreground: "#252525",
-  mutedForeground: "#737373",
-  muted: "#f7f7f7",
-  secondary: "#f7f7f7",
-  secondaryForeground: "#333333",
-  border: "#ebebeb",
-  cardFill: "#fafafa",
-  photoWell: "#f9f9f9",
+  background: "#262626",
+  foreground: "#fafafa",
+  mutedForeground: "#adadad",
+  muted: "#434343",
+  secondary: "#434343",
+  secondaryForeground: "#fafafa",
+  border: "#3a3a3a",
+  cardFill: "#2c2c2c",
+  photoWell: "#282828",
   fontFamily: "Figtree",
   /** Page horizontal padding — `px-4` */
   padX: 16,

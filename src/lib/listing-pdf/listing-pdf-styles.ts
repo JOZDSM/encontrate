@@ -158,11 +158,6 @@ export const listingPdfStyles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 8,
   },
-  linkLine: {
-    fontSize: t.bodySize,
-    color: t.mutedForeground,
-    marginTop: 16,
-  },
   footer: {
     position: "absolute",
     bottom: 16,

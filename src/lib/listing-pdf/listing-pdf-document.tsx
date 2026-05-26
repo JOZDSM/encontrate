@@ -32,10 +32,10 @@ function ListingPdfPhotoFrame({ photo }: { photo: ListingPdfPhotoSource }) {
   );
 }
 
-function ListingPdfFooter({ url }: { url: string }) {
+function ListingPdfFooter() {
   return (
     <Text style={s.footer} fixed>
-      encontrate.es · {url}
+      encontrate.es
     </Text>
   );
 }
@@ -46,7 +46,6 @@ export function ListingPdfDocument({
   unavailability,
   photos,
   showFullAddress,
-  listingUrl,
 }: ListingPdfProps) {
   const priceLines = listingPriceDisplayLines(
     listing.priceNote,
@@ -177,9 +176,7 @@ export function ListingPdfDocument({
           </>
         ) : null}
 
-        <Text style={s.linkLine}>Ver anuncio en línea: {listingUrl}</Text>
-
-        <ListingPdfFooter url={listingUrl} />
+        <ListingPdfFooter />
       </Page>
     </Document>
   );

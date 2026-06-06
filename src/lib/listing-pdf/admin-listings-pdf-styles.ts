@@ -4,30 +4,39 @@ import { listingPdfPageSize } from "@/lib/listing-pdf/listing-pdf-styles";
 
 export { listingPdfPageSize as adminListingsPdfPageSize };
 
+/** Light page — avoids a visible dark page edge in mobile PDF viewers. */
+const pageColors = {
+  background: "#ffffff",
+  foreground: "#262626",
+  mutedForeground: "#737373",
+  border: "#e5e5e5",
+};
+
 const basePage = {
-  backgroundColor: t.background,
-  color: t.foreground,
+  backgroundColor: pageColors.background,
+  color: pageColors.foreground,
   fontFamily: t.fontFamily,
   fontSize: t.bodySize,
   paddingTop: 16,
-  paddingBottom: 28,
+  paddingBottom: 16,
   paddingHorizontal: t.padX,
 };
 
 export const adminListingsPdfStyles = StyleSheet.create({
   page: {
     ...basePage,
+    borderWidth: 0,
   },
   docTitle: {
     fontSize: 18,
     fontWeight: 600,
     letterSpacing: -0.2,
-    color: t.foreground,
+    color: pageColors.foreground,
     marginBottom: 4,
   },
   docSubtitle: {
     fontSize: t.captionSize,
-    color: t.mutedForeground,
+    color: pageColors.mutedForeground,
     marginBottom: 14,
   },
   item: {
@@ -51,28 +60,19 @@ export const adminListingsPdfStyles = StyleSheet.create({
     fontWeight: 600,
     lineHeight: 1.25,
     letterSpacing: -0.15,
-    color: t.foreground,
+    color: pageColors.foreground,
     marginBottom: 3,
   },
   characteristics: {
     fontSize: 9,
     lineHeight: 1.35,
-    color: t.mutedForeground,
+    color: pageColors.mutedForeground,
     marginBottom: 2,
   },
   separator: {
     borderBottomWidth: 1,
-    borderBottomColor: t.border,
+    borderBottomColor: pageColors.border,
     marginTop: 6,
     marginBottom: 6,
-  },
-  footer: {
-    position: "absolute",
-    bottom: 16,
-    left: t.padX,
-    right: t.padX,
-    fontSize: 8,
-    color: t.mutedForeground,
-    textAlign: "center",
   },
 });

@@ -24,14 +24,6 @@ export type AdminListingsPdfProps = {
   generatedAtLabel: string;
 };
 
-function AdminListingsPdfFooter() {
-  return (
-    <Text style={s.footer} fixed>
-      encontrate.es
-    </Text>
-  );
-}
-
 export function AdminListingsPdfDocument({
   listings,
   generatedAtLabel,
@@ -40,11 +32,7 @@ export function AdminListingsPdfDocument({
     listings.length === 1 ? "1 habitación" : `${listings.length} habitaciones`;
 
   return (
-    <Document
-      title="Todos los anuncios"
-      author="encontrate"
-      subject="Listado de anuncios"
-    >
+    <Document title="Todos los anuncios" subject="Listado de anuncios">
       <Page size={adminListingsPdfPageSize} style={s.page} wrap>
         <Text style={s.docTitle}>Todos los anuncios</Text>
         <Text style={s.docSubtitle}>
@@ -76,8 +64,6 @@ export function AdminListingsPdfDocument({
             </View>
           ))
         )}
-
-        <AdminListingsPdfFooter />
       </Page>
     </Document>
   );

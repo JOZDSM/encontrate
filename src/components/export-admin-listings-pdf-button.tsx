@@ -36,7 +36,7 @@ export function ExportAdminListingsPdfButton() {
       const blob = await res.blob();
       const filename =
         parseFilenameFromDisposition(res.headers.get("Content-Disposition")) ??
-        "encontrate-anuncios.pdf";
+        "anuncios.pdf";
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;

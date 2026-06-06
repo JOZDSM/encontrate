@@ -7,7 +7,7 @@ import { ensureListingPdfFonts } from "@/lib/listing-pdf/register-listing-pdf-fo
 
 function adminListingsPdfFilename(date: Date): string {
   const iso = date.toISOString().slice(0, 10);
-  return `encontrate-anuncios-${iso}.pdf`;
+  return `anuncios-${iso}.pdf`;
 }
 
 function formatGeneratedAtLabel(date: Date): string {

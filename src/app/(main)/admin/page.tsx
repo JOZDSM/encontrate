@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AdminUserActions } from "@/components/admin-user-actions";
 import { ListingDeleteButton } from "@/components/listing-delete-button";
+import { ExportAdminListingsPdfButton } from "@/components/export-admin-listings-pdf-button";
 
 export default async function AdminPage() {
   const session = await auth();
@@ -166,7 +167,10 @@ export default async function AdminPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-medium">Anuncios</h2>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-lg font-medium">Anuncios</h2>
+              <ExportAdminListingsPdfButton />
+            </div>
             <Table>
               <TableHeader>
                 <TableRow>

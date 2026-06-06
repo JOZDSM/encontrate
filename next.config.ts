@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
       "./src/lib/listing-pdf/fonts/**/*",
       "./public/fonts/figtree/**/*",
     ],
+    "/api/admin/listings/pdf": [
+      "./src/lib/listing-pdf/fonts/**/*",
+      "./public/fonts/figtree/**/*",
+    ],
   },
   // Dev: allow opening the app via your LAN IP (e.g. Safari on another device).
   // Without this, Next can block /_next Webpack HMR WebSockets and some dev fetches.

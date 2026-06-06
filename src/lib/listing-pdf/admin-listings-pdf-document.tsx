@@ -34,39 +34,36 @@ export function AdminListingsPdfDocument({
   return (
     <Document title="Todos los anuncios" subject="Listado de anuncios">
       <Page size={adminListingsPdfPageSize} style={s.page} wrap>
-        <View style={s.pageBackground} fixed />
-        <View style={s.content}>
-          <Text style={s.docTitle}>Todos los anuncios</Text>
-          <Text style={s.docSubtitle}>
-            {countLabel} · {generatedAtLabel}
-          </Text>
+        <Text style={s.docTitle}>Todos los anuncios</Text>
+        <Text style={s.docSubtitle}>
+          {countLabel} · {generatedAtLabel}
+        </Text>
 
-          {listings.length === 0 ? (
-            <Text style={s.characteristics}>No hay anuncios cargados.</Text>
-          ) : (
-            listings.map((listing, index) => (
-              <View key={`${listing.neighborhood}-${listing.title}-${index}`} style={s.item}>
-                <View style={s.badge}>
-                  <Text style={s.badgeText}>{listing.neighborhood}</Text>
-                </View>
-                <Text style={s.itemTitle}>{listing.title}</Text>
-                <Text style={s.characteristics}>
-                  {formatListingCharacteristicsSummary({
-                    bedSize: listing.bedSize,
-                    windowTypes: listing.windowTypes,
-                    roomSizeSqm: listing.roomSizeSqm,
-                    furnished: listing.furnished,
-                    apartmentRooms: listing.apartmentRooms,
-                    apartmentBaths: listing.apartmentBaths,
-                    apartmentSizeSqm: listing.apartmentSizeSqm,
-                    wifi: listing.wifi,
-                  })}
-                </Text>
-                {index < listings.length - 1 ? <View style={s.separator} /> : null}
+        {listings.length === 0 ? (
+          <Text style={s.characteristics}>No hay anuncios cargados.</Text>
+        ) : (
+          listings.map((listing, index) => (
+            <View key={`${listing.neighborhood}-${listing.title}-${index}`} style={s.item}>
+              <View style={s.badge}>
+                <Text style={s.badgeText}>{listing.neighborhood}</Text>
               </View>
-            ))
-          )}
-        </View>
+              <Text style={s.itemTitle}>{listing.title}</Text>
+              <Text style={s.characteristics}>
+                {formatListingCharacteristicsSummary({
+                  bedSize: listing.bedSize,
+                  windowTypes: listing.windowTypes,
+                  roomSizeSqm: listing.roomSizeSqm,
+                  furnished: listing.furnished,
+                  apartmentRooms: listing.apartmentRooms,
+                  apartmentBaths: listing.apartmentBaths,
+                  apartmentSizeSqm: listing.apartmentSizeSqm,
+                  wifi: listing.wifi,
+                })}
+              </Text>
+              {index < listings.length - 1 ? <View style={s.separator} /> : null}
+            </View>
+          ))
+        )}
       </Page>
     </Document>
   );

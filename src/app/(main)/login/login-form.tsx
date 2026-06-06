@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import posthog from "posthog-js";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,10 +13,24 @@ import { cn } from "@/lib/utils";
 const inputDesign =
   "h-9 rounded-md border border-border bg-background shadow-[0px_1px_2px_0px_rgba(0,0,0,0.1)] placeholder:text-muted-foreground md:text-sm";
 
-export function LoginForm() {
+export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  async function onGoogle() {
+    setLoading(true);
+    setError(null);
+    posthog.capture("login_google_clicked");
+    // Clear any stale session so Auth.js always starts the Google OAuth flow.
+    await signOut({ redirect: false });
+    await signIn(
+      "google",
+      { callbackUrl },
+      { prompt: "select_account" },
+    );
+    setLoading(false);
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,7 +39,7 @@ export function LoginForm() {
     const res = await signIn("resend", {
       email,
       redirect: false,
-      callbackUrl: "/mis-cosas",
+      callbackUrl,
     });
     setLoading(false);
     if (res?.error) {
@@ -97,12 +111,10 @@ export function LoginForm() {
               variant="secondary"
               size="sm"
               className="w-full rounded-full font-medium shadow-xs"
-              onClick={() => {
-                posthog.capture("login_google_clicked");
-                void signIn("google", { callbackUrl: "/mis-cosas" });
-              }}
+              disabled={loading}
+              onClick={() => void onGoogle()}
             >
-              Continuar con Google
+              {loading ? "Redirigiendo…" : "Continuar con Google"}
             </Button>
           </div>
 

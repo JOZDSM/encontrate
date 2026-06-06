@@ -1,23 +1,37 @@
 import { StyleSheet } from "@react-pdf/renderer";
 import { listingPdfTokens as t } from "@/lib/listing-pdf/listing-pdf-tokens";
-import { listingPdfPageSize } from "@/lib/listing-pdf/listing-pdf-styles";
+import {
+  LISTING_PDF_PAGE_HEIGHT,
+  LISTING_PDF_PAGE_WIDTH,
+  listingPdfPageSize,
+} from "@/lib/listing-pdf/listing-pdf-styles";
 
 export { listingPdfPageSize as adminListingsPdfPageSize };
 
 const basePage = {
-  backgroundColor: t.background,
-  color: t.foreground,
+  backgroundColor: "#ffffff",
   fontFamily: t.fontFamily,
   fontSize: t.bodySize,
-  paddingTop: 16,
-  paddingBottom: 16,
-  paddingHorizontal: t.padX,
+  padding: 0,
 };
 
 export const adminListingsPdfStyles = StyleSheet.create({
   page: {
     ...basePage,
-    borderWidth: 0,
+  },
+  pageBackground: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: LISTING_PDF_PAGE_WIDTH,
+    height: LISTING_PDF_PAGE_HEIGHT,
+    backgroundColor: t.background,
+  },
+  content: {
+    color: t.foreground,
+    paddingTop: 16,
+    paddingBottom: 16,
+    paddingHorizontal: t.padX,
   },
   docTitle: {
     fontSize: 18,

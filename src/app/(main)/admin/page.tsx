@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { BookingStatus } from "@/generated/prisma/enums";
 import { isPlatformAdmin } from "@/lib/admin";
 import { bookingStatusLabel } from "@/lib/booking-status-label";
 import { formatDateLongES, formatDateUTC } from "@/lib/format";
@@ -20,6 +19,7 @@ import Link from "next/link";
 import { AdminUserActions } from "@/components/admin-user-actions";
 import { ListingDeleteButton } from "@/components/listing-delete-button";
 import { ExportAdminListingsPdfButton } from "@/components/export-admin-listings-pdf-button";
+import { AdminBookingEditDialog } from "@/components/admin-booking-edit-dialog";
 
 export default async function AdminPage() {
   const session = await auth();
@@ -42,12 +42,7 @@ export default async function AdminPage() {
       include: { host: { select: { email: true, name: true } } },
     }),
     prisma.booking.findMany({
-      where: {
-        status: {
-          in: [BookingStatus.PENDING, BookingStatus.CONFIRMED],
-        },
-      },
-      orderBy: { startDate: "asc" },
+      orderBy: [{ startDate: "desc" }, { createdAt: "desc" }],
       include: {
         listing: { select: { title: true, city: true } },
         guest: { select: { email: true } },
@@ -62,7 +57,7 @@ export default async function AdminPage() {
           <div>
             <h1 className="text-2xl font-semibold">Vista operador</h1>
             <p className="text-sm text-muted-foreground">
-              Todos los anuncios y reservas activas (pendiente o confirmada).
+              Todos los anuncios y reservas de la plataforma.
             </p>
             <div className="pt-3">
               <Button asChild size="sm" variant="secondary" className="rounded-full">
@@ -209,37 +204,55 @@ export default async function AdminPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-medium">Reservas (pendiente / confirmada)</h2>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Anuncio</TableHead>
-                  <TableHead>Huésped</TableHead>
-                  <TableHead>Fechas</TableHead>
-                  <TableHead>Estado</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {bookings.map((b) => (
-                  <TableRow key={b.id}>
-                    <TableCell>
-                      <span className="font-medium">{b.listing.title}</span>
-                      <span className="text-muted-foreground">
-                        {" "}
-                        · {b.listing.city}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-sm">{b.guest.email ?? "—"}</TableCell>
-                    <TableCell className="text-sm whitespace-nowrap">
-                      {formatDateLongES(b.startDate)} — {formatDateLongES(b.endDate)}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {bookingStatusLabel(b.status)}
-                    </TableCell>
+            <h2 className="text-lg font-medium">Reservas</h2>
+            {bookings.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No hay reservas registradas.
+              </p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Anuncio</TableHead>
+                    <TableHead>Huésped</TableHead>
+                    <TableHead>Fechas</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {bookings.map((b) => (
+                    <TableRow key={b.id}>
+                      <TableCell>
+                        <span className="font-medium">{b.listing.title}</span>
+                        <span className="text-muted-foreground">
+                          {" "}
+                          · {b.listing.city}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-sm">{b.guest.email ?? "—"}</TableCell>
+                      <TableCell className="text-sm whitespace-nowrap">
+                        {formatDateLongES(b.startDate)} — {formatDateLongES(b.endDate)}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {bookingStatusLabel(b.status)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <AdminBookingEditDialog
+                          bookingId={b.id}
+                          listingTitle={b.listing.title}
+                          listingCity={b.listing.city}
+                          guestEmail={b.guest.email}
+                          initialStartDate={formatDateUTC(b.startDate)}
+                          initialEndDate={formatDateUTC(b.endDate)}
+                          initialStatus={b.status}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </section>
         </CardContent>
       </Card>

@@ -379,7 +379,7 @@ export function ListingsFilterPanel({
 
   const previewQueryString = useMemo(() => {
     const sp = new URLSearchParams();
-    sp.set("sort", sort);
+    if (sort !== "none") sp.set("sort", sort);
     sp.set("city", defaultCity);
     sp.set("country", defaultCountry);
     sp.set("dateMode", dateMode);
@@ -516,7 +516,9 @@ export function ListingsFilterPanel({
         method="get"
         className="flex min-h-0 flex-1 flex-col"
       >
-        <input type="hidden" name="sort" value={sort} />
+        {sort !== "none" ? (
+          <input type="hidden" name="sort" value={sort} />
+        ) : null}
         <input type="hidden" name="city" value={defaultCity} readOnly />
         <input type="hidden" name="country" value={defaultCountry} readOnly />
         <input type="hidden" name="dateMode" value={dateMode} readOnly />

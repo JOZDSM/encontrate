@@ -1,6 +1,7 @@
 import type { PublicListingSort } from "@/lib/listing-queries";
 
 export function parseListingSort(raw: string | undefined): PublicListingSort {
+  if (raw === "none" || raw === "recent") return "none";
   if (
     raw === "neighborhood" ||
     raw === "price_asc" ||
@@ -8,5 +9,5 @@ export function parseListingSort(raw: string | undefined): PublicListingSort {
   ) {
     return raw;
   }
-  return "recent";
+  return "none";
 }

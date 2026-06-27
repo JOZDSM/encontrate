@@ -14,14 +14,14 @@ import {
 import type { PublicListingSort } from "@/lib/listing-queries";
 
 const OPTIONS = [
-  { value: "recent" as const, label: "Publicación (más recientes)" },
+  { value: "none" as const, label: "Ningún orden" },
   { value: "price_asc" as const, label: "Precio (menor a mayor)" },
   { value: "price_desc" as const, label: "Precio (mayor a menor)" },
   { value: "neighborhood" as const, label: "Barrio" },
 ];
 
 const LABELS: Record<PublicListingSort, string> = {
-  recent: "Publicación (más recientes)",
+  none: "Ningún orden",
   price_asc: "Precio (menor a mayor)",
   price_desc: "Precio (mayor a menor)",
   neighborhood: "Barrio",
@@ -39,7 +39,11 @@ export function ListingsSortSelect({
     (newValue: string | null) => {
       if (!newValue) return;
       const next = new URLSearchParams(searchParams.toString());
-      next.set("sort", newValue);
+      if (newValue === "none") {
+        next.delete("sort");
+      } else {
+        next.set("sort", newValue);
+      }
       router.push(`/listings?${next.toString()}`);
     },
     [router, searchParams],

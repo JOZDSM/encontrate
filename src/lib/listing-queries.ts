@@ -5,10 +5,19 @@ import { listingHasConflict } from "@/lib/booking-guards";
 import { addDays, differenceInCalendarDays } from "date-fns";
 
 export type PublicListingSort =
-  | "recent"
+  | "none"
   | "price_asc"
   | "price_desc"
   | "neighborhood";
+
+function shuffleListings<T>(items: T[]): T[] {
+  const out = [...items];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j]!, out[i]!];
+  }
+  return out;
+}
 
 export type AvailabilityRange = { start: Date; end: Date };
 
@@ -113,7 +122,7 @@ export async function getPublicListings(opts: {
         ? { priceMonthlyEur: "asc" }
         : opts.sort === "price_desc"
           ? { priceMonthlyEur: "desc" }
-          : { createdAt: "desc" };
+          : { id: "asc" };
 
   const listings = await prisma.listing.findMany({
     where,
@@ -126,7 +135,9 @@ export async function getPublicListings(opts: {
 
   if (opts.availabilityRanges?.length) {
     const ranges = opts.availabilityRanges.filter((r) => r.start < r.end).slice(0, 160);
-    if (!ranges.length) return listings;
+    if (!ranges.length) {
+      return opts.sort === "none" ? shuffleListings(listings) : listings;
+    }
 
     const filtered = [];
     for (const l of listings) {
@@ -140,11 +151,11 @@ export async function getPublicListings(opts: {
       }
       if (ok) filtered.push(l);
     }
-    return filtered;
+    return opts.sort === "none" ? shuffleListings(filtered) : filtered;
   }
 
   if (!opts.rangeStart || !opts.rangeEnd || !(opts.rangeStart < opts.rangeEnd)) {
-    return listings;
+    return opts.sort === "none" ? shuffleListings(listings) : listings;
   }
 
   const flexDays =
@@ -179,5 +190,5 @@ export async function getPublicListings(opts: {
     }
     if (ok) filtered.push(l);
   }
-  return filtered;
+  return opts.sort === "none" ? shuffleListings(filtered) : filtered;
 }

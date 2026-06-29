@@ -9,7 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SupportEncontrateDialog } from "@/components/support-encontrate-dialog";
 
-export function BookingRequestForm({ listingId }: { listingId: string }) {
+export function BookingRequestForm({
+  listingId,
+  disabled = false,
+}: {
+  listingId: string;
+  disabled?: boolean;
+}) {
   const router = useRouter();
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -19,6 +25,7 @@ export function BookingRequestForm({ listingId }: { listingId: string }) {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (disabled) return;
     posthog.capture("booking_request_clicked", { listing_id: listingId });
     setLoading(true);
     setMsg(null);
@@ -55,6 +62,7 @@ export function BookingRequestForm({ listingId }: { listingId: string }) {
               id="startDate"
               type="date"
               required
+              disabled={disabled}
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
@@ -65,13 +73,14 @@ export function BookingRequestForm({ listingId }: { listingId: string }) {
               id="endDate"
               type="date"
               required
+              disabled={disabled}
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
           </div>
         </div>
         {msg ? <p className="text-sm text-destructive">{msg}</p> : null}
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" disabled={loading || disabled}>
           {loading ? "Enviando…" : "Enviar solicitud"}
         </Button>
       </form>

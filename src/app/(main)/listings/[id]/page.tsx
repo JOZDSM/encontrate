@@ -288,20 +288,24 @@ export default async function ListingDetailPage({
 
         <Separator className="my-8" />
 
-        {!isHost && !isPlatformAdmin(session) ? (
-          session?.user ? (
-            <section>
-              <BookingRequestForm listingId={listing.id} />
-            </section>
-          ) : (
-            <section className="rounded-2xl border border-border bg-muted/20 p-4 text-sm">
-              <p className="mb-3">Inicia sesión para solicitar fechas en este anuncio.</p>
-              <Button asChild>
-                <Link href="/login">Entrar</Link>
-              </Button>
-            </section>
-          )
-        ) : null}
+        {session?.user ? (
+          <section className="space-y-3">
+            {isHost ? (
+              <p className="text-sm text-muted-foreground">
+                Vista de huésped: no podés enviar una solicitud de fechas en tu
+                propio anuncio.
+              </p>
+            ) : null}
+            <BookingRequestForm listingId={listing.id} disabled={isHost} />
+          </section>
+        ) : (
+          <section className="rounded-2xl border border-border bg-muted/20 p-4 text-sm">
+            <p className="mb-3">Inicia sesión para solicitar fechas en este anuncio.</p>
+            <Button asChild>
+              <Link href="/login">Entrar</Link>
+            </Button>
+          </section>
+        )}
       </div>
     </div>
   );

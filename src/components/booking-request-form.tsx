@@ -19,6 +19,7 @@ export function BookingRequestForm({ listingId }: { listingId: string }) {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    posthog.capture("booking_request_clicked", { listing_id: listingId });
     setLoading(true);
     setMsg(null);
     const res = await createBookingRequest({
@@ -29,10 +30,10 @@ export function BookingRequestForm({ listingId }: { listingId: string }) {
     setLoading(false);
     if (!res.ok) {
       setMsg(res.error);
-      posthog.capture("booking_request_error");
+      posthog.capture("booking_request_error", { listing_id: listingId });
       return;
     }
-    posthog.capture("booking_request_submitted");
+    posthog.capture("booking_request_submitted", { listing_id: listingId });
     setSupportOpen(true);
   }
 

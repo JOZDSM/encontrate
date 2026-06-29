@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { captureListingContactEvent } from "@/lib/listing-contact-analytics";
 
 export function ListingHostContact({
   listingId,
@@ -61,7 +62,16 @@ export function ListingHostContact({
               Teléfono
             </Button>
           ) : (
-            <Dialog>
+            <Dialog
+              onOpenChange={(open) => {
+                if (open) {
+                  captureListingContactEvent(
+                    "listing_contact_phone_clicked",
+                    listingId,
+                  );
+                }
+              }}
+            >
               <DialogTrigger
                 render={
                   <Button type="button" className="rounded-full">
@@ -96,7 +106,16 @@ export function ListingHostContact({
               Email
             </Button>
           ) : (
-            <Dialog>
+            <Dialog
+              onOpenChange={(open) => {
+                if (open) {
+                  captureListingContactEvent(
+                    "listing_contact_email_clicked",
+                    listingId,
+                  );
+                }
+              }}
+            >
               <DialogTrigger
                 render={
                   <Button type="button" className="rounded-full">
@@ -118,6 +137,12 @@ export function ListingHostContact({
 
           <Dialog
             onOpenChange={(open) => {
+              if (open) {
+                captureListingContactEvent(
+                  "listing_contact_inquiry_opened",
+                  listingId,
+                );
+              }
               setError(null);
               setSuccess(null);
               // Reset opt-in toggles whenever the dialog opens or closes so
@@ -161,8 +186,20 @@ export function ListingHostContact({
                   setSending(false);
                   if (!res.ok) {
                     setError(res.error);
+                    captureListingContactEvent(
+                      "listing_host_inquiry_error",
+                      listingId,
+                    );
                     return;
                   }
+                  captureListingContactEvent(
+                    "listing_host_inquiry_submitted",
+                    listingId,
+                    {
+                      share_whatsapp: shareWhatsapp,
+                      share_email: shareEmail,
+                    },
+                  );
                   setMessage("");
                   setShareWhatsapp(false);
                   setShareEmail(false);

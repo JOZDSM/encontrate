@@ -12,6 +12,10 @@ import type { Service } from "@/generated/prisma/client";
 import { HOME_PAGE_GUTTER_CLASS } from "@/lib/home-catalog-layout";
 import { cn } from "@/lib/utils";
 
+/** Approx. half the hero info block height — keeps the block vertically centered. */
+const HERO_INFO_TOP_SPACER =
+  "h-[calc(50svh-4.5rem)] md:h-[calc(50svh-5.5rem)]";
+
 function Stars({ rating }: { rating: number }) {
   return (
     <div className="flex items-center gap-0.5" aria-label={`${rating} de 5`}>
@@ -51,41 +55,46 @@ export function ServiceDetailPage({
   };
 
   return (
-    <div className="bg-black text-white">
-      <section className="relative min-h-svh w-full overflow-hidden">
+    <div className="relative bg-black text-white">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-svh overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={service.imageUrl}
           alt=""
           className="absolute inset-0 size-full object-cover object-top"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-black/20" />
-
         <div
-          className={cn(
-            "absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-3 pt-28 md:pt-36",
-            HOME_PAGE_GUTTER_CLASS,
-          )}
-        >
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-white/90 transition-colors hover:text-white"
-          >
-            <ArrowLeft className="size-4" aria-hidden />
-            Volver
-          </Link>
-          <ServiceShareButton
-            title={service.professionalName}
-            text={`${service.professionalName} · ${service.title}`}
-          />
-        </div>
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to top, #000000 0%, #000000 35%, rgba(0, 0, 0, 0) 70%)",
+          }}
+        />
+      </div>
 
-        <div
-          className={cn(
-            "absolute inset-0 z-10 flex items-center",
-            HOME_PAGE_GUTTER_CLASS,
-          )}
+      <div
+        className={cn(
+          "absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-3 pt-28 md:pt-36",
+          HOME_PAGE_GUTTER_CLASS,
+        )}
+      >
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-white/90 transition-colors hover:text-white"
         >
+          <ArrowLeft className="size-4" aria-hidden />
+          Volver
+        </Link>
+        <ServiceShareButton
+          title={service.professionalName}
+          text={`${service.professionalName} · ${service.title}`}
+        />
+      </div>
+
+      <div className="relative z-10">
+        <div className={HERO_INFO_TOP_SPACER} aria-hidden />
+
+        <div className={HOME_PAGE_GUTTER_CLASS}>
           <div className="max-w-2xl space-y-4">
             <div className="flex items-center gap-2 text-sm text-white/90">
               <EncontrateHeroBadge
@@ -140,100 +149,95 @@ export function ServiceDetailPage({
               />
             </div>
           </div>
-        </div>
-      </section>
 
-      <div
-        className={cn(
-          "space-y-12 py-10 md:space-y-16 md:py-14",
-          HOME_PAGE_GUTTER_CLASS,
-        )}
-      >
-        <section className="grid gap-8 md:grid-cols-[minmax(0,1fr)_14rem] md:gap-12">
-          <div className="space-y-3">
-            <h2 className="text-xl font-semibold">Descripción</h2>
-            <p className="max-w-2xl whitespace-pre-line text-base leading-relaxed text-white/85">
-              {service.description}
-            </p>
-          </div>
-          <aside className="flex flex-col gap-3 md:items-start">
-            <ServiceContactDialog
-              {...contactProps}
-              surface="description"
-              triggerClassName={cn(
-                "h-8 gap-1.5 px-3 text-sm font-medium",
-                heroCtaClassName,
-              )}
-            />
-            {service.instagramUrl ? (
-              <a
-                href={service.instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm text-white/85 underline-offset-4 hover:underline"
-              >
-                <Instagram className="size-4" aria-hidden />
-                {service.instagramHandle || "Instagram"}
-              </a>
+          <div className="mt-[112px] space-y-12 pb-12 md:space-y-16 md:pb-16">
+            <section className="grid gap-8 md:grid-cols-[minmax(0,1fr)_14rem] md:gap-12">
+              <div className="space-y-3">
+                <h2 className="text-xl font-semibold">Descripción</h2>
+                <p className="max-w-2xl whitespace-pre-line text-base leading-relaxed text-white/85">
+                  {service.description}
+                </p>
+              </div>
+              <aside className="flex flex-col gap-3 md:items-start">
+                <ServiceContactDialog
+                  {...contactProps}
+                  surface="description"
+                  triggerClassName={cn(
+                    "h-8 gap-1.5 px-3 text-sm font-medium",
+                    heroCtaClassName,
+                  )}
+                />
+                {service.instagramUrl ? (
+                  <a
+                    href={service.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-sm text-white/85 underline-offset-4 hover:underline"
+                  >
+                    <Instagram className="size-4" aria-hidden />
+                    {service.instagramHandle || "Instagram"}
+                  </a>
+                ) : null}
+              </aside>
+            </section>
+
+            {service.offeringItems.length > 0 ? (
+              <section className="space-y-4">
+                <h2 className="text-xl font-semibold">Servicios</h2>
+                <ul className="max-w-2xl list-disc space-y-2 pl-5 text-white/85">
+                  {service.offeringItems.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </section>
             ) : null}
-          </aside>
-        </section>
 
-        {service.offeringItems.length > 0 ? (
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold">Servicios</h2>
-            <ul className="max-w-2xl list-disc space-y-2 pl-5 text-white/85">
-              {service.offeringItems.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
-
-        {service.reviews.length > 0 ? (
-          <section className="space-y-4">
-            <h2 className="text-xl font-semibold">Valoraciones de clientes</h2>
-            <ul className="space-y-3">
-              {service.reviews.map((review) => (
-                <li
-                  key={review.id}
-                  className="flex items-start gap-4 rounded-2xl bg-white/5 p-4 md:p-5"
-                >
-                  <div className="size-11 shrink-0 overflow-hidden rounded-full bg-white/10">
-                    {review.avatarUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={review.avatarUrl}
-                        alt=""
-                        className="size-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex size-full items-center justify-center text-sm font-medium text-white/70">
-                        {review.authorName.slice(0, 1)}
+            {service.reviews.length > 0 ? (
+              <section className="space-y-4">
+                <h2 className="text-xl font-semibold">Valoraciones de clientes</h2>
+                <ul className="space-y-3">
+                  {service.reviews.map((review) => (
+                    <li
+                      key={review.id}
+                      className="flex items-start gap-4 rounded-2xl bg-white/5 p-4 md:p-5"
+                    >
+                      <div className="size-11 shrink-0 overflow-hidden rounded-full bg-white/10">
+                        {review.avatarUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={review.avatarUrl}
+                            alt=""
+                            className="size-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex size-full items-center justify-center text-sm font-medium text-white/70">
+                            {review.authorName.slice(0, 1)}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <p className="font-medium">{review.authorName}</p>
-                    <p className="text-sm leading-relaxed text-white/80">
-                      {review.body}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 flex-col items-end gap-1">
-                    <span className="text-lg font-semibold leading-none">
-                      {review.rating}
-                    </span>
-                    <Stars rating={review.rating} />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <p className="font-medium">{review.authorName}</p>
+                        <p className="text-sm leading-relaxed text-white/80">
+                          {review.body}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end gap-1">
+                        <span className="text-lg font-semibold leading-none">
+                          {review.rating}
+                        </span>
+                        <Stars rating={review.rating} />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+          </div>
+        </div>
       </div>
 
       {similares.length > 0 ? (
-        <section className="space-y-4 pb-12 md:pb-16">
+        <section className="relative z-10 space-y-4 pb-12 md:pb-16">
           <h2 className={cn("text-xl font-semibold", HOME_PAGE_GUTTER_CLASS)}>
             Similares
           </h2>
@@ -252,7 +256,7 @@ export function ServiceDetailPage({
         </section>
       ) : null}
 
-      <div className="border-t border-white/10">
+      <div className="relative z-10 border-t border-white/10">
         <SiteFooter />
       </div>
     </div>

@@ -67,7 +67,7 @@ export function ServiceDetailPage({
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to top, #000000 0%, #000000 35%, rgba(0, 0, 0, 0) 70%)",
+              "linear-gradient(to top, #000000 0%, #000000 25%, rgba(0, 0, 0, 0) 70%)",
           }}
         />
       </div>

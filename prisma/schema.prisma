@@ -440,3 +440,51 @@ model GuestListingMatch {
   @@unique([signalId, listingId])
   @@index([signalId, notifiedAt])
 }
+
+/// Curated local-services catalog (admin-authored profiles).
+model Service {
+  id               String   @id @default(cuid())
+  slug             String   @unique
+  professionalName String
+  /// Service type shown under the name (e.g. "Gestora en extranjería").
+  title            String
+  category         String
+  description      String   @db.Text
+  imageUrl         String
+  websiteUrl       String?
+  instagramUrl     String?
+  instagramHandle  String?
+  whatsapp         String?
+  email            String?
+  showWhatsapp     Boolean  @default(true)
+  showEmail        Boolean  @default(true)
+  /// Bullet lines under "Servicios".
+  offeringItems    String[] @default([])
+  published        Boolean  @default(false)
+  featured         Boolean  @default(false)
+  sortOrder        Int      @default(0)
+  neighborhood     String?
+  priceNote        String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  reviews ServiceReview[]
+
+  @@index([category, published])
+  @@index([published, featured, sortOrder])
+}
+
+model ServiceReview {
+  id         String   @id @default(cuid())
+  serviceId  String
+  service    Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  authorName String
+  body       String   @db.Text
+  rating     Int
+  avatarUrl  String?
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([serviceId, sortOrder])
+}

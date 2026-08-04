@@ -12,11 +12,16 @@ import { cn } from "@/lib/utils";
 export function SiteMainScrollBand({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isPanel = Boolean(pathname && pathname.startsWith("/mis-cosas"));
+  const isHome = pathname === "/";
 
   return (
     <div
+      data-site-scroll-band
       className={cn(
-        "flex min-h-0 flex-1 flex-col overflow-visible md:overflow-y-auto md:overscroll-y-contain",
+        "flex flex-col",
+        isHome
+          ? "overflow-visible"
+          : "min-h-0 flex-1 overflow-visible md:overflow-y-auto md:overscroll-y-contain",
         isPanel && "md:border-t md:border-b md:border-sidebar-border",
       )}
     >

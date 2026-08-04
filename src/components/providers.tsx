@@ -1,9 +1,11 @@
 "use client";
 
 import type { Session } from "next-auth";
+import { usePathname } from "next/navigation";
 import { SessionProvider } from "next-auth/react";
 import { isDesignPreviewSession } from "@/lib/design-preview";
 import { PosthogProvider } from "@/components/posthog-provider";
+import { cn } from "@/lib/utils";
 
 export function Providers({
   children,
@@ -13,6 +15,7 @@ export function Providers({
   session: Session | null;
 }) {
   const designPreview = isDesignPreviewSession(session);
+  const isHome = usePathname() === "/";
 
   return (
     <SessionProvider
@@ -21,7 +24,15 @@ export function Providers({
       refetchInterval={designPreview ? 0 : undefined}
     >
       <PosthogProvider session={session} enabled={!designPreview}>
-        <div className="flex h-full min-h-0 flex-1 flex-col">{children}</div>
+        <div
+          data-app-root
+          className={cn(
+            "flex flex-col",
+            isHome ? "min-h-svh" : "h-full min-h-0 flex-1",
+          )}
+        >
+          {children}
+        </div>
       </PosthogProvider>
     </SessionProvider>
   );

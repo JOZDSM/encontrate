@@ -36,7 +36,13 @@ export function RotatingSiteBackground({
 
   if (disabled) {
     return (
-      <div className="relative flex h-full min-h-0 w-full flex-1 flex-col bg-background text-foreground">
+      <div
+        data-site-chrome
+        className={cn(
+          "relative w-full bg-background text-foreground",
+          isHome ? "flex min-h-svh flex-col" : "flex h-full min-h-0 w-full flex-1 flex-col",
+        )}
+      >
         {children}
       </div>
     );

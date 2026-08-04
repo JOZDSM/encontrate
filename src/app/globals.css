@@ -204,6 +204,61 @@
   scrollbar-color: color-mix(in oklab, white 22%, transparent) transparent;
 }
 
+/*
+ * Catalog rows must hide scrollbars. This sits outside @layer so it can
+ * override the unlayered `*` rule above (Tailwind utilities alone lose).
+ */
+.catalog-h-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.catalog-h-scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Left→right scrim for photo service cards (Figma stops ~10% / 50% / 70%). */
+.service-card-scrim {
+  background-image: linear-gradient(
+    to right,
+    #0a0a0a 10%,
+    rgb(10 10 10 / 0.5) 50%,
+    rgb(10 10 10 / 0) 70%
+  );
+}
+
+/* Service card CTA: circle → pill on capable pointer hover (desktop). */
+.service-card-cta {
+  display: inline-flex;
+  height: 2rem;
+  width: 2rem;
+  align-items: center;
+  justify-content: flex-end;
+  border-radius: 9999px;
+  padding-right: 0.5rem; /* 8px — arrow stays inset from the right edge */
+  background-color: var(--foreground);
+  color: var(--background);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+  transition:
+    width 300ms ease-out,
+    background-color 300ms ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .group\/service-card:hover .service-card-cta {
+    width: 4rem; /* 64px — 80px pill minus 16px */
+    background-color: var(--brand-background);
+    color: #0a0a0a; /* matches Figma hover arrow on lime */
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .service-card-cta {
+    transition: none;
+  }
+}
+
 @layer components {
   /* Animation: "MARK_SPIN_360_EASE_1S" (see `src/lib/animations.ts`). */
   .animate-encontrate-mark-spin-360-ease-1s,
@@ -224,10 +279,31 @@
   }
 }
 
+/* Slow leftward pan for still hero backgrounds (matches carousel dwell time). */
+@keyframes hero-image-pan {
+  from {
+    transform: scale(1.1) translateX(1.75%);
+  }
+  to {
+    transform: scale(1.1) translateX(-1.75%);
+  }
+}
+
+.animate-hero-image-pan {
+  animation-name: hero-image-pan;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-encontrate-mark-spin-360-ease-1s,
   .animate-encontrate-coin {
     animation: none;
+  }
+
+  .animate-hero-image-pan {
+    animation: none;
+    transform: scale(1.05);
   }
 }
 
@@ -248,4 +324,22 @@
 }
 .signal-date-input::-webkit-inner-spin-button {
   display: none;
+}
+
+/* Homepage: one scrolling document (hero + overlapping catalog + footer). */
+html.home-document-scroll,
+html.home-document-scroll body {
+  height: auto !important;
+  min-height: 100svh;
+  max-height: none !important;
+  overflow-y: auto !important;
+}
+
+html.home-document-scroll [data-app-root],
+html.home-document-scroll [data-site-chrome],
+html.home-document-scroll main {
+  height: auto !important;
+  min-height: 0;
+  max-height: none !important;
+  overflow: visible !important;
 }

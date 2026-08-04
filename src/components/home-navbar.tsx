@@ -47,7 +47,8 @@ export function HomeNavbar({ topOffset = "none" }: { topOffset?: TopOffset } = {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const closeMenu = () => setMenuOpen(false);
-  const plainBackground = isPublicListingDetailPath(pathname);
+  const plainBackground =
+    isPublicListingDetailPath(pathname) || pathname === "/";
 
   const buscarActive = isBuscarHabitacionPath(pathname);
   const cargarActive = isCargaHabitacionPath(pathname);

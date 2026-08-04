@@ -59,9 +59,12 @@ export default async function AdminPage() {
             <p className="text-sm text-muted-foreground">
               Todos los anuncios y reservas de la plataforma.
             </p>
-            <div className="pt-3">
+            <div className="flex flex-wrap gap-2 pt-3">
               <Button asChild size="sm" variant="secondary" className="rounded-full">
                 <Link href="/admin/calendar">Ver calendario</Link>
+              </Button>
+              <Button asChild size="sm" variant="secondary" className="rounded-full">
+                <Link href="/admin/services">Servicios del catálogo</Link>
               </Button>
             </div>
           </div>

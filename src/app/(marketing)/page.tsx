@@ -1,4 +1,9 @@
-import { HomeHero } from "@/components/home-hero";
+import { HomeServicesCatalog } from "@/components/home-services-catalog";
+import { getCatalogRows } from "@/lib/service-catalog";
+import {
+  MOCK_CATEGORY_ROWS,
+  MOCK_RECENT_SERVICES,
+} from "@/lib/mock-services-catalog";
 
 export default async function HomePage({
   searchParams,
@@ -7,6 +12,16 @@ export default async function HomePage({
 }) {
   const { cuentaEliminada } = await searchParams;
   const showDeleted = cuentaEliminada === "1";
+
+  let recent = MOCK_RECENT_SERVICES;
+  let categories = MOCK_CATEGORY_ROWS;
+  try {
+    const catalog = await getCatalogRows();
+    if (catalog.recent.length > 0) recent = catalog.recent;
+    if (catalog.categories.length > 0) categories = catalog.categories;
+  } catch {
+    // Fall back to mock catalog if DB is unavailable.
+  }
 
   return (
     <>
@@ -20,7 +35,7 @@ export default async function HomePage({
           </p>
         </div>
       ) : null}
-      <HomeHero />
+      <HomeServicesCatalog recent={recent} categories={categories} />
     </>
   );
 }

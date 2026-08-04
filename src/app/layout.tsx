@@ -2,8 +2,11 @@ import type { Metadata, Viewport } from "next";
 import { Figtree, Geist_Mono, Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { SiteChrome } from "@/components/site-chrome";
-import { SiteFooter } from "@/components/site-footer";
+import { SiteHomeDocumentScroll } from "@/components/site-home-document-scroll";
+import { SiteMainContent } from "@/components/site-main-content";
 import { SiteMainScrollBand } from "@/components/site-main-scroll-band";
+import { SiteMainShell } from "@/components/site-main-shell";
+import { SiteInBandFooter, SiteOutsideFooter } from "@/components/site-page-footers";
 import { auth } from "@/auth";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -89,17 +92,14 @@ export default async function RootLayout({
       <body className="flex h-svh min-h-0 flex-col overflow-x-hidden overflow-y-auto bg-background md:overflow-y-hidden">
         <Providers session={session}>
           <SiteChrome>
-            <main className="flex min-h-0 flex-1 flex-col overflow-visible pt-20 md:overflow-hidden md:pt-28">
+            <SiteHomeDocumentScroll />
+            <SiteMainShell>
               <SiteMainScrollBand>
-                <div className="flex flex-1 flex-col md:min-h-0">{children}</div>
-                <div className="shrink-0 md:hidden">
-                  <SiteFooter />
-                </div>
+                <SiteMainContent>{children}</SiteMainContent>
+                <SiteInBandFooter />
               </SiteMainScrollBand>
-              <div className="hidden shrink-0 md:block">
-                <SiteFooter />
-              </div>
-            </main>
+              <SiteOutsideFooter />
+            </SiteMainShell>
           </SiteChrome>
         </Providers>
       </body>

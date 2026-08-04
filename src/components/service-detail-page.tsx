@@ -52,18 +52,18 @@ export function ServiceDetailPage({
 
   return (
     <div className="bg-black text-white">
-      <section className="relative min-h-[70svh] w-full overflow-hidden md:min-h-[75svh]">
+      <section className="relative w-full overflow-hidden max-md:min-h-[70svh]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={service.imageUrl}
           alt=""
-          className="absolute inset-0 size-full object-cover object-center"
+          className="block h-auto w-full max-md:absolute max-md:inset-0 max-md:size-full max-md:object-cover max-md:object-top"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-black/20" />
 
         <div
           className={cn(
-            "relative z-10 flex min-h-[70svh] flex-col justify-between py-6 md:min-h-[75svh] md:py-8",
+            "absolute inset-0 z-10 flex flex-col justify-between py-6 md:py-8",
             HOME_PAGE_GUTTER_CLASS,
           )}
         >

@@ -104,15 +104,18 @@ export function ServiceContactDialog({
     >
       <DialogTrigger
         render={
-          <Button
+          <button
             type="button"
-            className={cn("rounded-full", triggerClassName)}
+            className={cn(
+              "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full text-sm font-medium",
+              triggerClassName,
+            )}
           >
             {triggerIcon ? (
-              <MessageSquare className="size-4" aria-hidden />
+              <MessageSquare className="size-4" strokeWidth={2} aria-hidden />
             ) : null}
             {triggerLabel}
-          </Button>
+          </button>
         }
       />
       <DialogContent className="gap-4 sm:max-w-md">

@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { ArrowLeft, Globe, Instagram, Star } from "lucide-react";
 import { EncontrateHeroBadge } from "@/components/encontrate-hero-badge";
+import { heroCtaClassName } from "@/components/hero-location-cta";
 import { ServiceCard } from "@/components/service-card";
 import { ServiceContactDialog } from "@/components/service-contact-dialog";
 import { ServiceShareButton } from "@/components/service-share-button";
 import { SiteFooter } from "@/components/site-footer";
-import { Button } from "@/components/ui/button";
 import type { ServiceDetail } from "@/lib/service-catalog";
 import { toServiceOffering } from "@/lib/service-catalog";
 import type { Service } from "@/generated/prisma/client";
@@ -52,42 +52,46 @@ export function ServiceDetailPage({
 
   return (
     <div className="bg-black text-white">
-      <section className="relative w-full overflow-hidden max-md:min-h-[70svh]">
+      <section className="relative min-h-svh w-full overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={service.imageUrl}
           alt=""
-          className="block h-auto w-full max-md:absolute max-md:inset-0 max-md:size-full max-md:object-cover max-md:object-top"
+          className="absolute inset-0 size-full object-cover object-top"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-black/20" />
 
         <div
           className={cn(
-            "absolute inset-0 z-10 flex flex-col justify-between py-6 md:py-8",
+            "absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-3 pt-28 md:pt-36",
             HOME_PAGE_GUTTER_CLASS,
           )}
         >
-          <div className="flex items-center justify-between gap-3 pt-16 md:pt-20">
-            <Button
-              asChild
-              size="sm"
-              variant="secondary"
-              className="rounded-full bg-black/40 text-white backdrop-blur-sm hover:bg-black/55"
-            >
-              <Link href="/">
-                <ArrowLeft className="size-4" aria-hidden />
-                Volver
-              </Link>
-            </Button>
-            <ServiceShareButton
-              title={service.professionalName}
-              text={`${service.professionalName} · ${service.title}`}
-            />
-          </div>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-white/90 transition-colors hover:text-white"
+          >
+            <ArrowLeft className="size-4" aria-hidden />
+            Volver
+          </Link>
+          <ServiceShareButton
+            title={service.professionalName}
+            text={`${service.professionalName} · ${service.title}`}
+          />
+        </div>
 
-          <div className="max-w-2xl space-y-4 pb-8 md:pb-12">
+        <div
+          className={cn(
+            "absolute inset-0 z-10 flex items-center",
+            HOME_PAGE_GUTTER_CLASS,
+          )}
+        >
+          <div className="max-w-2xl space-y-4">
             <div className="flex items-center gap-2 text-sm text-white/90">
-              <EncontrateHeroBadge variant="card" className="size-6 max-h-6 max-w-6" />
+              <EncontrateHeroBadge
+                variant="card"
+                className="size-6 max-h-6 max-w-6"
+              />
               <span>Recomendado por miembros de Encontrate.</span>
             </div>
             <div className="space-y-2">
@@ -99,50 +103,52 @@ export function ServiceDetailPage({
 
             <div className="flex flex-wrap items-center gap-2 pt-1">
               {service.websiteUrl ? (
-                <Button
-                  asChild
-                  size="icon"
-                  variant="secondary"
-                  className="rounded-full bg-white text-black hover:bg-white/90"
+                <a
+                  href={service.websiteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Sitio web"
+                  className={cn(
+                    "inline-flex size-8 items-center justify-center",
+                    heroCtaClassName,
+                  )}
                 >
-                  <a
-                    href={service.websiteUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Sitio web"
-                  >
-                    <Globe className="size-4" />
-                  </a>
-                </Button>
+                  <Globe className="size-4" strokeWidth={2} aria-hidden />
+                </a>
               ) : null}
               {service.instagramUrl ? (
-                <Button
-                  asChild
-                  size="icon"
-                  variant="secondary"
-                  className="rounded-full bg-white text-black hover:bg-white/90"
+                <a
+                  href={service.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className={cn(
+                    "inline-flex size-8 items-center justify-center",
+                    heroCtaClassName,
+                  )}
                 >
-                  <a
-                    href={service.instagramUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Instagram"
-                  >
-                    <Instagram className="size-4" />
-                  </a>
-                </Button>
+                  <Instagram className="size-4" strokeWidth={2} aria-hidden />
+                </a>
               ) : null}
               <ServiceContactDialog
                 {...contactProps}
                 surface="hero"
-                triggerClassName="bg-white text-black hover:bg-white/90"
+                triggerClassName={cn(
+                  "h-8 gap-1.5 px-3 text-sm font-medium",
+                  heroCtaClassName,
+                )}
               />
             </div>
           </div>
         </div>
       </section>
 
-      <div className={cn("space-y-12 py-10 md:space-y-16 md:py-14", HOME_PAGE_GUTTER_CLASS)}>
+      <div
+        className={cn(
+          "space-y-12 py-10 md:space-y-16 md:py-14",
+          HOME_PAGE_GUTTER_CLASS,
+        )}
+      >
         <section className="grid gap-8 md:grid-cols-[minmax(0,1fr)_14rem] md:gap-12">
           <div className="space-y-3">
             <h2 className="text-xl font-semibold">Descripción</h2>
@@ -154,7 +160,10 @@ export function ServiceDetailPage({
             <ServiceContactDialog
               {...contactProps}
               surface="description"
-              triggerClassName="bg-white text-black hover:bg-white/90"
+              triggerClassName={cn(
+                "h-8 gap-1.5 px-3 text-sm font-medium",
+                heroCtaClassName,
+              )}
             />
             {service.instagramUrl ? (
               <a

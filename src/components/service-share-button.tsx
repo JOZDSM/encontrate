@@ -2,14 +2,17 @@
 
 import { Share } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { heroCtaClassName } from "@/components/hero-location-cta";
+import { cn } from "@/lib/utils";
 
 export function ServiceShareButton({
   title,
   text,
+  className,
 }: {
   title: string;
   text: string;
+  className?: string;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -33,15 +36,17 @@ export function ServiceShareButton({
   }
 
   return (
-    <Button
+    <button
       type="button"
-      variant="secondary"
-      size="sm"
-      className="rounded-full bg-black/40 text-white backdrop-blur-sm hover:bg-black/55"
+      className={cn(
+        "inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 px-3 text-sm font-medium",
+        heroCtaClassName,
+        className,
+      )}
       onClick={onShare}
     >
-      <Share className="size-4" aria-hidden />
+      <Share className="size-3.5" strokeWidth={2} aria-hidden />
       {copied ? "Enlace copiado" : "Compartir"}
-    </Button>
+    </button>
   );
 }

@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { EncontrateLockup } from "@/components/encontrate-lockup";
-import { HOME_CHROME_MAX_WIDTH_CLASS, HOME_PAGE_GUTTER_CLASS } from "@/lib/home-catalog-layout";
+import { HOME_PAGE_GUTTER_CLASS } from "@/lib/home-catalog-layout";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -80,7 +80,7 @@ export function HomeCatalogNavbar({ onSearchFocus }: Props) {
           "md:border-transparent md:hover:border-border md:focus-within:border-border",
         )}
       >
-        <div className={cn("flex w-full items-center justify-between", HOME_CHROME_MAX_WIDTH_CLASS)}>
+        <div className="flex w-full items-center justify-between">
           <Link
             href="/"
             aria-label="encontrate — Inicio"

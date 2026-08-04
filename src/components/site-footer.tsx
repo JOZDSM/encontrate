@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HOME_CHROME_MAX_WIDTH_CLASS, HOME_PAGE_GUTTER_CLASS } from "@/lib/home-catalog-layout";
+import { HOME_PAGE_GUTTER_CLASS } from "@/lib/home-catalog-layout";
 import { isPublicListingDetailPath } from "@/lib/listing-route";
 import { isServicesCatalogSurface } from "@/lib/service-slug";
 import { cn } from "@/lib/utils";
@@ -32,8 +32,8 @@ export function SiteFooter() {
     >
       <p
         className={cn(
-          "leading-snug",
-          catalogSurface ? cn("w-full", HOME_CHROME_MAX_WIDTH_CLASS) : "px-4",
+          "w-full leading-snug",
+          !catalogSurface && "px-4",
         )}
       >
         Encontrate solamente genera encuentros entre personas.{" "}

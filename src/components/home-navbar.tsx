@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { EncontrateLockup } from "@/components/encontrate-lockup";
+import { HOME_PAGE_GUTTER_CLASS } from "@/lib/home-catalog-layout";
 import { isPublicListingDetailPath } from "@/lib/listing-route";
 import { cn } from "@/lib/utils";
 
@@ -71,7 +72,8 @@ export function HomeNavbar({ topOffset = "none" }: { topOffset?: TopOffset } = {
     <>
       <header
         className={cn(
-          "fixed right-0 left-0 z-[100] flex h-20 flex-col items-center justify-center border-b border-border px-4 md:h-28",
+          "fixed right-0 left-0 z-[100] flex h-20 flex-col items-center justify-center border-b border-border md:h-28",
+          HOME_PAGE_GUTTER_CLASS,
           topOffset === "banner" ? "top-10 md:top-12" : "top-0",
           "transition-[top,border-color] duration-300 ease-out",
           misCosasActive
@@ -80,7 +82,7 @@ export function HomeNavbar({ topOffset = "none" }: { topOffset?: TopOffset } = {
           plainBackground ? "bg-background text-foreground" : undefined,
         )}
       >
-        <div className="flex w-full max-w-[1440px] items-center justify-between">
+        <div className="flex w-full items-center justify-between">
           <Link
             href="/"
             aria-label="encontrate — Inicio"

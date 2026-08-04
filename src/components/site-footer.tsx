@@ -2,22 +2,24 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { isPublicListingDetailPath } from "@/lib/listing-route";
 import { HOME_CHROME_MAX_WIDTH_CLASS, HOME_PAGE_GUTTER_CLASS } from "@/lib/home-catalog-layout";
+import { isPublicListingDetailPath } from "@/lib/listing-route";
+import { isServicesCatalogSurface } from "@/lib/service-slug";
 import { cn } from "@/lib/utils";
 
 export function SiteFooter() {
   const pathname = usePathname();
-  const isHome = pathname === "/";
-  const plainBackground = isPublicListingDetailPath(pathname) || isHome;
+  const catalogSurface = isServicesCatalogSurface(pathname);
+  const plainBackground =
+    isPublicListingDetailPath(pathname) || catalogSurface;
   const isMisCosas = Boolean(pathname && pathname.startsWith("/mis-cosas"));
 
   return (
     <footer
       className={cn(
         "flex shrink-0 flex-col items-center justify-center gap-1 border-t py-6 text-center text-sm",
-        isHome && HOME_PAGE_GUTTER_CLASS,
-        isHome
+        catalogSurface && HOME_PAGE_GUTTER_CLASS,
+        catalogSurface
           ? "border-transparent bg-black text-white/70"
           : plainBackground
             ? "border-border bg-background px-4 text-muted-foreground"
@@ -31,7 +33,7 @@ export function SiteFooter() {
       <p
         className={cn(
           "leading-snug",
-          isHome ? cn("w-full", HOME_CHROME_MAX_WIDTH_CLASS) : "px-4",
+          catalogSurface ? cn("w-full", HOME_CHROME_MAX_WIDTH_CLASS) : "px-4",
         )}
       >
         Encontrate solamente genera encuentros entre personas.{" "}
@@ -39,7 +41,7 @@ export function SiteFooter() {
           href="/aviso"
           className={cn(
             "underline underline-offset-2",
-            isHome
+            catalogSurface
               ? "text-white hover:text-white/80"
               : plainBackground
                 ? "text-foreground hover:text-foreground/80"

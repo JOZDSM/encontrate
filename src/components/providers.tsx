@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { SessionProvider } from "next-auth/react";
 import { isDesignPreviewSession } from "@/lib/design-preview";
 import { PosthogProvider } from "@/components/posthog-provider";
+import { isServicesCatalogSurface } from "@/lib/service-slug";
 import { cn } from "@/lib/utils";
 
 export function Providers({
@@ -15,7 +16,7 @@ export function Providers({
   session: Session | null;
 }) {
   const designPreview = isDesignPreviewSession(session);
-  const isHome = usePathname() === "/";
+  const catalogSurface = isServicesCatalogSurface(usePathname());
 
   return (
     <SessionProvider
@@ -28,7 +29,7 @@ export function Providers({
           data-app-root
           className={cn(
             "flex flex-col",
-            isHome ? "min-h-svh" : "h-full min-h-0 flex-1",
+            catalogSurface ? "min-h-svh" : "h-full min-h-0 flex-1",
           )}
         >
           {children}

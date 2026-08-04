@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { isServicesCatalogSurface } from "@/lib/service-slug";
 import { cn } from "@/lib/utils";
 
 /**
@@ -12,14 +13,14 @@ import { cn } from "@/lib/utils";
 export function SiteMainScrollBand({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isPanel = Boolean(pathname && pathname.startsWith("/mis-cosas"));
-  const isHome = pathname === "/";
+  const catalogSurface = isServicesCatalogSurface(pathname);
 
   return (
     <div
       data-site-scroll-band
       className={cn(
         "flex flex-col",
-        isHome
+        catalogSurface
           ? "overflow-visible"
           : "min-h-0 flex-1 overflow-visible md:overflow-y-auto md:overscroll-y-contain",
         isPanel && "md:border-t md:border-b md:border-sidebar-border",

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { signOutAction } from "@/app/actions/auth";
 import { CatalogSearchBar } from "@/components/catalog-search-bar";
@@ -36,6 +37,7 @@ function scrollMainToTop() {
 }
 
 export function HomeCatalogNavbar({ onSearchFocus }: Props) {
+  const pathname = usePathname();
   const { data: session, status } = useSession();
   const showPanel = status === "authenticated" && session?.user;
   const designPreview = Boolean(session?.user?.designPreview);
@@ -58,7 +60,7 @@ export function HomeCatalogNavbar({ onSearchFocus }: Props) {
       window.removeEventListener("scroll", onScroll);
       band?.removeEventListener("scroll", onScroll);
     };
-  }, []);
+  }, [pathname]);
 
   const scrollToMainSearch = () => {
     onSearchFocus?.();
@@ -84,8 +86,10 @@ export function HomeCatalogNavbar({ onSearchFocus }: Props) {
             aria-label="encontrate — Inicio"
             className="inline-flex items-center text-primary-foreground dark:text-foreground"
             onClick={(e) => {
-              e.preventDefault();
-              scrollMainToTop();
+              if (pathname === "/") {
+                e.preventDefault();
+                scrollMainToTop();
+              }
             }}
           >
             <EncontrateLockup className="h-8 w-auto shrink-0" />

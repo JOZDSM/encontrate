@@ -326,7 +326,7 @@
   display: none;
 }
 
-/* Homepage: one scrolling document (hero + overlapping catalog + footer). */
+/* Catalog surfaces (home + service detail): one scrolling document. */
 html.home-document-scroll,
 html.home-document-scroll body {
   height: auto !important;

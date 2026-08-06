@@ -158,14 +158,14 @@ export function ServiceDetailPage({
           </div>
 
           <div className="mt-[112px] space-y-12 pb-12 md:space-y-16 md:pb-16">
-            <section className="flex flex-col gap-8 md:flex-row md:items-start md:gap-12">
-              <div className="min-w-0 flex-1 space-y-3">
+            <section className="flex flex-col gap-8 md:flex-row md:items-start">
+              <div className="max-w-2xl space-y-3">
                 <h2 className="text-xl font-semibold">Descripción</h2>
-                <p className="max-w-2xl whitespace-pre-line text-base leading-relaxed text-white/85">
+                <p className="whitespace-pre-line text-base leading-relaxed text-white/85">
                   {service.description}
                 </p>
               </div>
-              <aside className="flex shrink-0 flex-col items-start gap-3 md:w-56 md:pl-6">
+              <aside className="flex shrink-0 flex-col items-start gap-3 md:pl-6">
                 <ServiceContactDialog
                   {...contactProps}
                   surface="description"

@@ -70,6 +70,13 @@ export function ServiceDetailPage({
               "linear-gradient(to top, #000000 0%, #000000 25%, rgba(0, 0, 0, 0) 70%)",
           }}
         />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to right, color-mix(in oklab, var(--background) 80%, transparent) 0%, color-mix(in oklab, var(--background) 40%, transparent) 30%, transparent 50%)",
+          }}
+        />
       </div>
 
       <div
@@ -151,30 +158,27 @@ export function ServiceDetailPage({
           </div>
 
           <div className="mt-[112px] space-y-12 pb-12 md:space-y-16 md:pb-16">
-            <section className="grid gap-8 md:grid-cols-[minmax(0,1fr)_14rem] md:gap-12">
-              <div className="space-y-3">
+            <section className="flex flex-col gap-8 md:flex-row md:items-start md:gap-12">
+              <div className="min-w-0 flex-1 space-y-3">
                 <h2 className="text-xl font-semibold">Descripción</h2>
                 <p className="max-w-2xl whitespace-pre-line text-base leading-relaxed text-white/85">
                   {service.description}
                 </p>
               </div>
-              <aside className="flex flex-col gap-3 md:items-start">
+              <aside className="flex shrink-0 flex-col items-start gap-3 md:w-56 md:pl-6">
                 <ServiceContactDialog
                   {...contactProps}
                   surface="description"
-                  triggerClassName={cn(
-                    "h-8 gap-1.5 px-3 text-sm font-medium",
-                    heroCtaClassName,
-                  )}
+                  triggerClassName="h-auto gap-2 rounded-none bg-transparent p-0 text-base font-medium text-white shadow-none hover:bg-transparent hover:text-white/80"
                 />
                 {service.instagramUrl ? (
                   <a
                     href={service.instagramUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm text-white/85 underline-offset-4 hover:underline"
+                    className="inline-flex items-center gap-2 text-base font-medium text-white hover:text-white/80"
                   >
-                    <Instagram className="size-4" aria-hidden />
+                    <Instagram className="size-4" strokeWidth={2} aria-hidden />
                     {service.instagramHandle || "Instagram"}
                   </a>
                 ) : null}
@@ -221,7 +225,7 @@ export function ServiceDetailPage({
                           {review.body}
                         </p>
                       </div>
-                      <div className="flex shrink-0 flex-col items-end gap-1">
+                      <div className="flex shrink-0 flex-col items-center gap-1 self-center">
                         <span className="text-lg font-semibold leading-none">
                           {review.rating}
                         </span>

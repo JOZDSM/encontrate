@@ -54,7 +54,7 @@ export function CatalogSearchBar({
           "w-full rounded-full shadow-none read-only:cursor-default",
           isCompact
             ? cn(
-                "border-0 bg-muted/50 text-foreground placeholder:text-foreground focus-visible:border-0 focus-visible:ring-0",
+                "border-transparent bg-muted/50 text-foreground placeholder:text-foreground focus-visible:border-transparent focus-visible:ring-0",
                 matchButtonHeight
                   ? "h-9 pr-10 pl-9 text-sm"
                   : "h-10 pr-11 pl-10 text-sm",

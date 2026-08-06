@@ -1,6 +1,13 @@
 "use client";
 
-import { Globe, Instagram, Mail, MessageCircle, MessageSquare } from "lucide-react";
+import {
+  Globe,
+  Instagram,
+  Mail,
+  MessageCircle,
+  MessageSquare,
+  MessageSquarePlus,
+} from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,6 +60,8 @@ export function ServiceContactDialog({
   triggerIcon?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const TriggerIcon =
+    surface === "description" ? MessageSquarePlus : MessageSquare;
 
   const options = [
     showWhatsapp && whatsapp
@@ -112,7 +121,7 @@ export function ServiceContactDialog({
             )}
           >
             {triggerIcon ? (
-              <MessageSquare className="size-4" strokeWidth={2} aria-hidden />
+              <TriggerIcon className="size-4" strokeWidth={2} aria-hidden />
             ) : null}
             {triggerLabel}
           </button>

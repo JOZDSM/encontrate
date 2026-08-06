@@ -47,7 +47,7 @@ function HeroSlideCopy({ service }: { service: FeaturedService }) {
       <FeaturedBrandTitle service={service} />
 
       {service.hours.length > 0 || (!service.locationLabel && service.address) ? (
-        <div className="max-w-md space-y-1 text-xs leading-relaxed text-white/80 sm:text-sm">
+        <div className="max-w-md space-y-1 text-sm leading-5 text-white/80">
           {service.hours.map((line) => (
             <p key={line}>{line}</p>
           ))}

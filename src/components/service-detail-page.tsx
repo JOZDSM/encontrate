@@ -158,31 +158,31 @@ export function ServiceDetailPage({
           </div>
 
           <div className="mt-[112px] space-y-12 pb-12 md:space-y-16 md:pb-16">
-            <section className="flex flex-col gap-8 md:flex-row md:items-start">
-              <div className="max-w-2xl space-y-3">
-                <h2 className="text-xl font-semibold">Descripción</h2>
-                <p className="whitespace-pre-line text-base leading-relaxed text-white/85">
+            <section className="space-y-3">
+              <h2 className="text-xl font-semibold">Descripción</h2>
+              <div className="flex flex-col gap-8 md:flex-row md:items-start">
+                <p className="max-w-2xl whitespace-pre-line text-base leading-relaxed text-white/85">
                   {service.description}
                 </p>
+                <aside className="flex shrink-0 flex-col items-start gap-3 md:pl-6">
+                  <ServiceContactDialog
+                    {...contactProps}
+                    surface="description"
+                    triggerClassName="h-auto gap-2 rounded-none bg-transparent p-0 text-base font-medium text-white shadow-none hover:bg-transparent hover:text-white/80"
+                  />
+                  {service.instagramUrl ? (
+                    <a
+                      href={service.instagramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-base font-medium text-white hover:text-white/80"
+                    >
+                      <Instagram className="size-4" strokeWidth={2} aria-hidden />
+                      {service.instagramHandle || "Instagram"}
+                    </a>
+                  ) : null}
+                </aside>
               </div>
-              <aside className="flex shrink-0 flex-col items-start gap-3 md:pl-6">
-                <ServiceContactDialog
-                  {...contactProps}
-                  surface="description"
-                  triggerClassName="h-auto gap-2 rounded-none bg-transparent p-0 text-base font-medium text-white shadow-none hover:bg-transparent hover:text-white/80"
-                />
-                {service.instagramUrl ? (
-                  <a
-                    href={service.instagramUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-base font-medium text-white hover:text-white/80"
-                  >
-                    <Instagram className="size-4" strokeWidth={2} aria-hidden />
-                    {service.instagramHandle || "Instagram"}
-                  </a>
-                ) : null}
-              </aside>
             </section>
 
             {service.offeringItems.length > 0 ? (

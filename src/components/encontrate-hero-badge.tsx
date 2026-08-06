@@ -42,7 +42,7 @@ export function HeroBrandWithBadge({
   return (
     <div className={cn("relative w-fit max-w-full", className)}>
       {children}
-      <EncontrateHeroBadge className="absolute top-0 right-0 translate-x-4 -translate-y-4" />
+      <EncontrateHeroBadge className="absolute top-0 left-full ml-2 -translate-y-1/3" />
     </div>
   );
 }

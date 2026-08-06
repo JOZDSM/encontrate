@@ -5,6 +5,8 @@ export type ServiceOffering = {
   title: string;
   professionalName: string;
   category: string;
+  /** Optional search synonyms from ServiceCategory. */
+  categorySynonyms?: string[];
   neighborhood?: string;
   priceNote?: string;
   imageUrl?: string;

@@ -66,6 +66,9 @@ export default async function AdminPage() {
               <Button asChild size="sm" variant="secondary" className="rounded-full">
                 <Link href="/admin/services">Servicios del catálogo</Link>
               </Button>
+              <Button asChild size="sm" variant="secondary" className="rounded-full">
+                <Link href="/admin/categories">Categorías</Link>
+              </Button>
             </div>
           </div>
 

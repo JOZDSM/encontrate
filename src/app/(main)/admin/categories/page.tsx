@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { deleteServiceAction } from "@/app/actions/admin-services";
+import { deleteCategoryAction } from "@/app/actions/admin-categories";
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,16 +15,13 @@ import {
 import { isPlatformAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 
-export default async function AdminServicesPage() {
+export default async function AdminCategoriesPage() {
   const session = await auth();
   if (!isPlatformAdmin(session)) redirect("/");
 
-  const services = await prisma.service.findMany({
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-    include: {
-      category: { select: { name: true } },
-      _count: { select: { reviews: true } },
-    },
+  const categories = await prisma.serviceCategory.findMany({
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    include: { _count: { select: { services: true } } },
   });
 
   return (
@@ -33,58 +30,49 @@ export default async function AdminServicesPage() {
         <CardContent className="space-y-6 p-6 text-card-foreground">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-semibold">Servicios</h1>
+              <h1 className="text-2xl font-semibold">Categorías</h1>
               <p className="text-sm text-muted-foreground">
-                Catálogo público de profesionales.
+                Agrupan servicios en el catálogo y definen sinónimos de búsqueda.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button asChild size="sm" variant="outline" className="rounded-full">
                 <Link href="/admin">Volver al panel</Link>
               </Button>
-              <Button asChild size="sm" variant="outline" className="rounded-full">
-                <Link href="/admin/categories">Categorías</Link>
-              </Button>
               <Button asChild size="sm" className="rounded-full">
-                <Link href="/admin/services/new">Nuevo servicio</Link>
+                <Link href="/admin/categories/new">Nueva categoría</Link>
               </Button>
             </div>
           </div>
 
-          {services.length === 0 ? (
+          {categories.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Todavía no hay servicios. Creá el primero.
+              Todavía no hay categorías. Creá la primera.
             </p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Nombre</TableHead>
-                  <TableHead>Categoría</TableHead>
                   <TableHead>Slug</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Reviews</TableHead>
+                  <TableHead>Orden</TableHead>
+                  <TableHead>Sinónimos</TableHead>
+                  <TableHead>Servicios</TableHead>
                   <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {services.map((service) => (
-                  <TableRow key={service.id}>
-                    <TableCell className="font-medium">
-                      {service.professionalName}
-                      <div className="text-xs text-muted-foreground">
-                        {service.title}
-                      </div>
-                    </TableCell>
-                    <TableCell>{service.category.name}</TableCell>
+                {categories.map((category) => (
+                  <TableRow key={category.id}>
+                    <TableCell className="font-medium">{category.name}</TableCell>
                     <TableCell className="font-mono text-xs">
-                      /{service.slug}
+                      {category.slug}
                     </TableCell>
-                    <TableCell>
-                      {service.published ? "Publicado" : "Borrador"}
-                      {service.featured ? " · Destacado" : ""}
+                    <TableCell>{category.sortOrder}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {category.synonyms.length}
                     </TableCell>
-                    <TableCell>{service._count.reviews}</TableCell>
+                    <TableCell>{category._count.services}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
@@ -93,26 +81,14 @@ export default async function AdminServicesPage() {
                           variant="secondary"
                           className="rounded-full"
                         >
-                          <Link href={`/admin/services/${service.id}/edit`}>
+                          <Link href={`/admin/categories/${category.id}/edit`}>
                             Editar
                           </Link>
                         </Button>
-                        {service.published ? (
-                          <Button
-                            asChild
-                            size="sm"
-                            variant="outline"
-                            className="rounded-full"
-                          >
-                            <Link href={`/${service.slug}`} target="_blank">
-                              Ver
-                            </Link>
-                          </Button>
-                        ) : null}
                         <form
                           action={async () => {
                             "use server";
-                            await deleteServiceAction(service.id);
+                            await deleteCategoryAction(category.id);
                           }}
                         >
                           <Button
@@ -120,6 +96,12 @@ export default async function AdminServicesPage() {
                             size="sm"
                             variant="destructive"
                             className="rounded-full"
+                            disabled={category._count.services > 0}
+                            title={
+                              category._count.services > 0
+                                ? "Reasigná los servicios antes de borrar"
+                                : undefined
+                            }
                           >
                             Borrar
                           </Button>

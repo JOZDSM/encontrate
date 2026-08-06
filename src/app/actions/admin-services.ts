@@ -24,7 +24,7 @@ const serviceInputSchema = z.object({
   professionalName: z.string().trim().min(2).max(120),
   slug: z.string().trim().min(2).max(80).optional().or(z.literal("")),
   title: z.string().trim().min(2).max(160),
-  category: z.string().trim().min(2).max(80),
+  categoryId: z.string().trim().min(1),
   description: z.string().trim().min(10).max(8000),
   imageUrl: z.string().trim().min(1).max(500),
   websiteUrl: z.string().trim().max(500).optional().or(z.literal("")),
@@ -92,6 +92,12 @@ export async function createServiceAction(
   }
 
   const data = parsed.data;
+  const category = await prisma.serviceCategory.findUnique({
+    where: { id: data.categoryId },
+    select: { id: true },
+  });
+  if (!category) return { ok: false, error: "Categoría no encontrada." };
+
   const baseSlug =
     data.slug?.trim() || slugifyProfessionalName(data.professionalName);
   const slugResult = await resolveUniqueSlug(baseSlug);
@@ -102,7 +108,7 @@ export async function createServiceAction(
       slug: slugResult,
       professionalName: data.professionalName,
       title: data.title,
-      category: data.category,
+      categoryId: data.categoryId,
       description: data.description,
       imageUrl: data.imageUrl,
       websiteUrl: emptyToNull(data.websiteUrl),
@@ -158,6 +164,12 @@ export async function updateServiceAction(
   if (!existing) return { ok: false, error: "Servicio no encontrado." };
 
   const data = parsed.data;
+  const category = await prisma.serviceCategory.findUnique({
+    where: { id: data.categoryId },
+    select: { id: true },
+  });
+  if (!category) return { ok: false, error: "Categoría no encontrada." };
+
   const baseSlug =
     data.slug?.trim() || slugifyProfessionalName(data.professionalName);
   const slugResult = await resolveUniqueSlug(baseSlug, id);
@@ -171,7 +183,7 @@ export async function updateServiceAction(
         slug: slugResult,
         professionalName: data.professionalName,
         title: data.title,
-        category: data.category,
+        categoryId: data.categoryId,
         description: data.description,
         imageUrl: data.imageUrl,
         websiteUrl: emptyToNull(data.websiteUrl),

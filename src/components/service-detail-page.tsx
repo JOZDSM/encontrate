@@ -6,9 +6,8 @@ import { ServiceCard } from "@/components/service-card";
 import { ServiceContactDialog } from "@/components/service-contact-dialog";
 import { ServiceShareButton } from "@/components/service-share-button";
 import { SiteFooter } from "@/components/site-footer";
-import type { ServiceDetail } from "@/lib/service-catalog";
+import type { ServiceDetail, ServiceWithCategory } from "@/lib/service-catalog";
 import { toServiceOffering } from "@/lib/service-catalog";
-import type { Service } from "@/generated/prisma/client";
 import { HOME_PAGE_GUTTER_CLASS } from "@/lib/home-catalog-layout";
 import { cn } from "@/lib/utils";
 
@@ -40,7 +39,7 @@ export function ServiceDetailPage({
   similares,
 }: {
   service: ServiceDetail;
-  similares: Service[];
+  similares: ServiceWithCategory[];
 }) {
   const contactProps = {
     serviceId: service.id,

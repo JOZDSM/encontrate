@@ -146,9 +146,11 @@ export function scoreService(
 
   const title = normalizeSearchText(service.title);
   const name = normalizeSearchText(service.professionalName);
-  const category = normalizeSearchText(service.category);
+  const category = normalizeSearchText(
+    [service.category, ...(service.categorySynonyms ?? [])].join(" "),
+  );
   const haystack = normalizeSearchText(
-    `${service.title} ${service.professionalName} ${service.category}`,
+    `${service.title} ${service.professionalName} ${service.category} ${(service.categorySynonyms ?? []).join(" ")}`,
   );
 
   let score =

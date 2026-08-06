@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import {
@@ -27,7 +28,7 @@ export type AdminServiceFormValues = {
   professionalName: string;
   slug: string;
   title: string;
-  category: string;
+  categoryId: string;
   description: string;
   imageUrl: string;
   websiteUrl: string;
@@ -50,7 +51,7 @@ const emptyValues: AdminServiceFormValues = {
   professionalName: "",
   slug: "",
   title: "",
-  category: "",
+  categoryId: "",
   description: "",
   imageUrl: "",
   websiteUrl: "",
@@ -72,9 +73,11 @@ const emptyValues: AdminServiceFormValues = {
 export function AdminServiceForm({
   serviceId,
   initial,
+  categories,
 }: {
   serviceId?: string;
   initial?: Partial<AdminServiceFormValues>;
+  categories: { id: string; name: string }[];
 }) {
   const router = useRouter();
   const [values, setValues] = useState<AdminServiceFormValues>({
@@ -170,13 +173,32 @@ export function AdminServiceForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="category">Categoría</Label>
-          <Input
-            id="category"
-            value={values.category}
-            onChange={(e) => setField("category", e.target.value)}
+          <Label htmlFor="categoryId">Categoría</Label>
+          <select
+            id="categoryId"
+            value={values.categoryId}
+            onChange={(e) => setField("categoryId", e.target.value)}
             required
-          />
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+          >
+            <option value="" disabled>
+              Elegí una categoría
+            </option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+          {categories.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              No hay categorías. Creá una en{" "}
+              <Link href="/admin/categories" className="underline">
+                Categorías
+              </Link>
+              .
+            </p>
+          ) : null}
         </div>
         <div className="space-y-2">
           <Label htmlFor="imageUrl">URL de imagen</Label>

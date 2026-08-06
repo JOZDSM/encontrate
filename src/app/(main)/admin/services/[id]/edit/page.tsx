@@ -13,22 +13,29 @@ export default async function AdminEditServicePage({
   if (!isPlatformAdmin(session)) redirect("/");
 
   const { id } = await params;
-  const service = await prisma.service.findUnique({
-    where: { id },
-    include: {
-      reviews: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] },
-    },
-  });
+  const [service, categories] = await Promise.all([
+    prisma.service.findUnique({
+      where: { id },
+      include: {
+        reviews: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] },
+      },
+    }),
+    prisma.serviceCategory.findMany({
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+      select: { id: true, name: true },
+    }),
+  ]);
   if (!service) notFound();
 
   return (
     <AdminServiceForm
       serviceId={service.id}
+      categories={categories}
       initial={{
         professionalName: service.professionalName,
         slug: service.slug,
         title: service.title,
-        category: service.category,
+        categoryId: service.categoryId,
         description: service.description,
         imageUrl: service.imageUrl,
         websiteUrl: service.websiteUrl ?? "",

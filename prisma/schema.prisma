@@ -441,6 +441,19 @@ model GuestListingMatch {
   @@index([signalId, notifiedAt])
 }
 
+/// Admin-managed catalog categories (homepage rows + search synonyms).
+model ServiceCategory {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  /// Extra search terms (e.g. gym, entrenador for "Fitness").
+  synonyms  String[]  @default([])
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  services  Service[]
+}
+
 /// Curated local-services catalog (admin-authored profiles).
 model Service {
   id               String   @id @default(cuid())
@@ -448,7 +461,8 @@ model Service {
   professionalName String
   /// Service type shown under the name (e.g. "Gestora en extranjería").
   title            String
-  category         String
+  categoryId       String
+  category         ServiceCategory @relation(fields: [categoryId], references: [id])
   description      String   @db.Text
   imageUrl         String
   websiteUrl       String?
@@ -470,7 +484,7 @@ model Service {
 
   reviews ServiceReview[]
 
-  @@index([category, published])
+  @@index([categoryId, published])
   @@index([published, featured, sortOrder])
 }
 

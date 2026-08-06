@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { PrismaClient } from "../src/generated/prisma/client";
+import { slugifyProfessionalName } from "../src/lib/service-slug";
 
 const url = process.env.DATABASE_URL;
 if (!url || url.startsWith("prisma+")) {
@@ -12,14 +13,108 @@ if (!url || url.startsWith("prisma+")) {
 const pool = new Pool({ connectionString: url });
 const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 
+const DEFAULT_CATEGORIES: {
+  name: string;
+  synonyms: string[];
+  sortOrder: number;
+}[] = [
+  {
+    name: "Extranjería",
+    synonyms: ["residencia", "gestora", "tramites", "nie", "papeleo", "extranjeria"],
+    sortOrder: 0,
+  },
+  {
+    name: "Wellness",
+    synonyms: ["masaje", "masajista", "yoga", "bienestar", "salud", "nutricionista"],
+    sortOrder: 1,
+  },
+  {
+    name: "Ayuda en el hogar",
+    synonyms: ["limpieza", "limpiadora", "hogar"],
+    sortOrder: 2,
+  },
+  {
+    name: "Belleza",
+    synonyms: ["manicura", "peluqueria", "corte", "color", "estetica"],
+    sortOrder: 3,
+  },
+  {
+    name: "Fitness",
+    synonyms: ["gym", "gimnasio", "personal trainer", "entrenador", "entrenamiento", "ejercicio"],
+    sortOrder: 4,
+  },
+  {
+    name: "Educación",
+    synonyms: ["clases", "profesor", "ingles", "italiano", "tutoria", "idiomas"],
+    sortOrder: 5,
+  },
+  {
+    name: "Reparaciones",
+    synonyms: ["fontanero", "arreglar", "fix"],
+    sortOrder: 6,
+  },
+  {
+    name: "Mascotas",
+    synonyms: ["perro", "paseador", "veterinario"],
+    sortOrder: 7,
+  },
+  {
+    name: "Gastronomía",
+    synonyms: ["chef", "cocina", "comida"],
+    sortOrder: 8,
+  },
+  {
+    name: "Eventos",
+    synonyms: ["fotografo", "dj", "fiesta"],
+    sortOrder: 9,
+  },
+  {
+    name: "Mudanza",
+    synonyms: ["fletero", "mudanzas", "transporte"],
+    sortOrder: 10,
+  },
+];
+
+async function upsertCategories() {
+  const byName = new Map<string, string>();
+  for (const cat of DEFAULT_CATEGORIES) {
+    const slug = slugifyProfessionalName(cat.name);
+    const row = await prisma.serviceCategory.upsert({
+      where: { name: cat.name },
+      create: {
+        name: cat.name,
+        slug,
+        synonyms: cat.synonyms,
+        sortOrder: cat.sortOrder,
+      },
+      update: {
+        synonyms: cat.synonyms,
+        sortOrder: cat.sortOrder,
+      },
+    });
+    byName.set(cat.name, row.id);
+  }
+  return byName;
+}
+
 async function main() {
+  const categories = await upsertCategories();
+
+  const extranjeriaId = categories.get("Extranjería");
+  const hogarId = categories.get("Ayuda en el hogar");
+  const mudanzaId = categories.get("Mudanza");
+  const wellnessId = categories.get("Wellness");
+  if (!extranjeriaId || !hogarId || !mudanzaId || !wellnessId) {
+    throw new Error("Missing seeded categories.");
+  }
+
   const florencia = await prisma.service.upsert({
     where: { slug: "florencia-gambini" },
     create: {
       slug: "florencia-gambini",
       professionalName: "Florencia Gambini",
       title: "Gestora en extranjería",
-      category: "Extranjería",
+      categoryId: extranjeriaId,
       description:
         "Acompaño a personas y familias en trámites de extranjería en Barcelona: residencia, arraigo, renovaciones y gestiones ante la administración. Trabajo con claridad, plazos realistas y seguimiento cercano en cada expediente.",
       imageUrl: "/design/home-services/gestora-extranjeria.jpg",
@@ -68,6 +163,7 @@ async function main() {
     update: {
       published: true,
       featured: true,
+      categoryId: extranjeriaId,
       imageUrl: "/design/home-services/gestora-extranjeria.jpg",
     },
   });
@@ -77,7 +173,7 @@ async function main() {
       slug: "maria-g",
       professionalName: "María G.",
       title: "Limpieza profunda del piso",
-      category: "Ayuda en el hogar",
+      categoryId: hogarId,
       description:
         "Servicio de limpieza profunda para pisos en Barcelona. Ideal antes de una mudanza, después de obras o para dejar el hogar a punto.",
       imageUrl: "/design/home-services/limpiadora.jpg",
@@ -93,7 +189,7 @@ async function main() {
       slug: "carlos-r",
       professionalName: "Carlos R.",
       title: "Mudanza económica",
-      category: "Mudanza",
+      categoryId: mudanzaId,
       description:
         "Mudanzas económicas en Barcelona y alrededores, con presupuesto sin compromiso y cuidado del mobiliario.",
       imageUrl: "/design/home-services/fletero.jpg",
@@ -109,7 +205,7 @@ async function main() {
       slug: "andrea-f",
       professionalName: "Andrea F.",
       title: "Nutricionista",
-      category: "Wellness",
+      categoryId: wellnessId,
       description:
         "Planes de alimentación personalizados y seguimiento cercano para objetivos de salud y bienestar.",
       imageUrl: "/design/home-services/nutricionista.jpg",
@@ -137,13 +233,14 @@ async function main() {
       },
       update: {
         published: true,
+        categoryId: item.categoryId,
         imageUrl: item.imageUrl,
         featured: true,
       },
     });
   }
 
-  console.log(`Seeded services (incl. ${florencia.slug}).`);
+  console.log(`Seeded categories + services (incl. ${florencia.slug}).`);
 }
 
 main()

@@ -20,7 +20,7 @@ export function SiteFooter() {
         "flex shrink-0 flex-col items-center justify-center gap-1 border-t py-6 text-center text-sm",
         catalogSurface && HOME_PAGE_GUTTER_CLASS,
         catalogSurface
-          ? "border-transparent bg-black text-white/70"
+          ? "border-transparent bg-background text-white/70"
           : plainBackground
             ? "border-border bg-background px-4 text-muted-foreground"
             : "border-transparent px-4 text-primary-foreground/80 dark:text-foreground",

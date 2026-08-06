@@ -68,12 +68,12 @@ export function HomeServicesCatalog({
           />
         </div>
 
-        <div className="bg-black">
+        <div className="bg-background">
           <div className={cn(HOME_PAGE_GUTTER_CLASS, "my-8 md:my-10")}>
             <CatalogSearchBar
               id="catalog-main-search"
               variant="prominent"
-              inputClassName="border-white/30 bg-black"
+              inputClassName="border-white/30 bg-background"
             />
           </div>
 

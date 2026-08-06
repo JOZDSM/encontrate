@@ -140,8 +140,6 @@ function HeroMedia({
           }
         />
       )}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
     </div>
   );
 }
@@ -171,13 +169,30 @@ export function ServiceHeroCarousel({
   return (
     <section
       data-hero-carousel
-      className="relative h-svh min-h-svh w-full overflow-hidden bg-black"
+      className="relative h-svh min-h-svh w-full overflow-hidden bg-background"
       aria-roledescription="carousel"
       aria-label="Servicios destacados"
     >
       {items.map((service, i) => (
         <HeroMedia key={service.id} service={service} active={i === index} />
       ))}
+
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-[1]"
+        style={{
+          background:
+            "linear-gradient(to bottom, transparent 85%, var(--background) 100%)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-[1]"
+        style={{
+          background:
+            "linear-gradient(to right, color-mix(in oklab, var(--background) 80%, transparent) 0%, color-mix(in oklab, var(--background) 40%, transparent) 30%, transparent 50%)",
+        }}
+      />
 
       <div
         className={cn(

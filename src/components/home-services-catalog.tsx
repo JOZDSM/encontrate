@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { CatalogSearchBar } from "@/components/catalog-search-bar";
+import { useCatalogSearch } from "@/components/catalog-search-provider";
 import { ServiceHeroCarousel } from "@/components/service-hero-carousel";
 import { ServiceScrollRow } from "@/components/service-scroll-row";
 import { SiteFooter } from "@/components/site-footer";
+import { flattenCatalogOfferings } from "@/lib/catalog-search";
 import {
   MOCK_FEATURED_SERVICES,
   type CuratedCollection,
@@ -26,28 +28,16 @@ export function HomeServicesCatalog({
   recent: ServiceOffering[];
   categories: CuratedCollection[];
 }) {
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key !== "e" && event.key !== "E") return;
-      const target = event.target;
-      if (
-        target instanceof HTMLElement &&
-        (target.isContentEditable ||
-          target.tagName === "INPUT" ||
-          target.tagName === "TEXTAREA" ||
-          target.tagName === "SELECT")
-      ) {
-        return;
-      }
-      event.preventDefault();
-      const el = document.getElementById("catalog-main-search");
-      el?.scrollIntoView({ behavior: "smooth", block: "center" });
-      window.setTimeout(() => el?.focus(), 350);
-    }
+  const { setServices } = useCatalogSearch();
 
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  const offerings = useMemo(
+    () => flattenCatalogOfferings(recent, categories),
+    [recent, categories],
+  );
+
+  useEffect(() => {
+    setServices(offerings);
+  }, [offerings, setServices]);
 
   return (
     <div className="relative w-full text-white">

@@ -2,6 +2,7 @@
 
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useOptionalCatalogSearch } from "@/components/catalog-search-provider";
 import { cn } from "@/lib/utils";
 
 type CatalogSearchBarProps = {
@@ -10,7 +11,7 @@ type CatalogSearchBarProps = {
   className?: string;
   inputClassName?: string;
   id?: string;
-  onFocus?: () => void;
+  onActivate?: () => void;
 };
 
 export function CatalogSearchBar({
@@ -19,9 +20,15 @@ export function CatalogSearchBar({
   className,
   inputClassName,
   id,
-  onFocus,
+  onActivate,
 }: CatalogSearchBarProps) {
   const isCompact = variant === "compact";
+  const search = useOptionalCatalogSearch();
+
+  const activate = () => {
+    onActivate?.();
+    search?.openSearch();
+  };
 
   return (
     <div
@@ -48,10 +55,11 @@ export function CatalogSearchBar({
         placeholder={
           isCompact ? "Encontrá…" : "Encontrá lo que precisás…"
         }
-        aria-label="Buscar servicios (próximamente)"
-        onFocus={onFocus}
+        aria-label="Buscar servicios"
+        onFocus={activate}
+        onClick={activate}
         className={cn(
-          "w-full rounded-full shadow-none read-only:cursor-default",
+          "w-full cursor-pointer rounded-full shadow-none read-only:cursor-pointer",
           isCompact
             ? cn(
                 "border-transparent bg-muted/50 text-foreground placeholder:text-foreground focus-visible:border-transparent focus-visible:ring-0",
@@ -70,13 +78,11 @@ export function CatalogSearchBar({
           isCompact
             ? cn(
                 "border border-foreground bg-transparent text-foreground",
-                /* h-9/h-10: circle sized so top = bottom = right inset */
                 matchButtonHeight
                   ? "right-1 size-7 text-[11px]"
                   : "right-1.5 size-7 text-[11px]",
               )
-            : /* h-14 (56px) − 2×6px inset → 44px circle */
-              "right-1.5 size-11 border border-white/25 bg-white/10 text-sm text-white/70",
+            : "right-1.5 size-11 border border-white/25 bg-white/10 text-sm text-white/70",
         )}
       >
         E

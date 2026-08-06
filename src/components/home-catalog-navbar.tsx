@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { signOutAction } from "@/app/actions/auth";
 import { CatalogSearchBar } from "@/components/catalog-search-bar";
+import { useCatalogSearch } from "@/components/catalog-search-provider";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -43,6 +44,7 @@ export function HomeCatalogNavbar({ onSearchFocus }: Props) {
   const designPreview = Boolean(session?.user?.designPreview);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { openSearch } = useCatalogSearch();
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -62,11 +64,9 @@ export function HomeCatalogNavbar({ onSearchFocus }: Props) {
     };
   }, [pathname]);
 
-  const scrollToMainSearch = () => {
+  const openCatalogSearch = () => {
     onSearchFocus?.();
-    const el = document.getElementById("catalog-main-search");
-    el?.scrollIntoView({ behavior: "smooth", block: "center" });
-    window.setTimeout(() => el?.focus(), 350);
+    openSearch();
   };
 
   return (
@@ -99,8 +99,8 @@ export function HomeCatalogNavbar({ onSearchFocus }: Props) {
             <button
               type="button"
               className="w-56 shrink-0 cursor-pointer text-left"
-              onClick={scrollToMainSearch}
-              aria-label="Ir al buscador principal"
+              onClick={openCatalogSearch}
+              aria-label="Buscar servicios"
             >
               <CatalogSearchBar variant="compact" matchButtonHeight />
             </button>
@@ -174,7 +174,7 @@ export function HomeCatalogNavbar({ onSearchFocus }: Props) {
               className="w-full text-left"
               onClick={() => {
                 closeMenu();
-                scrollToMainSearch();
+                openCatalogSearch();
               }}
             >
               <CatalogSearchBar

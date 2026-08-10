@@ -113,7 +113,8 @@ function fieldScore(fieldNorm: string, terms: string[], weight: number): number 
       best = Math.max(best, weight * 1);
       continue;
     }
-    if (fieldNorm.includes(term)) {
+    // Require a meaningful substring so 1–2 letter noise does not hit every field.
+    if (term.length >= 3 && fieldNorm.includes(term)) {
       // Prefer matches closer to the start / covering more of the field
       const coverage = term.length / Math.max(fieldNorm.length, 1);
       best = Math.max(best, weight * (0.55 + 0.4 * coverage));
@@ -123,7 +124,12 @@ function fieldScore(fieldNorm: string, terms: string[], weight: number): number 
     for (const ft of fieldTokens) {
       if (ft === term) {
         best = Math.max(best, weight * 0.85);
-      } else if (ft.startsWith(term) || term.startsWith(ft)) {
+        // Query is a prefix of a field token (typing "limp" → "limpieza").
+      } else if (term.length >= 2 && ft.startsWith(term)) {
+        best = Math.max(best, weight * 0.45);
+        // Field token is a prefix of the query — only for tokens long enough
+        // to avoid "María G." matching "gentrification" via "g".
+      } else if (ft.length >= 3 && term.startsWith(ft)) {
         best = Math.max(best, weight * 0.45);
       } else if (
         term.length >= 3 &&

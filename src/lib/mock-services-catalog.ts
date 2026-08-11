@@ -45,7 +45,7 @@ const IMG = {
   repair: "/pexels-ch-jawad-224803663-36883769.jpg",
   tutor: "/pexels-george-cristea-122917183-16058900.jpg",
   portrait: "/pexels-george-cristea-122917183-16104705.jpg",
-  pipolHero: "/design/home-services/pipol-hero.png",
+  pipolHero: "/design/home-services/pipol-hero.jpg",
   dulceMariaHero: "/design/home-services/dulce-maria-hero.jpg",
   gestoraExtranjeria: "/design/home-services/gestora-extranjeria.jpg",
   nutricionista: "/design/home-services/nutricionista.jpg",

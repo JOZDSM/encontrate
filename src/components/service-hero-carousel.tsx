@@ -20,7 +20,7 @@ function FeaturedBrandTitle({ service }: { service: FeaturedService }) {
   if (service.brandLogo === "pipol") {
     return (
       <HeroBrandWithBadge>
-        <PipolLogo className="w-[min(100%,14rem)] sm:w-56 md:w-64" />
+        <PipolLogo className="max-w-[14rem] sm:max-w-56 md:max-w-64" />
       </HeroBrandWithBadge>
     );
   }
@@ -34,7 +34,7 @@ function FeaturedBrandTitle({ service }: { service: FeaturedService }) {
 
   return (
     <HeroBrandWithBadge>
-      <p className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
+      <p className="max-w-full text-3xl font-bold tracking-tight break-words text-white sm:text-5xl md:text-6xl">
         {service.brandName}
       </p>
     </HeroBrandWithBadge>
@@ -43,7 +43,7 @@ function FeaturedBrandTitle({ service }: { service: FeaturedService }) {
 
 function HeroSlideCopy({ service }: { service: FeaturedService }) {
   return (
-    <div className="flex w-full flex-col gap-4 md:gap-5">
+    <div className="flex w-full min-w-0 max-w-lg flex-col gap-4 text-left md:max-w-none md:gap-5">
       <FeaturedBrandTitle service={service} />
 
       {service.hours.length > 0 || (!service.locationLabel && service.address) ? (
@@ -111,7 +111,7 @@ function HeroMedia({
       {showVideo ? (
         <video
           key={service.id}
-          className="absolute inset-0 size-full object-cover"
+          className="absolute inset-0 size-full object-cover object-center"
           autoPlay
           muted
           loop
@@ -146,11 +146,8 @@ function HeroMedia({
 
 export function ServiceHeroCarousel({
   items,
-  catalogOverlap = "230px",
 }: {
   items: FeaturedService[];
-  /** CSS length for space reserved above Recientes (matches catalog negative margin). */
-  catalogOverlap?: string;
 }) {
   const [index, setIndex] = useState(0);
   const active = items[index];
@@ -169,25 +166,27 @@ export function ServiceHeroCarousel({
   return (
     <section
       data-hero-carousel
-      className="relative h-svh min-h-svh w-full overflow-hidden bg-background"
+      className="relative h-[80svh] min-h-[80svh] w-full overflow-hidden bg-background md:h-svh md:min-h-svh"
       aria-roledescription="carousel"
       aria-label="Servicios destacados"
     >
       {items.map((service, i) => (
-        <HeroMedia key={service.id} service={service} active={i === index} />
+        <HeroMedia
+          key={service.id}
+          service={service}
+          active={i === index}
+        />
       ))}
 
+      {/* Bottom fade — stronger on mobile so the image edge blends into the catalog. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-[1]"
-        style={{
-          background:
-            "linear-gradient(to bottom, transparent 85%, var(--background) 100%)",
-        }}
+        className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(to_bottom,transparent_55%,var(--background)_100%)] md:bg-[linear-gradient(to_bottom,transparent_85%,var(--background)_100%)]"
       />
+      {/* Left scrim — desktop only; mobile copy sits on the bottom fade. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-[1]"
+        className="pointer-events-none absolute inset-0 z-[1] hidden md:block"
         style={{
           background:
             "linear-gradient(to right, color-mix(in oklab, var(--background) 80%, transparent) 0%, color-mix(in oklab, var(--background) 40%, transparent) 30%, transparent 50%)",
@@ -196,14 +195,14 @@ export function ServiceHeroCarousel({
 
       <div
         className={cn(
-          "absolute inset-x-0 z-10 flex flex-col justify-center",
+          "absolute inset-x-0 z-10 flex flex-col",
           HOME_PAGE_GUTTER_CLASS,
-          /* Vertically center between navbar (on load) and Recientes overlap. */
-          "top-20 md:top-28",
+          /* Mobile: pin content above first catalog row (gap-8). Desktop: center in overlap band. */
+          "top-20 bottom-8 justify-end md:top-28 md:bottom-[184px] md:justify-center",
+          "items-center md:items-stretch",
         )}
-        style={{ bottom: catalogOverlap }}
       >
-        <div className="grid w-full">
+        <div className="grid w-full min-w-0 max-w-lg md:max-w-none">
           {items.map((service, i) => {
             const isActive = i === index;
             return (
@@ -225,7 +224,7 @@ export function ServiceHeroCarousel({
         </div>
 
         {items.length > 1 ? (
-          <div className="mt-8 flex w-full items-center gap-2">
+          <div className="mt-8 flex w-full max-w-lg items-center justify-center gap-2 md:max-w-none md:justify-start">
             {items.map((service, i) => (
               <button
                 key={service.id}

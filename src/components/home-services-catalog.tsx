@@ -16,8 +16,9 @@ import { HOME_PAGE_GUTTER_CLASS } from "@/lib/home-catalog-layout";
 import { cn } from "@/lib/utils";
 
 /**
- * How far Recientes pulls up over the hero.
+ * How far Recientes pulls up over the hero on desktop.
  * Base 230px, shifted down by 20% of that on-load visible strip (~46px).
+ * Mobile uses no pull-up so hero content can sit gap-8 above the first row.
  */
 export const HOME_CATALOG_OVERLAP = "184px";
 
@@ -41,15 +42,14 @@ export function HomeServicesCatalog({
 
   return (
     <div className="relative w-full text-white">
-      <ServiceHeroCarousel
-        items={MOCK_FEATURED_SERVICES}
-        catalogOverlap={HOME_CATALOG_OVERLAP}
-      />
+      <ServiceHeroCarousel items={MOCK_FEATURED_SERVICES} />
 
       <section
         data-home-catalog
-        className="relative z-20"
-        style={{ marginTop: `calc(-1 * ${HOME_CATALOG_OVERLAP})` }}
+        className={cn(
+          "relative z-20 mt-0",
+          "md:-mt-[184px]",
+        )}
       >
         <div data-home-catalog-over-hero>
           <ServiceScrollRow

@@ -8,7 +8,10 @@ import { ServiceShareButton } from "@/components/service-share-button";
 import { SiteFooter } from "@/components/site-footer";
 import type { ServiceDetail, ServiceWithCategory } from "@/lib/service-catalog";
 import { toServiceOffering } from "@/lib/service-catalog";
-import { HOME_PAGE_GUTTER_CLASS } from "@/lib/home-catalog-layout";
+import {
+  HOME_CATALOG_SCROLL_GUTTER_CLASS,
+  HOME_PAGE_GUTTER_CLASS,
+} from "@/lib/home-catalog-layout";
 import { cn } from "@/lib/utils";
 
 /** Approx. half the hero info block height — keeps the block vertically centered. */
@@ -244,10 +247,18 @@ export function ServiceDetailPage({
           <h2 className={cn("text-xl font-semibold", HOME_PAGE_GUTTER_CLASS)}>
             Similares
           </h2>
-          <div className="catalog-h-scroll overflow-x-auto overscroll-x-contain pl-8">
-            <ul className="flex w-max gap-4 pr-8">
+          <div
+            className={cn(
+              "catalog-h-scroll overflow-x-auto overscroll-x-contain",
+              HOME_CATALOG_SCROLL_GUTTER_CLASS,
+            )}
+          >
+            <ul className="flex w-max gap-4">
               {similares.map((item) => (
-                <li key={item.id} className="h-[304px] w-[512px] shrink-0">
+                <li
+                  key={item.id}
+                  className="h-[216px] w-[160px] shrink-0 md:h-[304px] md:w-[512px]"
+                >
                   <ServiceCard
                     service={toServiceOffering(item)}
                     variant="tile"

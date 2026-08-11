@@ -31,7 +31,7 @@ export function EncontrateHeroBadge({
   );
 }
 
-/** Wraps a hero logo/title and pins the encontrate badge outside its top-right corner. */
+/** Wraps a hero logo/title and places the encontrate badge at the top-right. */
 export function HeroBrandWithBadge({
   children,
   className,
@@ -40,9 +40,14 @@ export function HeroBrandWithBadge({
   className?: string;
 }) {
   return (
-    <div className={cn("relative w-fit max-w-full", className)}>
-      {children}
-      <EncontrateHeroBadge className="absolute top-0 left-full ml-2 -translate-y-1/3" />
+    <div
+      className={cn(
+        "flex max-w-full items-start gap-1 md:gap-2",
+        className,
+      )}
+    >
+      <div className="min-w-0 max-w-full shrink">{children}</div>
+      <EncontrateHeroBadge className="mt-0.5 size-8 shrink-0 -translate-y-1/4 max-h-8 max-w-8 md:mt-0 md:size-10 md:max-h-10 md:max-w-10 md:-translate-y-1/3" />
     </div>
   );
 }

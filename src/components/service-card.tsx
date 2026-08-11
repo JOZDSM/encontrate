@@ -25,7 +25,7 @@ export function ServiceCard({
       <div
         data-service-id={service.id}
         className={cn(
-          "group/service-card relative h-[304px] w-[512px] overflow-hidden rounded-none bg-black text-white",
+          "group/service-card relative h-[216px] w-[160px] overflow-hidden rounded-none bg-black text-white md:h-[304px] md:w-[512px]",
           href ? "cursor-pointer" : null,
           className,
         )}
@@ -36,7 +36,7 @@ export function ServiceCard({
             src={service.imageUrl}
             alt=""
             decoding="async"
-            className="absolute inset-0 size-full object-cover object-center"
+            className="absolute top-0 -right-8 h-full w-[256px] max-w-none object-cover object-[72%_center] md:inset-0 md:right-0 md:size-full md:w-full md:object-center"
           />
         ) : null}
 
@@ -44,15 +44,15 @@ export function ServiceCard({
 
         <EncontrateHeroBadge
           variant="card"
-          className="absolute top-4 right-4 z-10"
+          className="absolute top-2 right-2 z-10 size-5 max-h-5 max-w-5 md:top-4 md:right-4 md:size-auto md:max-h-none md:max-w-none"
         />
 
-        <div className="relative z-10 flex h-full flex-col justify-center gap-3 p-4 pr-24">
-          <div className="space-y-1">
-            <h3 className="text-2xl leading-snug font-semibold text-balance text-white">
+        <div className="relative z-10 flex h-full flex-col justify-end gap-1.5 p-3 pr-2 md:justify-center md:gap-3 md:p-4 md:pr-24">
+          <div className="space-y-0.5 md:space-y-1">
+            <h3 className="text-base leading-snug font-semibold text-balance text-white md:text-2xl">
               {service.professionalName}
             </h3>
-            <p className="text-base text-white/90">{service.title}</p>
+            <p className="text-xs text-white/90 md:text-base">{service.title}</p>
           </div>
 
           <div className="service-card-cta" aria-hidden>

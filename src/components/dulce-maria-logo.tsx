@@ -2,8 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /** Design display width — SVG scales crisply at any DPR. */
-const LOGO_DISPLAY_WIDTH_PX = 589.22;
-const LOGO_ASPECT = 146 / 590;
+const LOGO_MAX_WIDTH_PX = 589.22;
 
 /** Dulce María wordmark from vector export. */
 export function DulceMariaLogo({
@@ -19,10 +18,10 @@ export function DulceMariaLogo({
       width={590}
       height={146}
       decoding="async"
-      className={cn("h-auto max-w-none object-contain", className)}
+      className={cn("h-auto w-full object-contain", className)}
       style={{
-        width: LOGO_DISPLAY_WIDTH_PX,
-        height: LOGO_DISPLAY_WIDTH_PX * LOGO_ASPECT,
+        maxWidth: LOGO_MAX_WIDTH_PX,
+        aspectRatio: "590 / 146",
         ...style,
       }}
       {...props}

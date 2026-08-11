@@ -14,9 +14,9 @@ import {
 } from "@/lib/home-catalog-layout";
 import { cn } from "@/lib/utils";
 
-/** Approx. half the hero info block height — keeps the block vertically centered. */
+/** Approx. half the hero info block height — centers content in the 2/3-svh hero. */
 const HERO_INFO_TOP_SPACER =
-  "h-[calc(50svh-4.5rem)] md:h-[calc(50svh-5.5rem)]";
+  "h-[calc(33.333svh-4.5rem)] md:h-[calc(33.333svh-5.5rem)]";
 
 function Stars({ rating }: { rating: number }) {
   return (
@@ -58,12 +58,12 @@ export function ServiceDetailPage({
 
   return (
     <div className="relative bg-black text-white">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-svh overflow-hidden">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[66.666svh] overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={service.imageUrl}
           alt=""
-          className="absolute inset-0 size-full object-cover object-top"
+          className="absolute inset-0 size-full object-cover object-[60%_top]"
         />
         <div
           className="absolute inset-0"
@@ -221,17 +221,19 @@ export function ServiceDetailPage({
                           </div>
                         )}
                       </div>
-                      <div className="min-w-0 flex-1 space-y-1">
-                        <p className="font-medium">{review.authorName}</p>
-                        <p className="text-sm leading-relaxed text-white/80">
-                          {review.body}
-                        </p>
-                      </div>
-                      <div className="flex shrink-0 flex-col items-center gap-1 self-center">
-                        <span className="text-lg font-semibold leading-none">
-                          {review.rating}
-                        </span>
-                        <Stars rating={review.rating} />
+                      <div className="flex min-w-0 flex-1 flex-col gap-2 md:flex-row md:items-center md:gap-4">
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <p className="font-medium">{review.authorName}</p>
+                          <p className="text-sm leading-relaxed text-white/80">
+                            {review.body}
+                          </p>
+                        </div>
+                        <div className="flex shrink-0 flex-row items-center gap-2 md:flex-col md:items-center md:gap-1 md:self-center">
+                          <span className="text-lg font-semibold leading-none">
+                            {review.rating}
+                          </span>
+                          <Stars rating={review.rating} />
+                        </div>
                       </div>
                     </li>
                   ))}

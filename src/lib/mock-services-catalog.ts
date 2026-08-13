@@ -308,7 +308,8 @@ const ALL_SERVICES: ServiceOffering[] = [
   },
 ];
 
-export const MOCK_RECENT_SERVICES: ServiceOffering[] = ALL_SERVICES.slice(0, 8);
+/** All distinct offerings — same pool as category rows, for the top row. */
+export const MOCK_RECENT_SERVICES: ServiceOffering[] = ALL_SERVICES;
 
 /** Ensure each catalog row has enough tiles to scroll past the right edge. */
 function padCategoryItems(

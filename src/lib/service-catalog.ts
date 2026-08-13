@@ -93,9 +93,11 @@ export async function getCatalogRows(): Promise<{
   ]);
 
   const offerings = services.map(toServiceOffering);
-  const recent = offerings.filter((s) => s.featured).slice(0, 8);
-  const recentFallback =
-    recent.length > 0 ? recent : offerings.slice(0, 8);
+  // Featured first, then the rest of the catalog so "Recomendados" has
+  // every distinct service that also appears in category rows.
+  const featured = offerings.filter((s) => s.featured);
+  const rest = offerings.filter((s) => !s.featured);
+  const recent = featured.length > 0 ? [...featured, ...rest] : offerings;
 
   const byCategory = new Map<string, ServiceOffering[]>();
   for (const item of offerings) {
@@ -128,7 +130,7 @@ export async function getCatalogRows(): Promise<{
     });
   }
 
-  return { recent: recentFallback, categories };
+  return { recent, categories };
 }
 
 function padCategoryItems(

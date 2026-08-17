@@ -205,7 +205,7 @@ export function ServiceDetailPage({
       {/* Back / share — mobile icon buttons */}
       <div
         className={cn(
-          "absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-3 pt-20 md:hidden",
+          "absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-3 pt-24 md:hidden",
           HOME_PAGE_GUTTER_CLASS,
         )}
       >

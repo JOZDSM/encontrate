@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { captureCatalogueSearchResultClicked } from "@/lib/catalogue-analytics";
 import type { ServiceOffering } from "@/lib/mock-services-catalog";
 import { HOME_PAGE_GUTTER_CLASS } from "@/lib/home-catalog-layout";
 import { searchCatalog } from "@/lib/catalog-search";
@@ -175,7 +176,15 @@ export function CatalogSearchOverlay({
                           <li key={hit.service.id}>
                             <Link
                               href={href}
-                              onClick={onClose}
+                              onClick={() => {
+                                captureCatalogueSearchResultClicked({
+                                  serviceId: hit.service.id,
+                                  slug: hit.service.slug!,
+                                  title: hit.service.title,
+                                  professionalName: hit.service.professionalName,
+                                });
+                                onClose();
+                              }}
                               className="text-base text-white/90 transition-colors hover:text-white"
                             >
                               {hit.label}

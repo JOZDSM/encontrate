@@ -201,13 +201,20 @@ export function AdminServiceForm({
           ) : null}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="imageUrl">URL de imagen</Label>
+          <Label htmlFor="imageUrl">URL de imagen (escritorio)</Label>
           <Input
             id="imageUrl"
             value={values.imageUrl}
             onChange={(e) => setField("imageUrl", e.target.value)}
             required
           />
+          <p className="text-xs text-muted-foreground">
+            Imagen móvil del hero: mismo nombre con{" "}
+            <code className="text-[11px]">-mobile</code> antes de la extensión en{" "}
+            <code className="text-[11px]">public/design/home-services/</code> (ej.{" "}
+            <code className="text-[11px]">gestora-extranjeria-mobile.jpg</code>).
+            Si falta, se usa la de escritorio.
+          </p>
         </div>
         <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="description">Descripción</Label>

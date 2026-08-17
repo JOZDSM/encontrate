@@ -4,6 +4,7 @@ import type { Session } from "next-auth";
 import { usePathname } from "next/navigation";
 import { SessionProvider } from "next-auth/react";
 import { isDesignPreviewSession } from "@/lib/design-preview";
+import { GoogleAnalytics } from "@/components/google-analytics";
 import { PosthogProvider } from "@/components/posthog-provider";
 import { isServicesCatalogSurface } from "@/lib/service-slug";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,8 @@ export function Providers({
       refetchInterval={designPreview ? 0 : undefined}
     >
       <PosthogProvider session={session} enabled={!designPreview}>
+        {/* Keep GA on in DESIGN_PREVIEW so catalogue events can be verified locally. */}
+        <GoogleAnalytics />
         <div
           data-app-root
           className={cn(

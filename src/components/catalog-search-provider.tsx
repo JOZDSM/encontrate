@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { CatalogSearchOverlay } from "@/components/catalog-search-overlay";
+import { captureCatalogueSearchOpened } from "@/lib/catalogue-analytics";
 import type { ServiceOffering } from "@/lib/mock-services-catalog";
 
 type CatalogSearchContextValue = {
@@ -47,7 +48,10 @@ export function CatalogSearchProvider({
   const [services, setServicesState] =
     useState<ServiceOffering[]>(initialServices);
 
-  const openSearch = useCallback(() => setOpen(true), []);
+  const openSearch = useCallback(() => {
+    setOpen(true);
+    captureCatalogueSearchOpened();
+  }, []);
   const closeSearch = useCallback(() => setOpen(false), []);
   const setServices = useCallback((next: ServiceOffering[]) => {
     setServicesState(next);

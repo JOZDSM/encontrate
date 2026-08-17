@@ -55,6 +55,7 @@ export function HomeServicesCatalog({
           <ServiceScrollRow
             title="Recomendados por Encontrate"
             items={recent}
+            catalogueSurface="recommended"
           />
         </div>
 
@@ -73,6 +74,7 @@ export function HomeServicesCatalog({
                 key={collection.id}
                 title={collection.title}
                 items={collection.items}
+                catalogueSurface={collection.slug}
               />
             ))}
           </div>

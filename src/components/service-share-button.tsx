@@ -1,39 +1,35 @@
 "use client";
 
 import { Share } from "lucide-react";
-import { useState } from "react";
 import { heroCtaClassName } from "@/components/hero-location-cta";
+import { useServiceShare } from "@/hooks/use-service-share";
 import { cn } from "@/lib/utils";
 
 export function ServiceShareButton({
   title,
   text,
+  serviceId,
+  slug,
+  serviceTitle,
+  professionalName,
   className,
 }: {
   title: string;
   text: string;
+  serviceId: string;
+  slug: string;
+  serviceTitle: string;
+  professionalName: string;
   className?: string;
 }) {
-  const [copied, setCopied] = useState(false);
-
-  async function onShare() {
-    const url = window.location.href;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title, text, url });
-        return;
-      }
-    } catch {
-      // fall through to clipboard
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // ignore
-    }
-  }
+  const { share, copied } = useServiceShare({
+    title,
+    text,
+    serviceId,
+    slug,
+    serviceTitle,
+    professionalName,
+  });
 
   return (
     <button
@@ -43,7 +39,7 @@ export function ServiceShareButton({
         heroCtaClassName,
         className,
       )}
-      onClick={onShare}
+      onClick={() => void share()}
     >
       <Share className="size-3.5" strokeWidth={2} aria-hidden />
       {copied ? "Enlace copiado" : "Compartir"}

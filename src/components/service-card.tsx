@@ -1,17 +1,23 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { EncontrateHeroBadge } from "@/components/encontrate-hero-badge";
 import { Card } from "@/components/ui/card";
+import { captureServiceCardClicked } from "@/lib/catalogue-analytics";
 import type { ServiceOffering } from "@/lib/mock-services-catalog";
 import { cn } from "@/lib/utils";
 
 export function ServiceCard({
   service,
   variant = "tile",
+  catalogueSurface = "unknown",
   className,
 }: {
   service: ServiceOffering;
   variant?: "tile" | "detail";
+  /** Where the card was shown (recommended, category slug, similar, …). */
+  catalogueSurface?: string;
   className?: string;
 }) {
   const locality = [service.neighborhood, service.priceNote]
@@ -19,6 +25,19 @@ export function ServiceCard({
     .join(" · ");
 
   const href = service.slug ? `/${service.slug}` : undefined;
+
+  function onCardNavigate() {
+    if (!service.slug) return;
+    captureServiceCardClicked(
+      {
+        serviceId: service.id,
+        slug: service.slug,
+        title: service.title,
+        professionalName: service.professionalName,
+      },
+      catalogueSurface,
+    );
+  }
 
   if (variant === "tile") {
     const card = (
@@ -67,6 +86,7 @@ export function ServiceCard({
     return (
       <Link
         href={href}
+        onClick={onCardNavigate}
         className="block outline-none focus-visible:ring-2 focus-visible:ring-white/70"
         aria-label={`${service.professionalName}, ${service.title}`}
       >

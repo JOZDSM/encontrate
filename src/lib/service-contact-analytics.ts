@@ -1,23 +1,32 @@
-import posthog from "posthog-js";
+import {
+  captureServiceContactOpenedDual,
+  captureServiceContactOptionClickedDual,
+  type ServiceContactOption,
+  type ServiceContactSurface,
+} from "@/lib/catalogue-analytics";
 
-export type ServiceContactOption =
-  | "whatsapp"
-  | "email"
-  | "instagram"
-  | "website";
+export type { ServiceContactOption, ServiceContactSurface };
 
-export type ServiceContactSurface = "hero" | "description";
+export type ServiceContactAnalyticsMeta = {
+  title?: string;
+  professionalName?: string;
+};
 
 export function captureServiceContactOpened(
   serviceId: string,
   slug: string,
   surface: ServiceContactSurface,
+  meta?: ServiceContactAnalyticsMeta,
 ) {
-  posthog.capture("service_contact_opened", {
-    service_id: serviceId,
-    slug,
+  captureServiceContactOpenedDual(
+    {
+      serviceId,
+      slug,
+      title: meta?.title,
+      professionalName: meta?.professionalName,
+    },
     surface,
-  });
+  );
 }
 
 export function captureServiceContactOptionClicked(
@@ -25,11 +34,16 @@ export function captureServiceContactOptionClicked(
   slug: string,
   option: ServiceContactOption,
   surface: ServiceContactSurface,
+  meta?: ServiceContactAnalyticsMeta,
 ) {
-  posthog.capture("service_contact_option_clicked", {
-    service_id: serviceId,
-    slug,
+  captureServiceContactOptionClickedDual(
+    {
+      serviceId,
+      slug,
+      title: meta?.title,
+      professionalName: meta?.professionalName,
+    },
     option,
     surface,
-  });
+  );
 }

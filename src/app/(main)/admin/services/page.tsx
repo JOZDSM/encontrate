@@ -35,7 +35,10 @@ export default async function AdminServicesPage() {
             <div>
               <h1 className="text-2xl font-semibold">Servicios</h1>
               <p className="text-sm text-muted-foreground">
-                Catálogo público de profesionales.
+                Catálogo público de profesionales. Stats por proveedor: GA4 +
+                Looker Studio (
+                <code className="text-xs">docs/ga4-catalogue-analytics.md</code>
+                ).
               </p>
             </div>
             <div className="flex flex-wrap gap-2">

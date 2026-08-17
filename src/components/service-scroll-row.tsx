@@ -9,9 +9,11 @@ import { cn } from "@/lib/utils";
 export function ServiceScrollRow({
   title,
   items,
+  catalogueSurface,
 }: {
   title: string;
   items: ServiceOffering[];
+  catalogueSurface: string;
 }) {
   return (
     <section className="space-y-3" aria-label={title}>
@@ -31,7 +33,11 @@ export function ServiceScrollRow({
               key={item.id}
               className="h-[216px] w-[160px] shrink-0 md:h-[304px] md:w-[512px]"
             >
-              <ServiceCard service={item} variant="tile" />
+              <ServiceCard
+                service={item}
+                variant="tile"
+                catalogueSurface={catalogueSurface}
+              />
             </li>
           ))}
         </ul>

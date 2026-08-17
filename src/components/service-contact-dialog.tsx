@@ -32,6 +32,8 @@ function whatsappHref(raw: string): string {
 export function ServiceContactDialog({
   serviceId,
   slug,
+  title,
+  professionalName,
   surface,
   whatsapp,
   email,
@@ -46,6 +48,8 @@ export function ServiceContactDialog({
 }: {
   serviceId: string;
   slug: string;
+  title?: string;
+  professionalName?: string;
   surface: ServiceContactSurface;
   whatsapp: string | null;
   email: string | null;
@@ -59,6 +63,7 @@ export function ServiceContactDialog({
   triggerIcon?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const analyticsMeta = { title, professionalName };
 
   const options = [
     showWhatsapp && whatsapp
@@ -105,7 +110,9 @@ export function ServiceContactDialog({
       open={open}
       onOpenChange={(next) => {
         setOpen(next);
-        if (next) captureServiceContactOpened(serviceId, slug, surface);
+        if (next) {
+          captureServiceContactOpened(serviceId, slug, surface, analyticsMeta);
+        }
       }}
     >
       <DialogTrigger
@@ -159,6 +166,7 @@ export function ServiceContactDialog({
                         slug,
                         option.key,
                         surface,
+                        analyticsMeta,
                       )
                     }
                   >

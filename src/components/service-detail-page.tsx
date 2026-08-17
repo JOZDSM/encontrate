@@ -231,13 +231,13 @@ export function ServiceDetailPage({
       </div>
 
       {/* Mobile hero info pinned to bottom of 552px hero */}
-      <div
-        className={cn(
-          "pointer-events-none absolute inset-x-0 top-0 z-10 h-[552px] md:hidden",
-          HOME_PAGE_GUTTER_CLASS,
-        )}
-      >
-        <div className="pointer-events-auto absolute inset-x-0 bottom-0 pb-6">
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[552px] md:hidden">
+        <div
+          className={cn(
+            "pointer-events-auto absolute inset-x-0 bottom-0 pb-6",
+            HOME_PAGE_GUTTER_CLASS,
+          )}
+        >
           <ServiceHeroInfo
             service={service}
             contactProps={contactProps}

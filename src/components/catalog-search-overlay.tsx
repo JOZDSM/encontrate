@@ -133,7 +133,7 @@ export function CatalogSearchOverlay({
             className={cn(
               "h-14 w-full rounded-full border-0 bg-white/10 px-6 text-base text-white outline-none",
               "shadow-[0_0_0_2px_color-mix(in_oklab,var(--brand-background)_55%,transparent),0_0_28px_color-mix(in_oklab,var(--brand-background)_35%,transparent)]",
-              "focus:shadow-[0_0_0_2px_var(--brand-background),0_0_32px_color-mix(in_oklab,var(--brand-background)_45%,transparent)]",
+              "focus:catalog-search-glow",
             )}
           />
         </div>

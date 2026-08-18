@@ -218,6 +218,25 @@
   height: 0;
 }
 
+@utility catalog-search-glow {
+  box-shadow:
+    0 0 0 2px var(--brand-background),
+    0 0 32px color-mix(in oklab, var(--brand-background) 45%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-catalog-search]:hover input,
+  button:hover [data-catalog-search] input {
+    box-shadow: 0 0 32px color-mix(in oklab, var(--brand-background) 45%, transparent);
+  }
+
+  [data-catalog-search]:focus-within input {
+    box-shadow:
+      0 0 0 2px var(--brand-background),
+      0 0 32px color-mix(in oklab, var(--brand-background) 45%, transparent);
+  }
+}
+
 /* Left→right scrim for photo service cards (Figma stops ~10% / 50% / 70%). */
 .service-card-scrim {
   background-image: linear-gradient(

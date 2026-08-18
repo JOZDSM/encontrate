@@ -59,7 +59,7 @@ export function CatalogSearchBar({
         onFocus={activate}
         onClick={activate}
         className={cn(
-          "w-full cursor-pointer rounded-full shadow-none read-only:cursor-pointer",
+          "w-full cursor-pointer rounded-full shadow-none read-only:cursor-pointer md:transition-shadow",
           isCompact
             ? cn(
                 "border-transparent bg-muted/50 text-foreground placeholder:text-foreground focus-visible:border-transparent focus-visible:ring-0",
@@ -69,6 +69,7 @@ export function CatalogSearchBar({
               )
             : cn(
                 "h-12 border border-white/20 bg-white/10 pr-12 pl-11 text-base text-white placeholder:text-white/50 md:h-14 md:pr-[3.25rem] md:pl-14 md:text-base",
+                "focus-visible:border-transparent focus-visible:ring-0",
               ),
           inputClassName,
         )}

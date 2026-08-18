@@ -26,9 +26,16 @@ import { cn } from "@/lib/utils";
 const HERO_INFO_TOP_SPACER =
   "hidden md:block h-[calc(33.333svh-5.5rem)]";
 
-const HERO_BOTTOM_GRADIENT = {
+/** Mobile hero: solid band lower in the 552px frame, then fade. */
+const HERO_BOTTOM_GRADIENT_MOBILE = {
   background:
     "linear-gradient(to top, #000000 0%, #000000 25%, rgba(0, 0, 0, 0) 70%)",
+};
+
+/** Desktop hero: bottom → top over 66.666svh (0% / 35% / 70% stops). */
+const HERO_BOTTOM_GRADIENT_DESKTOP = {
+  background:
+    "linear-gradient(to top, var(--background) 0%, var(--background) 35%, color-mix(in oklab, var(--background) 0%, transparent) 70%)",
 };
 
 const HERO_LEFT_SCRIM = {
@@ -195,7 +202,14 @@ export function ServiceDetailPage({
           desktopUrl={service.imageUrl}
           mobileUrl={mobileHeroUrl}
         />
-        <div className="absolute inset-0" style={HERO_BOTTOM_GRADIENT} />
+        <div
+          className="absolute inset-0 md:hidden"
+          style={HERO_BOTTOM_GRADIENT_MOBILE}
+        />
+        <div
+          className="absolute inset-0 hidden md:block"
+          style={HERO_BOTTOM_GRADIENT_DESKTOP}
+        />
         <div
           className="absolute inset-0 hidden md:block"
           style={HERO_LEFT_SCRIM}

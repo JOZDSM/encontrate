@@ -22,17 +22,13 @@ import {
 import { serviceMobileHeroImageUrl } from "@/lib/service-hero-images";
 import { cn } from "@/lib/utils";
 
-/** Approx. half the hero info block height — centers content in the 2/3-svh hero on desktop. */
-const HERO_INFO_TOP_SPACER =
-  "hidden md:block h-[calc(33.333svh-5.5rem)]";
-
 /** Mobile hero: solid band lower in the 552px frame, then fade. */
 const HERO_BOTTOM_GRADIENT_MOBILE = {
   background:
     "linear-gradient(to top, #000000 0%, #000000 25%, rgba(0, 0, 0, 0) 70%)",
 };
 
-/** Desktop hero: bottom → top over 66.666svh (0% / 35% / 70% stops). */
+/** Desktop hero: bottom → top over full viewport (0% / 35% / 70% stops). */
 const HERO_BOTTOM_GRADIENT_DESKTOP = {
   background:
     "linear-gradient(to top, var(--background) 0%, var(--background) 35%, color-mix(in oklab, var(--background) 0%, transparent) 70%)",
@@ -196,8 +192,8 @@ export function ServiceDetailPage({
         professionalName={service.professionalName}
       />
 
-      {/* Hero: fixed 552px on mobile, 2/3 svh on desktop */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[552px] overflow-hidden md:h-[66.666svh]">
+      {/* Hero: 552px mobile, full viewport height on desktop */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[552px] overflow-hidden md:h-svh">
         <ServiceHeroBackground
           desktopUrl={service.imageUrl}
           mobileUrl={mobileHeroUrl}
@@ -260,19 +256,25 @@ export function ServiceDetailPage({
         </div>
       </div>
 
-      <div className="relative z-10 pt-[552px] md:pt-0">
-        <div className={HERO_INFO_TOP_SPACER} aria-hidden />
+      {/* Desktop hero info pinned to bottom of full-viewport hero */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 hidden h-svh md:block">
+        <div
+          className={cn(
+            "pointer-events-auto absolute inset-x-0 bottom-0 pb-16",
+            HOME_PAGE_GUTTER_CLASS,
+          )}
+        >
+          <ServiceHeroInfo
+            service={service}
+            contactProps={contactProps}
+            outboundBase={outboundBase}
+          />
+        </div>
+      </div>
 
+      <div className="relative z-10 pt-[552px] md:pt-svh">
         <div className={HOME_PAGE_GUTTER_CLASS}>
-          <div className="hidden md:block">
-            <ServiceHeroInfo
-              service={service}
-              contactProps={contactProps}
-              outboundBase={outboundBase}
-            />
-          </div>
-
-          <div className="mt-0 space-y-12 pb-12 md:mt-[112px] md:space-y-16 md:pb-16">
+          <div className="space-y-12 pb-12 md:space-y-16 md:pb-16">
             <section className="space-y-3">
               <h2 className="text-xl font-semibold">Descripción</h2>
               <div className="flex flex-col gap-8 md:flex-row md:items-start">

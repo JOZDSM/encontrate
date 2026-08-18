@@ -67,11 +67,13 @@ export function ServiceCard({
         />
 
         <div className="relative z-10 flex h-full flex-col justify-end gap-1.5 p-3 pr-2 md:justify-center md:gap-3 md:p-4 md:pr-24">
-          <div className="space-y-0.5 md:space-y-1">
+          <div className="min-w-0 space-y-0.5 md:space-y-1">
             <h3 className="text-base leading-snug font-semibold text-balance text-white md:text-2xl">
               {service.professionalName}
             </h3>
-            <p className="text-xs text-white/90 md:text-base">{service.title}</p>
+            <p className="truncate text-xs text-white/90 md:text-base">
+              {service.title}
+            </p>
           </div>
 
           <div className="service-card-cta" aria-hidden>

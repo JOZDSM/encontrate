@@ -231,9 +231,7 @@
   }
 
   [data-catalog-search]:focus-within input {
-    box-shadow:
-      0 0 0 2px var(--brand-background),
-      0 0 32px color-mix(in oklab, var(--brand-background) 45%, transparent);
+    box-shadow: 0 0 32px color-mix(in oklab, var(--brand-background) 45%, transparent);
   }
 }
 

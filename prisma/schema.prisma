@@ -464,7 +464,10 @@ model Service {
   categoryId       String
   category         ServiceCategory @relation(fields: [categoryId], references: [id])
   description      String   @db.Text
+  /// Landscape hero / card image (desktop).
   imageUrl         String
+  /// Portrait hero image (mobile). Falls back to desktop when null.
+  imageMobileUrl   String?
   websiteUrl       String?
   instagramUrl     String?
   instagramHandle  String?

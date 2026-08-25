@@ -154,7 +154,10 @@ export function ServiceDetailPage({
   service: ServiceDetail;
   similares: ServiceWithCategory[];
 }) {
-  const mobileHeroUrl = serviceMobileHeroImageUrl(service.imageUrl);
+  const mobileHeroUrl = serviceMobileHeroImageUrl(
+    service.imageUrl,
+    service.imageMobileUrl,
+  );
 
   const contactProps = {
     serviceId: service.id,

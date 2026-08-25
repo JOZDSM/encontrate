@@ -38,6 +38,7 @@ export default async function AdminEditServicePage({
         categoryId: service.categoryId,
         description: service.description,
         imageUrl: service.imageUrl,
+        imageMobileUrl: service.imageMobileUrl ?? "",
         websiteUrl: service.websiteUrl ?? "",
         instagramUrl: service.instagramUrl ?? "",
         instagramHandle: service.instagramHandle ?? "",

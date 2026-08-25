@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { auth } from "@/auth";
+import { isPlatformAdmin } from "@/lib/admin";
 import { isUserApproved } from "@/lib/approval";
 import {
   LISTING_PHOTO_TOO_LARGE_MESSAGE,
@@ -17,7 +18,7 @@ export async function POST(req: Request) {
       { status: 401 },
     );
   }
-  if (!isUserApproved(session)) {
+  if (!isUserApproved(session) && !isPlatformAdmin(session)) {
     return NextResponse.json(
       { error: "Tu cuenta está pendiente de aprobación." },
       { status: 403 },

@@ -118,6 +118,7 @@ async function main() {
       description:
         "Acompaño a personas y familias en trámites de extranjería en Barcelona: residencia, arraigo, renovaciones y gestiones ante la administración. Trabajo con claridad, plazos realistas y seguimiento cercano en cada expediente.",
       imageUrl: "/design/home-services/gestora-extranjeria.jpg",
+      imageMobileUrl: "/design/home-services/gestora-extranjeria-mobile.jpg",
       websiteUrl: "https://example.com",
       instagramUrl: "https://www.instagram.com/unclickaway",
       instagramHandle: "@unclickaway",
@@ -165,6 +166,7 @@ async function main() {
       featured: true,
       categoryId: extranjeriaId,
       imageUrl: "/design/home-services/gestora-extranjeria.jpg",
+      imageMobileUrl: "/design/home-services/gestora-extranjeria-mobile.jpg",
     },
   });
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useId, useMemo, useRef, useState, useTransition } from "react";
 import {
   createServiceAction,
   updateServiceAction,
@@ -13,7 +13,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { compressListingPhotoIfNeeded } from "@/lib/listing-photo-compress";
+import {
+  LISTING_PHOTO_SIZE_HELPER_ES,
+  LISTING_PHOTO_TOO_LARGE_MESSAGE,
+} from "@/lib/listing-photo-upload";
 import { slugifyProfessionalName } from "@/lib/service-slug";
+import { cn } from "@/lib/utils";
 
 export type AdminServiceFormReview = {
   id?: string;
@@ -31,6 +37,7 @@ export type AdminServiceFormValues = {
   categoryId: string;
   description: string;
   imageUrl: string;
+  imageMobileUrl: string;
   websiteUrl: string;
   instagramUrl: string;
   instagramHandle: string;
@@ -54,6 +61,7 @@ const emptyValues: AdminServiceFormValues = {
   categoryId: "",
   description: "",
   imageUrl: "",
+  imageMobileUrl: "",
   websiteUrl: "",
   instagramUrl: "",
   instagramHandle: "",
@@ -69,6 +77,119 @@ const emptyValues: AdminServiceFormValues = {
   sortOrder: 0,
   reviews: [],
 };
+
+async function uploadServiceImage(file: File): Promise<string> {
+  const next = await compressListingPhotoIfNeeded(file);
+  const fd = new FormData();
+  fd.set("file", next);
+  const res = await fetch("/api/uploads/photos", {
+    method: "POST",
+    body: fd,
+    credentials: "include",
+  });
+  let body: { error?: string; url?: string } | null = null;
+  try {
+    body = (await res.json()) as { error?: string; url?: string };
+  } catch {
+    body = null;
+  }
+  if (!res.ok) {
+    let message = body?.error ?? "No se pudo subir la imagen.";
+    if (!body?.error) {
+      if (res.status === 401) message = "Tenés que iniciar sesión.";
+      else if (res.status === 403)
+        message = "Tu cuenta está pendiente de aprobación.";
+      else if (res.status === 413) message = LISTING_PHOTO_TOO_LARGE_MESSAGE;
+    }
+    throw new Error(message);
+  }
+  if (!body?.url) throw new Error("No se pudo subir la imagen.");
+  return body.url;
+}
+
+function ServiceImageUploadField({
+  label,
+  hint,
+  value,
+  required,
+  previewAspect,
+  onChange,
+  onError,
+}: {
+  label: string;
+  hint: string;
+  value: string;
+  required?: boolean;
+  previewAspect: "landscape" | "portrait";
+  onChange: (url: string) => void;
+  onError: (message: string | null) => void;
+}) {
+  const inputId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  async function onFileChange(file: File | null) {
+    if (!file) return;
+    onError(null);
+    setUploading(true);
+    try {
+      const url = await uploadServiceImage(file);
+      onChange(url);
+    } catch (err) {
+      onError(err instanceof Error ? err.message : "No se pudo subir la imagen.");
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={inputId}>{label}</Label>
+      <div
+        className={cn(
+          "overflow-hidden rounded-md border border-border bg-muted/30",
+          previewAspect === "landscape" ? "aspect-video" : "aspect-[3/4] max-w-xs",
+        )}
+      >
+        {value ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={value} alt="" className="size-full object-cover" />
+        ) : (
+          <div className="flex size-full items-center justify-center px-3 text-center text-xs text-muted-foreground">
+            Sin imagen
+          </div>
+        )}
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          ref={inputRef}
+          id={inputId}
+          type="file"
+          accept="image/*"
+          disabled={uploading}
+          required={required && !value}
+          onChange={(e) => void onFileChange(e.target.files?.[0] ?? null)}
+          className="block w-full max-w-md cursor-pointer text-sm text-foreground file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-secondary-foreground"
+        />
+        {value ? (
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            disabled={uploading}
+            onClick={() => onChange("")}
+          >
+            Quitar
+          </Button>
+        ) : null}
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {uploading ? "Subiendo…" : hint}
+      </p>
+    </div>
+  );
+}
 
 export function AdminServiceForm({
   serviceId,
@@ -104,6 +225,11 @@ export function AdminServiceForm({
   function onSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+
+    if (!values.imageUrl.trim()) {
+      setError("Subí la imagen de escritorio (horizontal).");
+      return;
+    }
 
     const payload: ServiceFormInput = {
       ...values,
@@ -200,21 +326,24 @@ export function AdminServiceForm({
             </p>
           ) : null}
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="imageUrl">URL de imagen (escritorio)</Label>
-          <Input
-            id="imageUrl"
+        <div className="space-y-6 sm:col-span-2">
+          <ServiceImageUploadField
+            label="Imagen de escritorio (horizontal)"
+            hint={`Hero y tarjetas en desktop. ${LISTING_PHOTO_SIZE_HELPER_ES}`}
             value={values.imageUrl}
-            onChange={(e) => setField("imageUrl", e.target.value)}
             required
+            previewAspect="landscape"
+            onChange={(url) => setField("imageUrl", url)}
+            onError={setError}
           />
-          <p className="text-xs text-muted-foreground">
-            Imagen móvil del hero: mismo nombre con{" "}
-            <code className="text-[11px]">-mobile</code> antes de la extensión en{" "}
-            <code className="text-[11px]">public/design/home-services/</code> (ej.{" "}
-            <code className="text-[11px]">gestora-extranjeria-mobile.jpg</code>).
-            Si falta, se usa la de escritorio.
-          </p>
+          <ServiceImageUploadField
+            label="Imagen de móvil (vertical)"
+            hint="Hero en móvil. Si no subís una, se usa la de escritorio."
+            value={values.imageMobileUrl}
+            previewAspect="portrait"
+            onChange={(url) => setField("imageMobileUrl", url)}
+            onError={setError}
+          />
         </div>
         <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="description">Descripción</Label>

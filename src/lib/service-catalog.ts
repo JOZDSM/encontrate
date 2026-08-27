@@ -25,6 +25,7 @@ export function toServiceOffering(service: ServiceWithCategory): ServiceOffering
     professionalName: service.professionalName,
     category: service.category.name,
     categorySynonyms: service.category.synonyms,
+    offeringItems: service.offeringItems,
     neighborhood: service.neighborhood ?? undefined,
     priceNote: service.priceNote ?? undefined,
     imageUrl: service.imageUrl,

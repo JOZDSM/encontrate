@@ -155,14 +155,25 @@ export function scoreService(
   const category = normalizeSearchText(
     [service.category, ...(service.categorySynonyms ?? [])].join(" "),
   );
+  const offerings = normalizeSearchText(
+    (service.offeringItems ?? []).join(" "),
+  );
   const haystack = normalizeSearchText(
-    `${service.title} ${service.professionalName} ${service.category} ${(service.categorySynonyms ?? []).join(" ")}`,
+    [
+      service.title,
+      service.professionalName,
+      service.category,
+      ...(service.categorySynonyms ?? []),
+      ...(service.offeringItems ?? []),
+    ].join(" "),
   );
 
   let score =
     fieldScore(title, terms, 1) +
     fieldScore(name, terms, 0.75) +
-    fieldScore(category, terms, 0.9);
+    fieldScore(category, terms, 0.9) +
+    // Admin "Servicios" bullets — high weight so queries like "argentina" match.
+    fieldScore(offerings, terms, 1);
 
   // Phrase / multi-token boost against combined haystack
   const full = normalizeSearchText(query);

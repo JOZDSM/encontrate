@@ -37,6 +37,17 @@ export function useOptionalCatalogSearch(): CatalogSearchContextValue | null {
   return useContext(CatalogSearchContext);
 }
 
+async function fetchPublishedCatalogServices(): Promise<ServiceOffering[]> {
+  const res = await fetch("/api/catalog/services", {
+    method: "GET",
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  const body = (await res.json()) as { services?: ServiceOffering[] };
+  return Array.isArray(body.services) ? body.services : [];
+}
+
 export function CatalogSearchProvider({
   children,
   initialServices = [],
@@ -48,18 +59,37 @@ export function CatalogSearchProvider({
   const [services, setServicesState] =
     useState<ServiceOffering[]>(initialServices);
 
-  const openSearch = useCallback(() => {
-    setOpen(true);
-    captureCatalogueSearchOpened();
-  }, []);
-  const closeSearch = useCallback(() => setOpen(false), []);
   const setServices = useCallback((next: ServiceOffering[]) => {
     setServicesState(next);
   }, []);
 
+  const refreshServices = useCallback(async () => {
+    try {
+      const next = await fetchPublishedCatalogServices();
+      if (next.length > 0) setServicesState(next);
+    } catch {
+      // Keep whatever is already in memory (homepage props or prior fetch).
+    }
+  }, []);
+
+  const openSearch = useCallback(() => {
+    setOpen(true);
+    captureCatalogueSearchOpened();
+    void refreshServices();
+  }, [refreshServices]);
+  const closeSearch = useCallback(() => setOpen(false), []);
+
   useEffect(() => {
-    setServicesState(initialServices);
+    if (initialServices.length > 0) {
+      setServicesState(initialServices);
+    }
   }, [initialServices]);
+
+  // Load published DB services on mount so search works on service pages too,
+  // not only after visiting the homepage (which used to be the only refresh path).
+  useEffect(() => {
+    void refreshServices();
+  }, [refreshServices]);
 
   useEffect(() => {
     if (!open) return;

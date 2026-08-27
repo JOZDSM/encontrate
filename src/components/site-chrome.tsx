@@ -6,18 +6,8 @@ import { HomeCatalogNavbar } from "@/components/home-catalog-navbar";
 import { HomeNavbar } from "@/components/home-navbar";
 import { RotatingSiteBackground } from "@/components/rotating-site-background";
 import { SupportEncontrateBanner } from "@/components/support-encontrate-banner";
-import { flattenCatalogOfferings } from "@/lib/catalog-search";
 import { isPublicListingDetailPath } from "@/lib/listing-route";
-import {
-  MOCK_CATEGORY_ROWS,
-  MOCK_RECENT_SERVICES,
-} from "@/lib/mock-services-catalog";
 import { isServicesCatalogSurface } from "@/lib/service-slug";
-
-const DEFAULT_CATALOG_SERVICES = flattenCatalogOfferings(
-  MOCK_RECENT_SERVICES,
-  MOCK_CATEGORY_ROWS,
-);
 
 export function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -35,9 +25,8 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
 
   if (!catalogSurface) return chrome;
 
-  return (
-    <CatalogSearchProvider initialServices={DEFAULT_CATALOG_SERVICES}>
-      {chrome}
-    </CatalogSearchProvider>
-  );
+  // Search index loads published services from /api/catalog/services (and
+  // homepage HomeServicesCatalog can still push a fresher list). Do not seed
+  // with MOCK catalog — that hid newly added DB services from search.
+  return <CatalogSearchProvider>{chrome}</CatalogSearchProvider>;
 }

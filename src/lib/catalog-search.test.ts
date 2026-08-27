@@ -42,4 +42,23 @@ describe("catalog search scoring", () => {
     };
     assert.ok(scoreService(trainer, "fitness") > 0);
   });
+
+  it("matches text from Servicios offering bullets", () => {
+    const gestora: ServiceOffering = {
+      id: "gestora",
+      slug: "gestora-test",
+      title: "Gestora en extranjería",
+      professionalName: "Test User",
+      category: "Extranjería",
+      offeringItems: [
+        "Permisos de residencia y trabajo",
+        "Gestión de citas en consulado de argentina",
+      ],
+    };
+    assert.ok(scoreService(gestora, "argentina") > 0);
+    assert.ok(scoreService(gestora, "consulado") > 0);
+    const groups = searchCatalog([gestora, mariaG], "argentina");
+    assert.equal(groups.length, 1);
+    assert.equal(groups[0]?.items[0]?.service.id, "gestora");
+  });
 });

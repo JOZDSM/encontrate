@@ -7,6 +7,8 @@ export type ServiceOffering = {
   category: string;
   /** Optional search synonyms from ServiceCategory. */
   categorySynonyms?: string[];
+  /** Bullet lines from the admin "Servicios" field — included in catalog search. */
+  offeringItems?: string[];
   neighborhood?: string;
   priceNote?: string;
   imageUrl?: string;
